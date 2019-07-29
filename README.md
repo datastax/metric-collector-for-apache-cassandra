@@ -9,9 +9,11 @@ Currently to use run the following commands:
      ````
      mvn -DskipTests package
      ````
+
      ````
      cd ~/cassandra_root
      ````
+     
      ````
      JVM_EXTRA_OPTS="-javaagent:/path/to/this/project/./target/datastax-mcac-agent-0.1.0-SNAPSHOT.jar" ./bin/cassandra -f
      ````
