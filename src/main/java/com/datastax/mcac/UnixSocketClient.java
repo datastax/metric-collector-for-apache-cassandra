@@ -111,7 +111,7 @@ public class UnixSocketClient
 
     private Bootstrap bootstrap;
     private EventLoopGroup eventLoopGroup;
-    private volatile Configuration runtimeConfig = new Configuration();
+    private volatile Configuration runtimeConfig = ConfigurationLoader.loadConfig();
     private final CassandraMetricsRegistry metricsRegistry;
     volatile Channel channel;
     private ScheduledFuture metricReportFuture;

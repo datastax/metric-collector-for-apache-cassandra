@@ -65,7 +65,7 @@ public class ConfigurationLoader
 
     private static URL storageConfigURL;
 
-    public Configuration loadConfig()
+    public static Configuration loadConfig()
     {
         if (storageConfigURL == null)
             storageConfigURL = getStorageConfigURL();
@@ -73,7 +73,7 @@ public class ConfigurationLoader
         return loadConfig(storageConfigURL);
     }
 
-    public Configuration loadConfig(URL url)
+    public static Configuration loadConfig(URL url)
     {
         try
         {
@@ -136,7 +136,7 @@ public class ConfigurationLoader
         }
     }
 
-    private Configuration loadConfig(Yaml yaml, byte[] configBytes)
+    private static Configuration loadConfig(Yaml yaml, byte[] configBytes)
     {
         Configuration config = yaml.loadAs(new ByteArrayInputStream(configBytes), Configuration.class);
         // If the configuration file is empty yaml will return null. In this case we should use the default

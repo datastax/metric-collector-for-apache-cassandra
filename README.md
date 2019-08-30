@@ -14,4 +14,8 @@ Currently to use run the following commands:
      JVM_EXTRA_OPTS="-javaagent:/path/to/this/project/./target/datastax-mcac-agent-0.1.0-SNAPSHOT.jar" ./bin/cassandra -f
      
 
+To test with docker run the following commands:
 
+    docker build -t ddac  ./ 
+
+    docker run -p 5005:5005 --name ddac -t ddac 
