@@ -1,26 +1,42 @@
 package com.datastax.mcac;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Configuration
 {
+    private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
+
     public static final long MAX_METRIC_UPDATE_GAP_IN_SECONDS = TimeUnit.MINUTES.toSeconds(5);
 
 
     String collectd_root;
     String log_dir = "/tmp/test/log";
     String data_dir = "/tmp/test/data";
+    String token_dir = "/tmp/";
 
     Long data_dir_max_size_in_mb = 5000L;
     Integer metric_sampling_interval_in_seconds = 30;
     Integer upload_interval_in_seconds = (int)MAX_METRIC_UPDATE_GAP_IN_SECONDS;
-    String upload_url = "http://foo.com";
+    String upload_url = "https://collector-riptano-insights-test.insights.dsexternal.org";
+    //String upload_url = "https://collector-riptano-insights-stage.insights.dsexternal.org";
+
 
     String insights_token;
 
     List<FilteringRule> filtering_rules = new ArrayList<>();
+
+    private boolean insightsUploadEnabled;
+    private boolean writeToDiskEnabled;
+    private boolean insightsStreamingEnabled;
 
     /**
      * This serves the opposite purpose of metric_sampling_interval_in_seconds
@@ -43,18 +59,29 @@ public class Configuration
 
     public boolean isInsightsUploadEnabled()
     {
-        return false;
+        return insightsUploadEnabled;
     }
 
     public boolean isInsightsStreamingEnabled()
     {
-        return false;
+        return insightsStreamingEnabled;
     }
 
     public boolean isWriteToDiskEnabled()
     {
-        return true;
+        return writeToDiskEnabled;
     }
 
 
+    public void setInsightsUploadEnabled(boolean insightsUploadEnabled) {
+        this.insightsUploadEnabled = insightsUploadEnabled;
+    }
+
+    public void setWriteToDiskEnabled(boolean writeToDiskEnabled) {
+        this.writeToDiskEnabled = writeToDiskEnabled;
+    }
+
+    public void setInsightsStreamingEnabled(boolean insightsStreamingEnabled) {
+        this.insightsStreamingEnabled = insightsStreamingEnabled;
+    }
 }

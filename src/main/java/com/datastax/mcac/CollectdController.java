@@ -399,6 +399,10 @@ public class CollectdController
 
     public synchronized ProcessState reloadPlugin(Configuration newConfig)
     {
+        if(currentState != ProcessState.STARTED){
+            logger.trace("not reloading, plugin is not started");
+            return currentState;
+        }
 
         try
         {

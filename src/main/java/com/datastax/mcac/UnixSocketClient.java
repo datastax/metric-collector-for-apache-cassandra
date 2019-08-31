@@ -1,6 +1,10 @@
 package com.datastax.mcac;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,10 +19,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
+import com.datastax.mcac.insights.TokenStore;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
+import com.google.common.io.CharStreams;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +71,8 @@ public class UnixSocketClient
 
     public static final int DEFAULT_WRITE_BUFFER_WATERMARK_LOW_IN_KB = 512;
     public static final int DEFAULT_WRITE_BUFFER_WATERMARK_HIGH_IN_KB = 1024;
+
+    private final TokenStore tokenStore;
 
     private static final Logger logger = LoggerFactory.getLogger(UnixSocketClient.class);
     private static final ObjectMapper jsonEventSerializer = new ObjectMapper();
@@ -120,6 +128,7 @@ public class UnixSocketClient
     private final AtomicLong errorResponses;
     private final AtomicLong failedHealthChecks;
     private final AtomicLong reportingIntervalCount;
+    private Long lastTokenRefreshNanos;
 
     public UnixSocketClient()
     {
@@ -128,6 +137,7 @@ public class UnixSocketClient
 
     public UnixSocketClient(String socketFile, TimeUnit rateUnit, TimeUnit durationUnit)
     {
+        this.tokenStore = new MCACTokenStore(runtimeConfig.token_dir);
         this.metricsRegistry = CassandraMetricsRegistry.Metrics;
         this.started = new AtomicBoolean(false);
         this.socketFile = socketFile == null ? CollectdController.defaultSocketFile.get() : socketFile;
@@ -152,6 +162,7 @@ public class UnixSocketClient
         this.errorResponses = new AtomicLong(0);
         this.failedHealthChecks = new AtomicLong(0);
         this.reportingIntervalCount = new AtomicLong(0);
+        this.lastTokenRefreshNanos = 0L;
     }
 
     private EventLoopGroup epollGroup()
@@ -219,6 +230,8 @@ public class UnixSocketClient
 
                 try
                 {
+                    //TODO: not sure about this
+                    maybeGetToken();
                     CollectdController.ProcessState r = CollectdController.instance.get().start(socketFile, runtimeConfig);
 
                     if (r != CollectdController.ProcessState.STARTED)
@@ -293,12 +306,98 @@ public class UnixSocketClient
                 }
 
                 tryConnect();
+                maybeGetToken();
+
+                //TODO: is this needed?
+                if (tokenStore instanceof MCACTokenStore)
+                    ((MCACTokenStore)tokenStore).checkFingerprint(this);
+                
             }
             catch (Throwable e)
             {
                 logger.error("Error with collectd healthcheck", e);
             }
         }, 30, 30, TimeUnit.SECONDS);
+    }
+
+
+    private void maybeGetToken()
+    {
+        /*
+         * We shouldn't communicate or try to communicate with the Insights service
+         * if uploading has not been enabled
+         */
+        if (!runtimeConfig.isInsightsUploadEnabled()) return;
+
+        Optional<String> currentToken = tokenStore.token();
+
+        //TODO: Could be ApproximateTime.nanoTIme() if we upgrade c* dependency versions
+        Long now = System.nanoTime();
+
+        //Attempt to fetch or refresh the token every upload interval or 1h (whichever is greater)
+        if (lastTokenRefreshNanos == 0 || (now - lastTokenRefreshNanos > TimeUnit.SECONDS.toNanos(Math.max(TimeUnit.HOURS.toSeconds(1),
+                runtimeConfig.upload_interval_in_seconds))))
+        {
+            try
+            {
+                //Figure out the collector token refresh endpoint
+                URL url = new URL(runtimeConfig.upload_url);
+                URL tokenUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), "/api/v1/tokens");
+
+                HttpURLConnection connection = (HttpURLConnection) tokenUrl.openConnection(Proxy.NO_PROXY);
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                connection.setFixedLengthStreamingMode(0);
+                if (currentToken.isPresent())
+                    connection.setRequestProperty("Authorization", "Bearer " + currentToken.get());
+                getAndStoreToken(connection);
+            }
+            catch (Throwable e)
+            {
+                logger.warn("Error trying to refresh insights token", e);
+            }
+            finally
+            {
+                lastTokenRefreshNanos = now;
+            }
+        }
+    }
+
+    private void getAndStoreToken(HttpURLConnection connection) throws IOException
+    {
+        try
+        {
+            connection.connect();
+            int code = connection.getResponseCode();
+            if (code != 200 && code != 201)
+            {
+                logger.warn(
+                        "Error trying to get insights token at {} {}",
+                        connection.getURL(),
+                        code
+                );
+            }
+            else
+            {
+                try (InputStreamReader stream = new InputStreamReader(connection.getInputStream()))
+                {
+                    String token = CharStreams.toString(stream);
+                    tokenStore.store(token);
+                }
+
+                // Required to update to the new token
+                runtimeConfig.insights_token = tokenStore.token().get();
+                if (CollectdController.instance.get().reloadPlugin(runtimeConfig)
+                        == CollectdController.ProcessState.STARTED)
+                {
+                    reportInternalWithFlush("RELOADINSIGHTS", "");
+                }
+            }
+        }
+        finally
+        {
+            connection.disconnect();
+        }
     }
 
     private void tryConnect()

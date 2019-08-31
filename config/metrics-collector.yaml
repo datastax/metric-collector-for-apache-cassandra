@@ -1,1 +1,3 @@
-upload_url : "http://puppies.com"
+insightsStreamingEnabled: true
+insightsUploadEnabled: true
+writeToDiskEnabled: true
