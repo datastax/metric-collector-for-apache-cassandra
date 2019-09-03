@@ -189,7 +189,7 @@ public class MCACTokenStore implements TokenStore {
         QueryState queryState= QueryState.forInternalCalls();
         QueryOptions queryOptions = QueryOptions.forInternalCalls(cl, values);
 
-        ResultMessage result = statement.execute(queryState,queryOptions);
+        ResultMessage result = statement.executeInternal(queryState,queryOptions);
 
         if (result.kind.equals(ResultMessage.Kind.ROWS))
         {

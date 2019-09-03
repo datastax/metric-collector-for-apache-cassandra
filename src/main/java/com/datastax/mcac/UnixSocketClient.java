@@ -230,7 +230,6 @@ public class UnixSocketClient
 
                 try
                 {
-                    //TODO: not sure about this
                     maybeGetToken();
                     CollectdController.ProcessState r = CollectdController.instance.get().start(socketFile, runtimeConfig);
 
@@ -308,7 +307,6 @@ public class UnixSocketClient
                 tryConnect();
                 maybeGetToken();
 
-                //TODO: is this needed?
                 if (tokenStore instanceof MCACTokenStore)
                     ((MCACTokenStore)tokenStore).checkFingerprint(this);
                 
