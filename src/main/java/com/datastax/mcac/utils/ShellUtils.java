@@ -1,22 +1,22 @@
-package com.datastax.mcac;
+package com.datastax.mcac.utils;
 
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
+import org.apache.cassandra.io.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 //From fallout
-class ShellUtils
+public class ShellUtils
 {
     private static final Logger logger = LoggerFactory.getLogger(ShellUtils.class);
+
+    private static final Pattern cpuLinePattern = Pattern.compile("^([A-Za-z _-]+[A-Za-z_-])\\s*[:] (.*)$");
 
     // Lifted from http://stackoverflow.com/a/26538384/322152
     private static final Escaper SHELL_QUOTE_ESCAPER;
@@ -29,6 +29,40 @@ class ShellUtils
                 "'\"'\"'"
         );
         SHELL_QUOTE_ESCAPER = builder.build();
+    }
+
+    public static List<Map<String, String>> loadCpuMap()
+    {
+        File fCpuInfo = new File("/proc/cpuinfo");
+        if (!fCpuInfo.exists())
+            throw new IOError(new FileNotFoundException(fCpuInfo.getAbsolutePath()));
+        List<String> cpuinfoLines = FileUtils.readLines(fCpuInfo);
+
+        return loadCpuMapFrom(cpuinfoLines);
+    }
+
+    public static List<Map<String, String>> loadCpuMapFrom(List<String> lines)
+    {
+        List<Map<String, String>> cpuMap = new ArrayList<>();
+        Map<String, String> info = new HashMap<>();
+        for (String cpuinfoLine : lines)
+        {
+            if (cpuinfoLine.isEmpty())
+            {
+                cpuMap.add(new HashMap<>());
+                info.clear();
+            }
+            else
+            {
+                Matcher matcher = cpuLinePattern.matcher(cpuinfoLine);
+                if (matcher.matches())
+                    info.put(matcher.group(1), matcher.group(2));
+            }
+        }
+
+        cpuMap.add(info);
+
+        return cpuMap;
     }
 
     // This is from http://stackoverflow.com/a/20725050/322152.  We're not using org.apache.commons

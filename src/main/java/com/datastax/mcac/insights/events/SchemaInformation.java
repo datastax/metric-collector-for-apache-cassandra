@@ -1,0 +1,192 @@
+package com.datastax.mcac.insights.events;
+
+/*
+ *
+ * @author Sebastián Estévez on 9/4/19.
+ *
+ */
+
+
+import com.datastax.mcac.insights.Insight;
+import com.datastax.mcac.insights.InsightMetadata;
+import com.datastax.mcac.utils.JacksonUtil;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import org.apache.cassandra.cql3.QueryProcessor;
+import org.apache.cassandra.cql3.UntypedResultSet;
+import org.apache.cassandra.schema.SchemaKeyspace;
+import org.apache.cassandra.utils.FBUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+
+/**
+ * Copyright DataStax, Inc.
+ *
+ * Please see the included license file for details.
+ */
+public class SchemaInformation extends Insight
+{
+    private static final String NAME = "dse.insights.events.schema_information";
+    private static final String MAPPING_VERSION = "oss-config-" + FBUtilities.getReleaseVersionString();
+
+    private static final Logger logger = LoggerFactory.getLogger(SchemaInformation.class);
+
+    @JsonCreator
+    public SchemaInformation(
+            @JsonProperty("metadata") InsightMetadata metadata,
+            @JsonProperty("data") Data data
+    )
+    {
+        super(
+                metadata,
+                data
+        );
+    }
+
+    public SchemaInformation(Data data)
+    {
+        super(new InsightMetadata(
+                NAME,
+                Optional.of(System.currentTimeMillis()),
+                Optional.empty(),
+                Optional.of(InsightMetadata.InsightType.EVENT),
+                Optional.of(MAPPING_VERSION)
+        ), data);
+    }
+
+    public SchemaInformation()
+    {
+        this(new Data());
+    }
+
+    public Data getData()
+    {
+        return (Data) this.insightData;
+    }
+
+    public static class Data
+    {
+        private static final Object SCHEMA_KEYSPACE_NAME = "system_schema";
+        @JsonRawValue
+        @JsonProperty("keyspaces")
+        public final String keyspaces;
+
+        @JsonRawValue
+        @JsonProperty("tables")
+        public final String tables;
+
+        @JsonRawValue
+        @JsonProperty("columns")
+        public final String columns;
+
+        @JsonRawValue
+        @JsonProperty("dropped_columns")
+        public final String dropped_columns;
+
+        @JsonRawValue
+        @JsonProperty("triggers")
+        public final String triggers;
+
+        @JsonRawValue
+        @JsonProperty("views")
+        public final String views;
+
+        @JsonRawValue
+        @JsonProperty("types")
+        public final String types;
+
+        @JsonRawValue
+        @JsonProperty("functions")
+        public final String functions;
+
+        @JsonRawValue
+        @JsonProperty("aggregates")
+        public final String aggregates;
+
+        @JsonRawValue
+        @JsonProperty("indexes")
+        public final String indexes;
+
+
+        @VisibleForTesting
+        @JsonCreator
+        public Data(
+                @JsonProperty("keyspaces") Object keyspaces,
+                @JsonProperty("tables") Object tables,
+                @JsonProperty("columns") Object columns,
+                @JsonProperty("dropped_columns")  Object dropped_columns,
+                @JsonProperty("triggers")  Object triggers,
+                @JsonProperty("views") Object views,
+                @JsonProperty("types") Object types,
+                @JsonProperty("functions") Object functions,
+                @JsonProperty("aggregates") Object aggregates,
+                @JsonProperty("indexes") Object indexes)
+        {
+            try
+            {
+                this.keyspaces = JacksonUtil.writeValueAsString(keyspaces);
+                this.tables = JacksonUtil.writeValueAsString(tables);
+                this.columns = JacksonUtil.writeValueAsString(columns);
+                this.dropped_columns = JacksonUtil.writeValueAsString(dropped_columns);
+                this.triggers = JacksonUtil.writeValueAsString(triggers);
+                this.views = JacksonUtil.writeValueAsString(views);
+                this.types = JacksonUtil.writeValueAsString(types);
+                this.functions = JacksonUtil.writeValueAsString(functions);
+                this.aggregates = JacksonUtil.writeValueAsString(aggregates);
+                this.indexes = JacksonUtil.writeValueAsString(indexes);
+            }
+            catch (JacksonUtil.JacksonUtilException e)
+            {
+                throw new IllegalArgumentException("Error creating schema info", e);
+            }
+        }
+
+        private Data()
+        {
+            this.keyspaces = tableToJson(SchemaKeyspace.KEYSPACES);
+            this.tables = tableToJson(SchemaKeyspace.TABLES);
+            this.columns = tableToJson(SchemaKeyspace.COLUMNS);
+            this.dropped_columns = tableToJson(SchemaKeyspace.DROPPED_COLUMNS);
+            this.triggers = tableToJson(SchemaKeyspace.TRIGGERS);
+            this.views = tableToJson(SchemaKeyspace.VIEWS);
+            this.types = tableToJson(SchemaKeyspace.TYPES);
+            this.functions = tableToJson(SchemaKeyspace.FUNCTIONS);
+            this.aggregates = tableToJson(SchemaKeyspace.AGGREGATES);
+            this.indexes = tableToJson(SchemaKeyspace.INDEXES);
+        }
+
+
+        private String tableToJson(String table)
+        {
+            String cql = String.format("SELECT JSON * from %s.%s", SCHEMA_KEYSPACE_NAME, table);
+            String json = "[";
+            try
+            {
+                UntypedResultSet rs = QueryProcessor.executeInternal(cql);
+                List<String> rows = new ArrayList<>(rs.size());
+                for (UntypedResultSet.Row row : rs)
+                {
+                    rows.add(row.getString("[json]"));
+                }
+
+                json += Joiner.on(",").join(rows);
+            }
+            catch (Exception e)
+            {
+                logger.warn("Error fetching schema information on {}.{}", SCHEMA_KEYSPACE_NAME, table, e);
+            }
+
+            json += "]";
+
+            return json;
+        }
+    }
+}

@@ -20,6 +20,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import com.datastax.mcac.insights.TokenStore;
+import com.datastax.mcac.insights.events.NodeConfiguration;
+import com.datastax.mcac.insights.events.NodeSystemInformation;
+import com.datastax.mcac.insights.events.SchemaInformation;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
@@ -123,11 +126,13 @@ public class UnixSocketClient
     private final CassandraMetricsRegistry metricsRegistry;
     volatile Channel channel;
     private ScheduledFuture metricReportFuture;
+    private ScheduledFuture eventReportFuture;
     private ScheduledFuture healthCheckFuture;
     private final AtomicLong successResponses;
     private final AtomicLong errorResponses;
     private final AtomicLong failedHealthChecks;
-    private final AtomicLong reportingIntervalCount;
+    private final AtomicLong metricReportingIntervalCount;
+    private final AtomicLong eventReportingIntervalCount;
     private Long lastTokenRefreshNanos;
 
     public UnixSocketClient()
@@ -161,7 +166,8 @@ public class UnixSocketClient
         this.successResponses = new AtomicLong(0);
         this.errorResponses = new AtomicLong(0);
         this.failedHealthChecks = new AtomicLong(0);
-        this.reportingIntervalCount = new AtomicLong(0);
+        this.metricReportingIntervalCount = new AtomicLong(0);
+        this.eventReportingIntervalCount = new AtomicLong(0);
         this.lastTokenRefreshNanos = 0L;
     }
 
@@ -249,6 +255,7 @@ public class UnixSocketClient
                 initMetricsReporting();
                 initCollectdHealthCheck();
                 restartMetricReporting(runtimeConfig.metric_sampling_interval_in_seconds);
+                restartEventReporting(runtimeConfig.event_interval_in_seconds);
             }
             else
             {
@@ -600,6 +607,86 @@ public class UnixSocketClient
         });
     }
 
+    private synchronized void restartEventReporting(Integer interval)
+    {
+        if (eventReportFuture != null)
+            eventReportFuture.cancel(false);
+
+        logger.info("Starting event reporting with {} sec interval", interval);
+
+        //Some metrics are reported to insights as custom Insight types.
+        //We avoid sending these at the same interval as other metrics since insights only needs things
+        //at a 5 minute interval worst case. see InsightsRuntimeConfig::metricUpdateGapInSeconds
+        final long reportInsightEvery = Math.max((long) Math.floor(runtimeConfig.eventUpdateGapInSeconds() / interval), 1);
+        logger.debug("Reporting event insights every {} intervals", reportInsightEvery);
+
+        eventReportFuture = eventLoopGroup.scheduleWithFixedDelay(() -> {
+
+            if (channel == null || !channel.isOpen())
+                logger.info("Event reporting skipped due to connection to collectd not being established");
+
+            long count = 0;
+            long thisInterval = eventReportingIntervalCount.getAndIncrement();
+
+            try
+            {
+                NodeConfiguration nodeConfiguration = new NodeConfiguration();
+                report(nodeConfiguration);
+            }
+            catch (Exception e)
+            {
+                logger.warn(
+                        "Error reporting node configuration",
+                        e
+                );
+            }
+
+
+            try
+            {
+                NodeSystemInformation nodeConfiguration = new NodeSystemInformation();
+                report(nodeConfiguration);
+            }
+            catch (Exception e)
+            {
+                logger.warn(
+                        "Error reporting node system information",
+                        e
+                );
+            }
+
+            try
+            {
+                SchemaInformation schemaInformation = new SchemaInformation();
+                report(schemaInformation);
+            }
+            catch (Exception e)
+            {
+                logger.warn(
+                        "Error reporting schema information",
+                        e
+                );
+            }
+
+            /*
+            // Event data
+            // We only send insight data every N seconds defined above
+            count += writeGroup(eventProcessors, thisInterval % reportInsightEvery == 0 ? "" : FILTER_INSIGHTS_TAG);
+
+            // Metric data (Not sent to insight)
+            count += writeGroup(insightFilteredEventProcessors, FILTER_INSIGHTS_TAG);
+
+            if (count > 0)
+            {
+                logger.trace("Calling flush with {}", count);
+                flush();
+            }
+            */
+
+        }, interval, interval, TimeUnit.SECONDS);
+    }
+
+
     private synchronized void restartMetricReporting(Integer metricSamplingIntervalInSeconds)
     {
         if (metricReportFuture != null)
@@ -619,7 +706,7 @@ public class UnixSocketClient
                 logger.info("Metric reporting skipped due to connection to collectd not being established");
 
             long count = 0;
-            long thisInterval = reportingIntervalCount.getAndIncrement();
+            long thisInterval = metricReportingIntervalCount.getAndIncrement();
 
             // Metric and Insight data
             // We only send insight data every N seconds defined above

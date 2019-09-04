@@ -16,6 +16,7 @@ public class Configuration
     private static final Logger logger = LoggerFactory.getLogger(Configuration.class);
 
     public static final long MAX_METRIC_UPDATE_GAP_IN_SECONDS = TimeUnit.MINUTES.toSeconds(5);
+    public static final long MAX_EVENT_INTERVAL = (int)TimeUnit.MINUTES.toSeconds(5);
 
 
     String collectd_root;
@@ -26,6 +27,9 @@ public class Configuration
     Long data_dir_max_size_in_mb = 5000L;
     Integer metric_sampling_interval_in_seconds = 30;
     Integer upload_interval_in_seconds = (int)MAX_METRIC_UPDATE_GAP_IN_SECONDS;
+
+    Integer event_interval_in_seconds = (int)MAX_EVENT_INTERVAL;
+
     String upload_url = "https://collector-riptano-insights-test.insights.dsexternal.org";
     //String upload_url = "https://collector-riptano-insights-stage.insights.dsexternal.org";
 
@@ -49,6 +53,14 @@ public class Configuration
      * Reporting more often would be wasteful (unless the customer lowers the upload
      * interval or starts streaming)
      */
+    public long eventUpdateGapInSeconds()
+    {
+        if (upload_interval_in_seconds > MAX_METRIC_UPDATE_GAP_IN_SECONDS)
+            return MAX_METRIC_UPDATE_GAP_IN_SECONDS;
+        else
+            return upload_interval_in_seconds;
+    }
+
     public long metricUpdateGapInSeconds()
     {
         if (upload_interval_in_seconds > MAX_METRIC_UPDATE_GAP_IN_SECONDS)
