@@ -19,3 +19,7 @@ To test with docker run the following commands:
     docker build -t ddac  ./ 
 
     docker run -p 5005:5005 --name ddac -t ddac 
+
+To run with IDE debugging, uncomment the debugging line in the Dockerfile and
+
+    docker run -p 5005:5005 --name ddac -t ddac 
