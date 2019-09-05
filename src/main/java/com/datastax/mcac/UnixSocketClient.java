@@ -23,6 +23,7 @@ import com.datastax.mcac.insights.TokenStore;
 import com.datastax.mcac.insights.events.NodeConfiguration;
 import com.datastax.mcac.insights.events.NodeSystemInformation;
 import com.datastax.mcac.insights.events.SchemaInformation;
+import com.datastax.mcac.utils.JacksonUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
@@ -78,7 +79,6 @@ public class UnixSocketClient
     private final TokenStore tokenStore;
 
     private static final Logger logger = LoggerFactory.getLogger(UnixSocketClient.class);
-    private static final ObjectMapper jsonEventSerializer = new ObjectMapper();
     private static final int BATCH_SIZE = 256;
     private static final String FILTER_INSIGHTS_TAG = "insight_filtered=true";
     private static final String INF_BUCKET = "bucket_inf";
@@ -631,7 +631,12 @@ public class UnixSocketClient
             try
             {
                 NodeConfiguration nodeConfiguration = new NodeConfiguration();
-                report(nodeConfiguration);
+                boolean status = report(nodeConfiguration);
+                if (status){
+                    logger.trace("reported node config");
+                }else {
+                    logger.warn("didn't report node config");
+                }
             }
             catch (Exception e)
             {
@@ -644,8 +649,14 @@ public class UnixSocketClient
 
             try
             {
-                NodeSystemInformation nodeConfiguration = new NodeSystemInformation();
-                report(nodeConfiguration);
+                NodeSystemInformation nodeSystemInformation= new NodeSystemInformation();
+                boolean status = report(nodeSystemInformation);
+                if (status){
+                    logger.trace("reported node system info");
+                }else {
+                    logger.warn("didn't report system info");
+                }
+
             }
             catch (Exception e)
             {
@@ -658,7 +669,13 @@ public class UnixSocketClient
             try
             {
                 SchemaInformation schemaInformation = new SchemaInformation();
-                report(schemaInformation);
+                boolean status = report(schemaInformation);
+                if (status){
+                    logger.trace("reported schema info");
+                }else {
+                    logger.warn("didn't report schema info");
+                }
+
             }
             catch (Exception e)
             {
@@ -1286,7 +1303,7 @@ public class UnixSocketClient
     {
         return reportInternalWithFlush(
                 "PUTINSIGHT",
-                jsonEventSerializer.writeValueAsString(metricInsight)
+                JacksonUtil.writeValueAsString(metricInsight)
         );
     }
 
@@ -1294,7 +1311,7 @@ public class UnixSocketClient
     {
         return reportInternalWithFlush(
                 "PUTINSIGHT",
-                jsonEventSerializer.writeValueAsString(insight)
+                JacksonUtil.writeValueAsString(insight)
         );
     }
 

@@ -2,6 +2,7 @@ package com.datastax.mcac.insights;
 
 import java.util.Objects;
 
+import com.datastax.mcac.utils.JacksonUtil;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -17,8 +18,6 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public class Insight
 {
-    transient private static final ObjectMapper om = new ObjectMapper();
-
     @JsonProperty("metadata")
     public final InsightMetadata metadata;
     @JsonProperty("data")
@@ -74,8 +73,8 @@ public class Insight
         try
         {
             return "Insight{"
-                    + "metadata=" + om.writeValueAsString(metadata)
-                    + ", data=" + om.writeValueAsString(insightData)
+                    + "metadata=" + JacksonUtil.prettyPrint(metadata)
+                    + ", data=" + JacksonUtil.prettyPrint(insightData)
                     + '}';
         }
         catch (Exception ex)

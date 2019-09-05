@@ -47,11 +47,6 @@ public class MCACTokenStore implements TokenStore {
 
     private static Supplier<File> tokenFile;
 
-    private static final String HOST_COLUMN = "node";
-    private static final String TOKEN_COLUMN = "bearer_token";
-    private static final String LAST_UPDATED = "last_updated";
-    private static final String MAX_ADDED_DATE_SEEN_BY_NODE = "max_added_date_seen_by_node";
-
     private static final QueryProcessor qp =  QueryProcessor.instance;
 
     private Optional<String> cachedToken = Optional.empty();
@@ -150,6 +145,7 @@ public class MCACTokenStore implements TokenStore {
             logger.trace("Token file missing {}", tokenFile.get());
         }
 
+        logger.info("Read token file from disk {}", tokenFile.get());
         return cachedToken;
     }
 
