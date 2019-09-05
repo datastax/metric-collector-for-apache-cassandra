@@ -40,7 +40,7 @@ public class NodeSystemInformation extends Insight
     private static final Logger logger = LoggerFactory.getLogger(NodeSystemInformation.class);
 
     public static final String NAME = "dse.insights.event.node_system_information";
-    private static final String MAPPING_VERSION = "oss-config-" + FBUtilities.getReleaseVersionString();
+    private static final String MAPPING_VERSION = "oss-node-config-v1";
 
     public static final String LOCAL = "local";
     public static final String PEERS = "peers";
@@ -76,7 +76,7 @@ public class NodeSystemInformation extends Insight
     @JsonIgnore
     public Data getData()
     {
-        return (Data) this.insightData;
+        return (Data) this.data;
     }
 
     public static class Data

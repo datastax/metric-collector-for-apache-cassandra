@@ -35,7 +35,7 @@ import java.util.Optional;
 public class SchemaInformation extends Insight
 {
     private static final String NAME = "dse.insights.events.schema_information";
-    private static final String MAPPING_VERSION = "oss-config-" + FBUtilities.getReleaseVersionString();
+    private static final String MAPPING_VERSION = "oss-node-config-v1";
 
     private static final Logger logger = LoggerFactory.getLogger(SchemaInformation.class);
 
@@ -69,7 +69,7 @@ public class SchemaInformation extends Insight
 
     public Data getData()
     {
-        return (Data) this.insightData;
+        return (Data) this.data;
     }
 
     public static class Data

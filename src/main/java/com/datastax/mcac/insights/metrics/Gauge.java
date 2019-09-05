@@ -43,7 +43,7 @@ public class Gauge extends Metric
     @JsonIgnore
     public Number getValue()
     {
-        Number value = ((Data) insightData).value;
+        Number value = ((Data) data).value;
         return value;
     }
 

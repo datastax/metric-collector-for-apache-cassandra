@@ -59,7 +59,7 @@ public class NodeConfiguration extends Insight
 {
     private static final Logger logger = LoggerFactory.getLogger(NodeConfiguration.class);
     private static final String NAME = "dse.insights.event.node_configuration";
-    private static final String MAPPING_VERSION = "oss-config-" + FBUtilities.getReleaseVersionString();
+    private static final String MAPPING_VERSION = "oss-node-config-v1";
     private static final ObjectWriter SECURE_WRITER =new ObjectMapper().addMixIn(Object.class, SecureFilterMixIn.class)
             .writer(new SimpleFilterProvider().addFilter("secure filter", new SecurePropertyFilter()));
 
@@ -93,7 +93,7 @@ public class NodeConfiguration extends Insight
 
     public Data getData()
     {
-        return (Data) this.insightData;
+        return (Data) this.data;
     }
 
     public static class Data

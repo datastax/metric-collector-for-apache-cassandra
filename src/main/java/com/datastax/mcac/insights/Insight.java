@@ -5,14 +5,13 @@ import java.util.Objects;
 import com.datastax.mcac.utils.JacksonUtil;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * Instead of providing both `Object o` and `InsightsMetadata meta` to the associated <br>
  * `InsightsClient::report(*)` APIs, you can also just use this wrapper class to provide <br>
  * your data and metadata. <br>
  *
- * <p>The data in `Object insightData`, should be serializable with Jackson defaults, other than we <br>
+ * <p>The data in `Object data`, should be serializable with Jackson defaults, other than we <br>
  * do also configure Java time, and Java 8 Jackson serialization modules so types like `java.util.Optional`, <br>
  * or `java.time.Instant`. <br>
  */
@@ -21,7 +20,7 @@ public class Insight
     @JsonProperty("metadata")
     public final InsightMetadata metadata;
     @JsonProperty("data")
-    public final Object insightData;
+    public final Object data;
 
     @JsonCreator
     public Insight(
@@ -34,12 +33,12 @@ public class Insight
         /*
          * It's possible this can be null and we are just generating an event with a name/time, but no data fields
          */
-        this.insightData = data;
+        this.data = data;
     }
 
     public Insight withMetadata(InsightMetadata newMetadata)
     {
-        return new Insight(newMetadata, this.insightData);
+        return new Insight(newMetadata, this.data);
     }
 
     @Override
@@ -74,7 +73,7 @@ public class Insight
         {
             return "Insight{"
                     + "metadata=" + JacksonUtil.prettyPrint(metadata)
-                    + ", data=" + JacksonUtil.prettyPrint(insightData)
+                    + ", data=" + JacksonUtil.prettyPrint(data)
                     + '}';
         }
         catch (Exception ex)
@@ -82,7 +81,7 @@ public class Insight
             // if json has issues, still print what we can, never want to not return a string here
             return "Insight{"
                     + "metadata=" + metadata
-                    + ", data=" + insightData
+                    + ", data=" + data
                     + '}';
         }
     }
