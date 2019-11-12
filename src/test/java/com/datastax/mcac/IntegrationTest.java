@@ -3,9 +3,7 @@ package com.datastax.mcac;
 import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 
-import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -13,8 +11,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
@@ -61,4 +57,37 @@ public class IntegrationTest
                 "insights_client_started", 30);
     }
 
+
+    @Test
+    public void testDriverMessage()
+    {
+        Cluster cluster = null;
+        try
+        {
+            cluster = Cluster.builder()
+                    .addContactPoint("127.0.0.1")
+                    .build();
+            Session session = cluster.connect();
+
+           session.execute("CALL InsightsRpc.reportInsight('{\n" +
+                   "  \"metadata\": {\n" +
+                   "    \"name\": \"driver.startup\",\n" +
+                   "    \"insightMappingId\": \"v1\",\n" +
+                   "    \"insightType\": \"EVENT\",\n" +
+                   "    \"timestamp\": 1542285611120,\n" +
+                   "    \"tags\": {\n" +
+                   "      \"language\": \"nodejs\"\n" +
+                   "    }\n" +
+                   "  },\n" +
+                   "  \"data\": {}" +
+                   "}')");
+        }
+        finally
+        {
+            if (cluster != null) cluster.close();
+        }
+
+        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
+                "driver.startup", 30);
+    }
 }
