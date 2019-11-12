@@ -10,7 +10,6 @@ import com.datastax.mcac.insights.InsightMetadata;
 import com.datastax.mcac.utils.JacksonUtil;
 import com.google.common.base.Joiner;
 import org.apache.cassandra.cql3.UntypedResultSet;
-import org.apache.cassandra.utils.FBUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +22,6 @@ import static org.apache.cassandra.cql3.QueryProcessor.executeInternal;
 
 
 
-/*
- *
- * @author Sebastián Estévez on 9/4/19.
- *
- */
 
 /**
  * Insight that holds all the meta-info we can get our hands on.

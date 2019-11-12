@@ -29,10 +29,12 @@
 
     <properties>
         <dropwizard.version>1.0.2</dropwizard.version>
-        <cassandra.version>3.0.18</cassandra.version>
+        <cassandra.version>3.11.5</cassandra.version>
+        <driver.version>3.1.0</driver.version> <!-- Needed for guava 18 compat-->
         <bytebuddy.version>1.9.15</bytebuddy.version>
         <mustache.version>0.9.6</mustache.version>
         <collectd.version>0.1.0-96</collectd.version>
+        <docker.java.version>3.1.2</docker.java.version>
     </properties>
 
     <dependencies>
@@ -61,6 +63,12 @@
             <groupId>org.apache.cassandra</groupId>
             <artifactId>cassandra-all</artifactId>
             <version>${cassandra.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -73,6 +81,24 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.9.8</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>${docker.java.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+            <version>${driver.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -82,6 +108,16 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <dockerFileRoot>${basedir}</dockerFileRoot>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

@@ -1,5 +1,5 @@
-FROM cassandra:2.2
-#FROM cassandra:3.0
+#FROM cassandra:2.2
+FROM cassandra:3.0
 #FROM cassandra:3.11
 
 COPY config/metrics-collector.yaml /etc/cassandra/metrics-collector.yaml

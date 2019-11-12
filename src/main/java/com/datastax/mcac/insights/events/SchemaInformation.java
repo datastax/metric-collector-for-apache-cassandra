@@ -1,12 +1,5 @@
 package com.datastax.mcac.insights.events;
 
-/*
- *
- * @author Sebastián Estévez on 9/4/19.
- *
- */
-
-
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
 import com.datastax.mcac.utils.JacksonUtil;
@@ -18,7 +11,6 @@ import com.google.common.base.Joiner;
 import org.apache.cassandra.cql3.QueryProcessor;
 import org.apache.cassandra.cql3.UntypedResultSet;
 import org.apache.cassandra.schema.SchemaKeyspace;
-import org.apache.cassandra.utils.FBUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

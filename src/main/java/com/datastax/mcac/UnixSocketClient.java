@@ -332,7 +332,7 @@ public class UnixSocketClient
          * We shouldn't communicate or try to communicate with the Insights service
          * if uploading has not been enabled
          */
-        if (!runtimeConfig.isInsightsUploadEnabled()) return;
+        if ((!runtimeConfig.insights_upload_enabled && !runtimeConfig.insights_streaming_enabled) || runtimeConfig.upload_url == null) return;
 
         Optional<String> currentToken = tokenStore.token();
 
@@ -684,22 +684,6 @@ public class UnixSocketClient
                         e
                 );
             }
-
-            /*
-            // Event data
-            // We only send insight data every N seconds defined above
-            count += writeGroup(eventProcessors, thisInterval % reportInsightEvery == 0 ? "" : FILTER_INSIGHTS_TAG);
-
-            // Metric data (Not sent to insight)
-            count += writeGroup(insightFilteredEventProcessors, FILTER_INSIGHTS_TAG);
-
-            if (count > 0)
-            {
-                logger.trace("Calling flush with {}", count);
-                flush();
-            }
-            */
-
         }, interval, interval, TimeUnit.SECONDS);
     }
 
@@ -1189,20 +1173,24 @@ public class UnixSocketClient
     @VisibleForTesting
     boolean reportInternalWithoutFlush(String collectdAction, String insightJsonString)
     {
-        ChannelOutboundBuffer buf = channel.unsafe().outboundBuffer();
-        // if we can access ChannelOutboundBuffer, flush before the channel becomes unwritable
-        if (channel != null && buf != null)
+        if (started.get())
         {
-            if (buf.bytesBeforeUnwritable() < channel.config().getWriteBufferHighWaterMark() * 0.1)
+            ChannelOutboundBuffer buf = channel.unsafe().outboundBuffer();
+            // if we can access ChannelOutboundBuffer, flush before the channel becomes unwritable
+            if (channel != null && buf != null)
+            {
+                if (buf.bytesBeforeUnwritable() < channel.config().getWriteBufferHighWaterMark() * 0.1)
+                {
+                    flush();
+                }
+            }
+            // fallback in case ChannelOutboundBuffer is not accessible
+            else if (channel != null && !channel.isWritable())
             {
                 flush();
             }
         }
-        // fallback in case ChannelOutboundBuffer is not accessible
-        else if (channel != null && !channel.isWritable())
-        {
-            flush();
-        }
+
         return reportInternal(collectdAction, insightJsonString, false);
     }
 

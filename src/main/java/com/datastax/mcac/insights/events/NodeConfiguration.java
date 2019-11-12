@@ -1,10 +1,5 @@
 package com.datastax.mcac.insights.events;
 
-/*
- *
- * @author Sebastián Estévez on 9/3/19.
- *
- */
 
 /**
  * Copyright DataStax, Inc.
@@ -47,7 +42,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import org.apache.cassandra.config.DatabaseDescriptor;
-import org.apache.cassandra.utils.FBUtilities;
 
 
 /**

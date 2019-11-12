@@ -145,7 +145,7 @@ public class MCACTokenStore implements TokenStore {
             logger.trace("Token file missing {}", tokenFile.get());
         }
 
-        logger.info("Read token file from disk {}", tokenFile.get());
+        logger.trace("Read token file from disk {}", tokenFile.get());
         return cachedToken;
     }
 

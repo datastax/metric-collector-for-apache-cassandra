@@ -1,3 +1,6 @@
-insightsStreamingEnabled: true
-insightsUploadEnabled: true
-writeToDiskEnabled: true
+insights_streaming_enabled: false
+insights_upload_enabled: false
+write_to_disk_enabled: true
+
+data_dir: /var/lib/cassandra
+log_dir: /var/log/cassandra

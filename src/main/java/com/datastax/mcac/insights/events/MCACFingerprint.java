@@ -1,13 +1,5 @@
 package com.datastax.mcac.insights.events;
 
-/*
- *
- * @author Sebastián Estévez on 8/30/19.
- *
- */
-
-
-import java.net.InetAddress;
 import java.util.*;
 
 import com.datastax.mcac.insights.Insight;

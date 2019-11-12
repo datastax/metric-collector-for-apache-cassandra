@@ -30,7 +30,7 @@ public class ConfigurationLoader
 {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationLoader.class);
 
-    private final static String DEFAULT_CONFIGURATION = "ds-metric-collector.yaml";
+    private final static String DEFAULT_CONFIGURATION = "metric-collector.yaml";
 
     /**
      * Inspect the classpath to find storage configuration file

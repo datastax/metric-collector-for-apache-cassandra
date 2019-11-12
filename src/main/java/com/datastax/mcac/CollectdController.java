@@ -240,32 +240,37 @@ public class CollectdController
     private ScribeConfig generateScribeConf(Configuration configuration)
     {
         assert collectdConfig != null;
-
+        URL url = null;
         try
         {
-            ScribeConfig.Builder builder = new ScribeConfig.Builder()
-                    .withInsightsUploadEnabled(configuration.isInsightsUploadEnabled())
-                    .withInsightsStreamingEnabled(configuration.isInsightsStreamingEnabled())
-                    .withWriteToDiskEnabled(configuration.isWriteToDiskEnabled())
-                    .withDataDir(configuration.data_dir)
-                    .withServiceURL(new URL(configuration.upload_url))
-                    .withUploadInterval(configuration.upload_interval_in_seconds)
-                    .withMaxDirSizeBytes(configuration.data_dir_max_size_in_mb * 1000000L)
-                    .withMetricUpdateGapInSeconds(configuration.metricUpdateGapInSeconds())
-                    .withExistingConfigFile(collectdConfig.scribeConfigFile);
-
-            Optional<String> token = Optional.ofNullable(configuration.insights_token);
-            if (token.isPresent())
-                builder = builder.withToken(token.get());
-
-            scribeConfig = builder.build();
-
-            return scribeConfig;
+            if (configuration.upload_url != null)
+                url = new URL(configuration.upload_url);
         }
         catch (MalformedURLException e)
         {
-            throw new RuntimeException(e);
+            logger.warn("Invalid insights url: {}", configuration.upload_url);
         }
+
+        ScribeConfig.Builder builder = new ScribeConfig.Builder()
+                .withInsightsUploadEnabled(configuration.insights_upload_enabled)
+                .withInsightsStreamingEnabled(configuration.insights_streaming_enabled)
+                .withWriteToDiskEnabled(configuration.write_to_disk_enabled)
+                .withDataDir(configuration.data_dir)
+                .withUploadInterval(configuration.upload_interval_in_seconds)
+                .withMaxDirSizeBytes(configuration.data_dir_max_size_in_mb * 1000000L)
+                .withMetricUpdateGapInSeconds(configuration.metricUpdateGapInSeconds())
+                .withExistingConfigFile(collectdConfig.scribeConfigFile);
+
+        if (url != null)
+            builder = builder.withServiceURL(url);
+
+        Optional<String> token = Optional.ofNullable(configuration.insights_token);
+        if (token.isPresent())
+            builder = builder.withToken(token.get());
+
+        scribeConfig = builder.build();
+
+        return scribeConfig;
     }
 
     public synchronized ProcessState start(String socketFile, Configuration insightsConfig)
@@ -695,26 +700,34 @@ public class CollectdController
 
             ScribeConfig build()
             {
-                int port = serviceUrl.getPort() == -1 ? serviceUrl.getDefaultPort() : serviceUrl.getPort();
-                String host = serviceUrl.getHost();
-                boolean isSSL = serviceUrl.getProtocol().equalsIgnoreCase("https");
-
                 insightsUploadEnabled = insightsUploadEnabled || insightsStreamingEnabled;
+                int port = 0;
+                String host = null;
+                String path = null;
+                boolean isSSL = false;
 
-                if (insightsUploadEnabled)
+                if (serviceUrl != null)
                 {
-                    try
+                    port = serviceUrl.getPort() == -1 ? serviceUrl.getDefaultPort() : serviceUrl.getPort();
+                    host = serviceUrl.getHost();
+                    path = serviceUrl.getPath();
+                    isSSL = serviceUrl.getProtocol().equalsIgnoreCase("https");
+
+                    if (insightsUploadEnabled)
                     {
-                        //Vet hostname
-                        InetAddress.getByName(host).getHostAddress();
-                    }
-                    catch (UnknownHostException e)
-                    {
-                        //FIXME: These checks should happen in scribe
-                        //Avoiding an NPE for now..
-                        logger.warn("Insights service url {} is unreachable, no insights will be sent."
-                                + " This can be fixed with dsetool insights_config --upload_url", serviceUrl.toString());
-                        host = null;
+                        try
+                        {
+                            //Vet hostname
+                            InetAddress.getByName(host).getHostAddress();
+                        }
+                        catch (UnknownHostException e)
+                        {
+                            //FIXME: These checks should happen in scribe
+                            //Avoiding an NPE for now..
+                            logger.warn("Insights service url {} is unreachable, no insights will be sent."
+                                    + " This can be fixed with dsetool insights_config --upload_url", serviceUrl.toString());
+                            host = null;
+                        }
                     }
                 }
 
@@ -724,7 +737,7 @@ public class CollectdController
                         writeToDiskEnabled,
                         port,
                         host,
-                        serviceUrl.getPath(),
+                        path,
                         isSSL,
                         intervalSec,
                         metricUpdateGapInSec,
