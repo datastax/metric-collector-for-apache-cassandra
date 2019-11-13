@@ -64,7 +64,7 @@ public class Agent {
                         return builder.method(ElementMatchers.named("start")).intercept(MethodDelegation.to(CassandraDaemonInterceptor.class));
                     }
                 })
-                .type(ElementMatchers.nameEndsWith(".QueryProcessor"))
+                .type(ElementMatchers.isSubTypeOf(QueryHandler.class))
                 .transform(new AgentBuilder.Transformer() {
                     @Override
                     public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
