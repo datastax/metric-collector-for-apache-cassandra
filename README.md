@@ -2,7 +2,7 @@
 Metric Collector for Apache Cassandra (MCAC)
 ============================================
 
-Allows metric collector from DSE to run on OSS (3.0, 3.11, DDAC)
+Allows metric collector from DSE to run on OSS (2.2, 3.0, 3.11, DDAC)
 clusters.
 
 Currently to use run the following commands:
