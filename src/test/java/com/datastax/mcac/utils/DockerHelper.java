@@ -24,6 +24,7 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
@@ -32,6 +33,7 @@ import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.command.BuildImageResultCallback;
+import com.github.dockerjava.core.command.LogContainerResultCallback;
 
 public class DockerHelper
 {
@@ -186,6 +188,15 @@ public class DockerHelper
         }
 
         dockerClient.startContainerCmd(containerResponse.getId()).exec();
+
+
+        dockerClient.logContainerCmd(containerResponse.getId()).withStdOut(true).withFollowStream(true).withTailAll().exec(new LogContainerResultCallback() {
+            @Override
+            public void onNext(Frame item)
+            {
+                logger.info(new String(item.getPayload()));
+            }
+        });
 
         return containerResponse.getId();
     }

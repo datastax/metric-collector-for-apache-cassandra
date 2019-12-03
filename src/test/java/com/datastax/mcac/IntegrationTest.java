@@ -12,8 +12,10 @@ import org.junit.rules.TemporaryFolder;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.mcac.insights.events.ClientConnectionInformation;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
+import io.airlift.command.Cli;
 
 public class IntegrationTest
 {
@@ -89,5 +91,9 @@ public class IntegrationTest
 
         InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
                 "driver.startup", 30);
+
+        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
+                ClientConnectionInformation.NAME, 30);
+
     }
 }
