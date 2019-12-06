@@ -23,11 +23,12 @@ public class ClientConnectionInformation extends Insight
     public static final String PRODUCT_TYPE = "PRODUCT_TYPE";
 
     public static final String NAME = "oss.insights.event.client_connected";
+    public static final String NAME_HEARTBEAT = "oss.insights.event.client_heartbeat";
 
-    public ClientConnectionInformation(ClientState clientState, Map<String, String> options)
+    public ClientConnectionInformation(ClientState clientState, Map<String, String> options, boolean isHeartbeat)
     {
         super(new InsightMetadata(
-                        NAME,
+                        isHeartbeat ? NAME_HEARTBEAT : NAME,
                         Optional.of(System.currentTimeMillis()),
                         Optional.empty(),
                         Optional.of(InsightMetadata.InsightType.EVENT),
