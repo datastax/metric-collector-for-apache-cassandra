@@ -3,7 +3,9 @@ package com.datastax.mcac;
 import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -11,6 +13,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
 import com.datastax.mcac.utils.DockerHelper;
@@ -68,10 +71,11 @@ public class IntegrationTest
         {
             cluster = Cluster.builder()
                     .addContactPoint("127.0.0.1")
+                    .withPoolingOptions(new PoolingOptions().setHeartbeatIntervalSeconds(1))
                     .build();
             Session session = cluster.connect();
 
-           session.execute("CALL InsightsRpc.reportInsight('{\n" +
+            session.execute("CALL InsightsRpc.reportInsight('{\n" +
                    "  \"metadata\": {\n" +
                    "    \"name\": \"driver.startup\",\n" +
                    "    \"insightMappingId\": \"v1\",\n" +
@@ -83,6 +87,8 @@ public class IntegrationTest
                    "  },\n" +
                    "  \"data\": {}" +
                    "}')");
+
+            Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
         }
         finally
         {
@@ -94,6 +100,9 @@ public class IntegrationTest
 
         InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
                 ClientConnectionInformation.NAME, 30);
+
+        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
+                ClientConnectionInformation.NAME_HEARTBEAT, 30);
 
     }
 }

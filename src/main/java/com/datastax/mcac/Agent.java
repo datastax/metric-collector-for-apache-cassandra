@@ -1,6 +1,7 @@
 package com.datastax.mcac;
 
 import com.datastax.mcac.interceptors.CassandraDaemonInterceptor;
+import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -31,6 +32,7 @@ public class Agent {
         injected.put(new TypeDescription.ForLoadedType(CassandraDaemonInterceptor.class), ClassFileLocator.ForClassLoader.read(CassandraDaemonInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(QueryHandlerInterceptor.class), ClassFileLocator.ForClassLoader.read(QueryHandlerInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(StartupMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(StartupMessageInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(OptionsMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(OptionsMessageInterceptor.class));
 
         ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
 
@@ -38,31 +40,18 @@ public class Agent {
                 //.with(AgentBuilder.Listener.StreamWriting.toSystemOut()) //For debug
                 .ignore(ElementMatchers.nameStartsWith("net.bytebuddy."))
                 .enableBootstrapInjection(inst, temp)
-                .type(ElementMatchers.nameEndsWith(".CassandraDaemon"))
-                .transform(new AgentBuilder.Transformer()
-                {
-                    @Override
-                    public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
-                    {
-                        return builder.method(ElementMatchers.named("start")).intercept(MethodDelegation.to(CassandraDaemonInterceptor.class));
-                    }
-                })
-                .type(ElementMatchers.isSubTypeOf(QueryHandler.class))
-                .transform(new AgentBuilder.Transformer() {
-                    @Override
-                    public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
-                    {
-                        return builder.method(ElementMatchers.named("process")).intercept(MethodDelegation.to(QueryHandlerInterceptor.class));
-                    }
-                })
-                .type(ElementMatchers.nameEndsWith("StartupMessage"))
-                .transform(new AgentBuilder.Transformer() {
-                    @Override
-                    public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
-                    {
-                        return builder.method(ElementMatchers.named("execute")).intercept(MethodDelegation.to(StartupMessageInterceptor.class));
-                    }
-                })
+                //Cassandra Daemon
+                .type(CassandraDaemonInterceptor.type())
+                .transform(CassandraDaemonInterceptor.transformer())
+                //Query Handler
+                .type(QueryHandlerInterceptor.type())
+                .transform(QueryHandlerInterceptor.transformer())
+                //Startup Message
+                .type(StartupMessageInterceptor.type())
+                .transform(StartupMessageInterceptor.transformer())
+                //Options Message
+                .type(OptionsMessageInterceptor.type())
+                .transform(OptionsMessageInterceptor.transformer())
                 .installOn(inst);
     }
 }
