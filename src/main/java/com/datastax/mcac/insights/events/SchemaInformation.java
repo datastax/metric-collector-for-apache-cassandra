@@ -26,7 +26,7 @@ import java.util.Optional;
  */
 public class SchemaInformation extends Insight
 {
-    private static final String NAME = "dse.insights.events.schema_information";
+    private static final String NAME = "oss.insights.events.schema_information";
     private static final String MAPPING_VERSION = "oss-node-config-v1";
 
     private static final Logger logger = LoggerFactory.getLogger(SchemaInformation.class);
