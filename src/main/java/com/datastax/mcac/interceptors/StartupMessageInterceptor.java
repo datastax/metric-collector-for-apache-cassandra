@@ -21,6 +21,7 @@ import net.bytebuddy.utility.JavaModule;
 import org.apache.cassandra.service.QueryState;
 import org.apache.cassandra.transport.Message;
 import org.apache.cassandra.transport.messages.StartupMessage;
+import org.apache.cassandra.utils.Pair;
 
 public class StartupMessageInterceptor extends AbstractInterceptor
 {
@@ -57,7 +58,7 @@ public class StartupMessageInterceptor extends AbstractInterceptor
                 //We want to keep sending connection event information events for the duration of the session.
                 //The drivers uses OPTIONS messages as a heartbeat so we
                 //register the option information to be used by the OPTIONS interceptor
-                OptionsMessageInterceptor.stateCache.put(request.connection().channel(), request.options);
+                OptionsMessageInterceptor.stateCache.put(request.connection().channel(), Pair.create(1L, request.options));
             }
         }
         catch (Throwable t)

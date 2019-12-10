@@ -18,7 +18,6 @@ import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
-import io.airlift.command.Cli;
 
 public class IntegrationTest
 {

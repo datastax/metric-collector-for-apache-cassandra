@@ -52,7 +52,7 @@ import org.apache.cassandra.config.DatabaseDescriptor;
 public class NodeConfiguration extends Insight
 {
     private static final Logger logger = LoggerFactory.getLogger(NodeConfiguration.class);
-    private static final String NAME = "dse.insights.event.node_configuration";
+    private static final String NAME = "oss.insights.event.node_configuration";
     private static final String MAPPING_VERSION = "oss-node-config-v1";
     private static final ObjectWriter SECURE_WRITER =new ObjectMapper().addMixIn(Object.class, SecureFilterMixIn.class)
             .writer(new SimpleFilterProvider().addFilter("secure filter", new SecurePropertyFilter()));

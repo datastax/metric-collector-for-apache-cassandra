@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,13 +24,22 @@ import org.apache.cassandra.service.QueryState;
 import org.apache.cassandra.transport.Message;
 import org.apache.cassandra.transport.messages.OptionsMessage;
 import org.apache.cassandra.utils.ExpiringMap;
+import org.apache.cassandra.utils.Pair;
 
+/**
+ * We intercept the OPTIONS message to capture the Driver heartbeat messages.
+ * The ExpiringMap is available in all C* versions so we use this to
+ * cache the startup driver flags from the STARTUP message and send
+ * them to insights every 5 minutes.  This lets insights track user sessions over time.
+ *
+ * Once the connection is closed the information will expire from the cache.
+ */
 public class OptionsMessageInterceptor extends AbstractInterceptor
 {
     private static final Logger logger = LoggerFactory.getLogger(OptionsMessageInterceptor.class);
 
-
-    static final ExpiringMap<Channel, Map<String, String>> stateCache = new ExpiringMap<>(TimeUnit.MINUTES.toMillis(5));
+    private static final Long lifetimeMs = TimeUnit.MINUTES.toMillis(5);
+    static final ExpiringMap<Channel, Pair<Long, Map<String, String>>> stateCache = new ExpiringMap<>(lifetimeMs);
 
     public static ElementMatcher<? super TypeDescription> type()
     {
@@ -61,12 +69,21 @@ public class OptionsMessageInterceptor extends AbstractInterceptor
                 OptionsMessage request = (OptionsMessage) instance;
                 QueryState queryState = (QueryState) allArguments[0];
 
-                Map<String, String> options = stateCache.get(request.connection().channel());
+                Pair<Long, Map<String, String>> options = stateCache.get(request.connection().channel());
                 if (options != null)
-                    client.get().report(new ClientConnectionInformation(queryState.getClientState(), options, true));
+                {
+                    Long now = System.currentTimeMillis();
+                    Long lastInsightSend = options.left;
 
-                //Put options back in cache to keep it alive
-                stateCache.put(request.connection().channel(), options);
+                    if (options != null && (now - lastInsightSend) > lifetimeMs)
+                    {
+                        client.get().report(new ClientConnectionInformation(queryState.getClientState(), options.right, true));
+                        lastInsightSend = now;
+                    }
+
+                    //Put options back in cache to keep it alive
+                    stateCache.put(request.connection().channel(), Pair.create(lastInsightSend, options.right));
+                }
             }
         }
         catch (Throwable t)
