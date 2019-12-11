@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
+import com.datastax.mcac.utils.AgentVersionSupplier;
 import com.datastax.mcac.utils.JacksonUtil;
 import com.google.common.base.Joiner;
 import org.apache.cassandra.cql3.UntypedResultSet;
@@ -75,6 +76,9 @@ public class NodeSystemInformation extends Insight
 
     public static class Data
     {
+        @JsonProperty("oss_agent_version")
+        public final String ossAgentVersion;
+
         @JsonProperty("local_info")
         @JsonRawValue()
         public final String localInfo;
@@ -85,10 +89,12 @@ public class NodeSystemInformation extends Insight
 
         @JsonCreator
         public Data(
+                @JsonProperty("oss_agent_version") final String ossAgentVersion,
                 @JsonProperty("local_info") final Object localInfo,
                 @JsonProperty("peers_info") final Object peersInfo
         )
         {
+            this.ossAgentVersion = ossAgentVersion;
             try
             {
                 this.localInfo = JacksonUtil.writeValueAsString(localInfo);
@@ -110,7 +116,7 @@ public class NodeSystemInformation extends Insight
 
         private Data()
         {
-
+            this.ossAgentVersion = AgentVersionSupplier.getAgentVersion();
             String req = "SELECT JSON * from system." + LOCAL + " where key = '" + LOCAL + "'";
             this.localInfo =  executeInternal(req).one().getString("[json]");
 
