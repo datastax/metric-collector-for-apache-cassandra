@@ -1,6 +1,7 @@
 package com.datastax.mcac;
 
 import com.datastax.mcac.interceptors.CassandraDaemonInterceptor;
+import com.datastax.mcac.interceptors.LargePartitionInterceptor;
 import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
@@ -33,6 +34,7 @@ public class Agent {
         injected.put(new TypeDescription.ForLoadedType(QueryHandlerInterceptor.class), ClassFileLocator.ForClassLoader.read(QueryHandlerInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(StartupMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(StartupMessageInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(OptionsMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(OptionsMessageInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(LargePartitionInterceptor.class), ClassFileLocator.ForClassLoader.read(LargePartitionInterceptor.class));
 
         ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
 
@@ -52,6 +54,9 @@ public class Agent {
                 //Options Message
                 .type(OptionsMessageInterceptor.type())
                 .transform(OptionsMessageInterceptor.transformer())
+                //Large partitions
+                .type(LargePartitionInterceptor.type())
+                .transform(LargePartitionInterceptor.transformer())
                 .installOn(inst);
     }
 }

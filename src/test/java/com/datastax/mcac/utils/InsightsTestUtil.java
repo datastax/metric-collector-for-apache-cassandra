@@ -63,9 +63,10 @@ public class InsightsTestUtil
                     continue;
                 }
 
-                if (insightsContent.contains(entry))
+                int idx = insightsContent.indexOf(entry);
+                if (idx > 0)
                 {
-                    logger.info("Found {}", entry);
+                    logger.info("Found {}: {}", entry, insightsContent.substring(idx, idx + 256));
                     break;
                 }
                 else
