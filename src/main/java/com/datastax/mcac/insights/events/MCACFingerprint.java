@@ -4,12 +4,24 @@ import java.util.*;
 
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MCACFingerprint extends Insight
 {
     public static final String NAME = "dse.insights.event.ossfingerprint";
+
+    @JsonCreator
+    public MCACFingerprint(
+            @JsonProperty("metadata") InsightMetadata metadata,
+            @JsonProperty("data") MCACFingerprint.Data data
+    )
+    {
+        super(
+                metadata,
+                data
+        );
+    }
 
     public MCACFingerprint(List<OSSFingerprint> fingerprintList)
     {
@@ -37,14 +49,11 @@ public class MCACFingerprint extends Insight
 
     public static class OSSFingerprint
     {
-        @JsonProperty
+        @JsonProperty("host_id")
         public final UUID host_id;
 
         @JsonCreator
-        public OSSFingerprint(
-                @JsonProperty UUID host_id
-                ) {
-
+        public OSSFingerprint(@JsonProperty("host_id") UUID host_id) {
             this.host_id = host_id;
         }
 

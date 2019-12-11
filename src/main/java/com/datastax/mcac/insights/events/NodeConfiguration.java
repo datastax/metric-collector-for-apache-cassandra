@@ -25,13 +25,13 @@ import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
 import com.datastax.mcac.utils.JacksonUtil;
 import com.datastax.mcac.utils.ShellUtils;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import org.apache.cassandra.config.Config;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonRawValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
