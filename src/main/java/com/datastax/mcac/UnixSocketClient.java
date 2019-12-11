@@ -1,38 +1,5 @@
 package com.datastax.mcac;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.Proxy;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
-
-import com.datastax.mcac.insights.TokenStore;
-import com.datastax.mcac.insights.events.NodeConfiguration;
-import com.datastax.mcac.insights.events.NodeSystemInformation;
-import com.datastax.mcac.insights.events.SchemaInformation;
-import com.datastax.mcac.utils.JacksonUtil;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Maps;
-import com.google.common.io.CharStreams;
-import org.apache.commons.lang3.SystemUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -41,8 +8,18 @@ import com.codahale.metrics.MetricRegistryListener;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.datastax.mcac.insights.Insight;
+import com.datastax.mcac.insights.TokenStore;
+import com.datastax.mcac.insights.events.NodeConfiguration;
+import com.datastax.mcac.insights.events.NodeSystemInformation;
+import com.datastax.mcac.insights.events.SchemaInformation;
 import com.datastax.mcac.insights.metrics.RateStats;
 import com.datastax.mcac.insights.metrics.SamplingStats;
+import com.datastax.mcac.utils.JacksonUtil;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Maps;
+import com.google.common.io.CharStreams;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -54,7 +31,6 @@ import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollDomainSocketChannel;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.unix.DomainSocketAddress;
-import io.netty.channel.unix.UnixChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
@@ -68,7 +44,31 @@ import org.apache.cassandra.utils.EstimatedHistogram;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.NoSpamLogger;
 import org.apache.cassandra.utils.Pair;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
+
+import static org.apache.cassandra.cql3.QueryProcessor.executeInternal;
 
 public class UnixSocketClient
 {
@@ -182,12 +182,12 @@ public class UnixSocketClient
         return epollEventLoopGroup;
     }
 
-    private ChannelInitializer<UnixChannel> createNettyPipeline()
+    private ChannelInitializer<Channel> createNettyPipeline()
     {
-        return new ChannelInitializer<UnixChannel>()
+        return new ChannelInitializer<Channel>()
         {
             @Override
-            protected void initChannel(final UnixChannel channel) throws Exception
+            protected void initChannel(final Channel channel) throws Exception
             {
                 channel.pipeline().addLast(new LineBasedFrameDecoder(256));
                 channel.pipeline().addLast(new StringDecoder(CharsetUtil.US_ASCII));
@@ -316,7 +316,7 @@ public class UnixSocketClient
 
                 if (tokenStore instanceof MCACTokenStore)
                     ((MCACTokenStore)tokenStore).checkFingerprint(this);
-                
+
             }
             catch (Throwable e)
             {
@@ -353,6 +353,23 @@ public class UnixSocketClient
                 connection.setRequestMethod("POST");
                 connection.setDoOutput(true);
                 connection.setFixedLengthStreamingMode(0);
+
+                try
+                {
+                    String localHostId = StorageService.instance.getLocalHostId();
+                    connection.setRequestProperty(
+                            "ClientId",
+                            localHostId
+                    );
+                }
+                catch (Exception ex)
+                {
+                    logger.warn(
+                            "Error looking up host_id of node",
+                            ex
+                    );
+                }
+
                 if (currentToken.isPresent())
                     connection.setRequestProperty("Authorization", "Bearer " + currentToken.get());
                 getAndStoreToken(connection);
@@ -1173,6 +1190,11 @@ public class UnixSocketClient
     @VisibleForTesting
     boolean reportInternalWithoutFlush(String collectdAction, String insightJsonString)
     {
+        if(channel == null)
+        {
+            return false;
+        }
+
         if (started.get())
         {
             ChannelOutboundBuffer buf = channel.unsafe().outboundBuffer();
