@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -16,6 +17,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
+import com.datastax.mcac.insights.events.LargePartitionInformation;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
 
@@ -31,7 +33,7 @@ public class IntegrationTest
         try
         {
             temporaryFolder.create();
-            docker = new DockerHelper(temporaryFolder.getRoot());
+            docker = new DockerHelper(temporaryFolder.getRoot(), Lists.newArrayList("-Dmcac.partition_limit_override_bytes=1"));
         }
         catch (IOException e)
         {
@@ -87,6 +89,9 @@ public class IntegrationTest
                    "  \"data\": {}" +
                    "}')");
 
+
+            session.execute("CREATE KEYSPACE foo with replication={'class': 'SimpleStrategy', 'replication_factor':3}");
+
             Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
         }
         finally
@@ -102,6 +107,10 @@ public class IntegrationTest
 
         InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
                 ClientConnectionInformation.NAME_HEARTBEAT, 30);
+
+
+        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
+                LargePartitionInformation.NAME, 30);
 
     }
 }

@@ -1,6 +1,5 @@
 package com.datastax.mcac.interceptors;
 
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;

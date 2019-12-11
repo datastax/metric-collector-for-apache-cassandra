@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.slf4j.Logger;
@@ -41,12 +42,14 @@ public class DockerHelper
     private DockerClient dockerClient;
     private String container;
     private File dataDir;
+    private List<String> startupArgs;
     private Logger logger = LoggerFactory.getLogger(DockerHelper.class);
 
-    public DockerHelper(File dataDir) {
+    public DockerHelper(File dataDir, List<String> startupArgs) {
         this.config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
         this.dockerClient = DockerClientBuilder.getInstance(config).build();
         this.dataDir = dataDir;
+        this.startupArgs = startupArgs;
     }
 
     public void startCassandra()
@@ -55,8 +58,11 @@ public class DockerHelper
         String name = "cassandra";
         List<Integer> ports = Arrays.asList(9042);
         List<String> volumeDescList = Arrays.asList(dataDir.getAbsolutePath() + ":/var/lib/cassandra");
-        List<String> envList = Arrays.asList();
-        List<String> cmdList = Arrays.asList();
+        List<String> envList = null;
+        List<String> cmdList = Lists.newArrayList("cassandra", "-f");
+
+        if (startupArgs != null)
+            cmdList.addAll(startupArgs);
 
         this.container = startDocker(dockerFileDir, name, ports, volumeDescList, envList, cmdList);
 
