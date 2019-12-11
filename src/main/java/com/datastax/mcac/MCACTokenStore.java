@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.datastax.mcac.insights.LocalHostIdSupplier;
+import com.datastax.mcac.utils.LocalHostIdSupplier;
 import com.datastax.mcac.insights.events.MCACFingerprint;
 import com.datastax.mcac.insights.TokenStore;
 import com.google.common.base.Suppliers;
@@ -23,7 +23,6 @@ import org.apache.cassandra.cql3.statements.SelectStatement;
 import org.apache.cassandra.db.ConsistencyLevel;
 import org.apache.cassandra.exceptions.RequestValidationException;
 import org.apache.cassandra.service.QueryState;
-import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.transport.messages.ResultMessage;
 import org.apache.cassandra.utils.MD5Digest;
 import org.slf4j.Logger;
