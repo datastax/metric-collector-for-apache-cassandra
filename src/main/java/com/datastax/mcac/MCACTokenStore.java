@@ -207,9 +207,16 @@ public class MCACTokenStore implements TokenStore {
             return;
         }
 
+        List<MCACFingerprint.OSSFingerprint> fingerprintList = new ArrayList<>();
         UntypedResultSet resultSet = selectAllTokenFromCQL();
 
-        List<MCACFingerprint.OSSFingerprint> fingerprintList = new ArrayList<>();
+        resultSet.iterator().forEachRemaining(row -> {
+            UUID hostId = row.getUUID("host_id");
+            fingerprintList.add(new MCACFingerprint.OSSFingerprint(
+                    hostId
+            ));
+        });
+
         String localHostId = StorageService.instance.getLocalHostId();
 
         //This node
