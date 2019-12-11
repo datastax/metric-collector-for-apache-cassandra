@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.datastax.mcac.insights.LocalHostIdSupplier;
 import com.datastax.mcac.insights.events.MCACFingerprint;
 import com.datastax.mcac.insights.TokenStore;
 import com.google.common.base.Suppliers;
@@ -217,11 +218,9 @@ public class MCACTokenStore implements TokenStore {
             ));
         });
 
-        String localHostId = StorageService.instance.getLocalHostId();
-
         //This node
         fingerprintList.add(new MCACFingerprint.OSSFingerprint(
-                UUID.fromString(localHostId)
+                UUID.fromString(LocalHostIdSupplier.getHostId())
         ));
 
         //Filter and Update if we see a newer token
