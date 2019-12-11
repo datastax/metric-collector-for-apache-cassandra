@@ -8,6 +8,7 @@ import com.codahale.metrics.MetricRegistryListener;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.datastax.mcac.insights.Insight;
+import com.datastax.mcac.insights.LocalHostIdSupplier;
 import com.datastax.mcac.insights.TokenStore;
 import com.datastax.mcac.insights.events.NodeConfiguration;
 import com.datastax.mcac.insights.events.NodeSystemInformation;
@@ -59,7 +60,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
@@ -67,8 +67,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
-
-import static org.apache.cassandra.cql3.QueryProcessor.executeInternal;
 
 public class UnixSocketClient
 {
@@ -356,10 +354,9 @@ public class UnixSocketClient
 
                 try
                 {
-                    String localHostId = StorageService.instance.getLocalHostId();
                     connection.setRequestProperty(
                             "ClientId",
-                            localHostId
+                            LocalHostIdSupplier.getHostId()
                     );
                 }
                 catch (Exception ex)
@@ -384,6 +381,8 @@ public class UnixSocketClient
             }
         }
     }
+
+
 
     private void getAndStoreToken(HttpURLConnection connection) throws IOException
     {
