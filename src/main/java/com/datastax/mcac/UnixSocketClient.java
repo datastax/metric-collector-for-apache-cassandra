@@ -1273,7 +1273,6 @@ public class UnixSocketClient
         }
         else
         {
-            logger.warn("Insights Client is not started");
             return false;
         }
     }

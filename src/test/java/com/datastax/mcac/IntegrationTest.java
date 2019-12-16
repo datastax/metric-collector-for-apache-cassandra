@@ -19,6 +19,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
+import com.datastax.mcac.insights.events.CompactionStartedInformation;
 import com.datastax.mcac.insights.events.ExceptionInformation;
 import com.datastax.mcac.insights.events.FlushInformation;
 import com.datastax.mcac.insights.events.GCInformation;
@@ -105,7 +106,6 @@ public class IntegrationTest
                 session.execute("INSERT into foo.bar(key, value) VALUES (?, ?)", ""+i, val);
             }
 
-
             Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
         }
         finally
@@ -128,5 +128,7 @@ public class IntegrationTest
         InsightsTestUtil.lookForEntryInLog(rootDir, ExceptionInformation.NAME, 30);
 
         InsightsTestUtil.lookForEntryInLog(rootDir, GCInformation.NAME, 30);
+
+        InsightsTestUtil.lookForEntryInLog(rootDir, CompactionStartedInformation.NAME, 30);
     }
 }
