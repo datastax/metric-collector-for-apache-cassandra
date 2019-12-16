@@ -1,10 +1,14 @@
 package com.datastax.mcac;
 
+import com.datastax.mcac.insights.events.DroppedMessageInformation;
 import com.datastax.mcac.interceptors.CassandraDaemonInterceptor;
+import com.datastax.mcac.interceptors.FlushInterceptor;
+import com.datastax.mcac.interceptors.FlushInterceptorLegacy;
 import com.datastax.mcac.interceptors.LargePartitionInterceptor;
 import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
+import com.datastax.mcac.interceptors.StringFormatInterceptor;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -35,6 +39,10 @@ public class Agent {
         injected.put(new TypeDescription.ForLoadedType(StartupMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(StartupMessageInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(OptionsMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(OptionsMessageInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(LargePartitionInterceptor.class), ClassFileLocator.ForClassLoader.read(LargePartitionInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(StringFormatInterceptor.class), ClassFileLocator.ForClassLoader.read(StringFormatInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(FlushInterceptor.class), ClassFileLocator.ForClassLoader.read(FlushInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(FlushInterceptorLegacy.class), ClassFileLocator.ForClassLoader.read(FlushInterceptorLegacy.class));
+
 
         ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
 
@@ -57,6 +65,14 @@ public class Agent {
                 //Large partitions
                 .type(LargePartitionInterceptor.type())
                 .transform(LargePartitionInterceptor.transformer())
+                //Dropped Messages
+                .type(StringFormatInterceptor.type())
+                .transform(StringFormatInterceptor.transformer())
+                //Flush Information
+                .type(FlushInterceptor.type())
+                .transform(FlushInterceptor.transformer())
+                .type(FlushInterceptorLegacy.type())
+                .transform(FlushInterceptorLegacy.transformer())
                 .installOn(inst);
     }
 }

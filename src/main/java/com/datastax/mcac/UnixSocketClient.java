@@ -546,11 +546,11 @@ public class UnixSocketClient
             {
                 //Keep the last value of a metric when it's removed.
                 Function<String, Integer> f = metricProcessors.remove(name);
-                if (f != null && !StorageService.instance.isShutdown())
+                if (f != null && !StorageService.instance.isInShutdownHook())
                     f.apply("");
 
                 f = insightFilteredMetricProcessors.remove(name);
-                if (f != null && !StorageService.instance.isShutdown())
+                if (f != null && !StorageService.instance.isInShutdownHook())
                     f.apply(FILTER_INSIGHTS_TAG);
 
                 globalFilteredMetricProcessors.remove(name);

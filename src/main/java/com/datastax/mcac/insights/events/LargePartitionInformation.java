@@ -5,7 +5,6 @@ import java.util.Optional;
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.DecoratedKey;
 import org.apache.cassandra.dht.Murmur3Partitioner;
 
@@ -13,7 +12,7 @@ public class LargePartitionInformation extends Insight
 {
     public static final String NAME = "oss.insights.event.large_partition";
 
-    public LargePartitionInformation(String keyspace, String table, DecoratedKey key, long size)
+    public LargePartitionInformation(String keyspace, String table, DecoratedKey key, long size, long partitionLimit)
     {
         super(new InsightMetadata(
                         NAME,
@@ -23,7 +22,7 @@ public class LargePartitionInformation extends Insight
                         Optional.empty()),
                 new Data(keyspace, table,
                         key.getToken() instanceof Murmur3Partitioner.LongToken ? (Long) key.getToken().getTokenValue() : Long.MIN_VALUE,
-                        size));
+                        size, partitionLimit));
     }
 
     static class Data
@@ -43,15 +42,14 @@ public class LargePartitionInformation extends Insight
         @JsonProperty("threshold_in_bytes")
         final Long threshold;
 
-        public Data(String keyspace, String table, Long token, Long bytes)
+        public Data(String keyspace, String table, Long token, Long bytes, Long partitionLimit)
         {
             this.keyspace = keyspace;
             this.table = table;
             this.token = token;
             this.bytes = bytes;
 
-            Long partitionWarnThreshold = DatabaseDescriptor.getCompactionLargePartitionWarningThreshold();
-            this.threshold = partitionWarnThreshold == null || partitionWarnThreshold < 0 ? -1 : partitionWarnThreshold * 1024L * 1024L;
+            this.threshold = partitionLimit;
         }
     }
 }

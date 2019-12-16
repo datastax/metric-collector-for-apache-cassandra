@@ -10,7 +10,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import org.apache.cassandra.cql3.QueryProcessor;
 import org.apache.cassandra.cql3.UntypedResultSet;
-import org.apache.cassandra.schema.SchemaKeyspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +27,17 @@ public class SchemaInformation extends Insight
 {
     private static final String NAME = "oss.insights.events.schema_information";
     private static final String MAPPING_VERSION = "oss-node-config-v1";
+
+    public static final String KEYSPACES = "keyspaces";
+    public static final String TABLES = "tables";
+    public static final String COLUMNS = "columns";
+    public static final String DROPPED_COLUMNS = "dropped_columns";
+    public static final String TRIGGERS = "triggers";
+    public static final String VIEWS = "views";
+    public static final String TYPES = "types";
+    public static final String FUNCTIONS = "functions";
+    public static final String AGGREGATES = "aggregates";
+    public static final String INDEXES = "indexes";
 
     private static final Logger logger = LoggerFactory.getLogger(SchemaInformation.class);
 
@@ -143,16 +153,16 @@ public class SchemaInformation extends Insight
 
         private Data()
         {
-            this.keyspaces = tableToJson(SchemaKeyspace.KEYSPACES);
-            this.tables = tableToJson(SchemaKeyspace.TABLES);
-            this.columns = tableToJson(SchemaKeyspace.COLUMNS);
-            this.dropped_columns = tableToJson(SchemaKeyspace.DROPPED_COLUMNS);
-            this.triggers = tableToJson(SchemaKeyspace.TRIGGERS);
-            this.views = tableToJson(SchemaKeyspace.VIEWS);
-            this.types = tableToJson(SchemaKeyspace.TYPES);
-            this.functions = tableToJson(SchemaKeyspace.FUNCTIONS);
-            this.aggregates = tableToJson(SchemaKeyspace.AGGREGATES);
-            this.indexes = tableToJson(SchemaKeyspace.INDEXES);
+            this.keyspaces = tableToJson(KEYSPACES);
+            this.tables = tableToJson(TABLES);
+            this.columns = tableToJson(COLUMNS);
+            this.dropped_columns = tableToJson(DROPPED_COLUMNS);
+            this.triggers = tableToJson(TRIGGERS);
+            this.views = tableToJson(VIEWS);
+            this.types = tableToJson(TYPES);
+            this.functions = tableToJson(FUNCTIONS);
+            this.aggregates = tableToJson(AGGREGATES);
+            this.indexes = tableToJson(INDEXES);
         }
 
 

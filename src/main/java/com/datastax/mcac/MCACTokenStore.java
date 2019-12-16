@@ -7,8 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.function.Supplier;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import com.datastax.mcac.utils.LocalHostIdSupplier;
 import com.datastax.mcac.insights.events.MCACFingerprint;
@@ -30,18 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import org.apache.cassandra.cql3.UntypedResultSet;
 
-
-/*
- *
- * @author Sebastián Estévez on 8/30/19.
- *
- */
-
-
-@Singleton
-public class MCACTokenStore implements TokenStore {
-
-
+public class MCACTokenStore implements TokenStore
+{
     private static final Logger logger = LoggerFactory.getLogger(MCACTokenStore.class);
     private static final String SELECT_ALL_PEERS = "SELECT peer, data_center, host_id, preferred_ip, rack, release_version, rpc_address, schema_version, tokens FROM system.peers;";
 
@@ -52,7 +40,6 @@ public class MCACTokenStore implements TokenStore {
     private Optional<String> cachedToken = Optional.empty();
     private List<MCACFingerprint.OSSFingerprint> cachedFingerprint = Collections.EMPTY_LIST;
 
-    @Inject
     public MCACTokenStore(String log_dir)
     {
         this.tokenFile = Suppliers.memoize(() -> new File(log_dir + File.separator + "insights.token"))::get;
