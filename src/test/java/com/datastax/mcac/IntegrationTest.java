@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -20,6 +21,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
 import com.datastax.mcac.insights.events.ExceptionInformation;
 import com.datastax.mcac.insights.events.FlushInformation;
+import com.datastax.mcac.insights.events.GCInformation;
 import com.datastax.mcac.insights.events.LargePartitionInformation;
 import com.datastax.mcac.interceptors.FlushInterceptor;
 import com.datastax.mcac.utils.DockerHelper;
@@ -95,6 +97,14 @@ public class IntegrationTest
 
 
             session.execute("CREATE KEYSPACE foo with replication={'class': 'SimpleStrategy', 'replication_factor':3}");
+            session.execute("CREATE TABLE foo.bar (key text PRIMARY KEY, value text)");
+
+            String val = StringUtils.rightPad("1", 10000);
+            for (int i = 0; i < 10000; i++)
+            {
+                session.execute("INSERT into foo.bar(key, value) VALUES (?, ?)", ""+i, val);
+            }
+
 
             Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
         }
@@ -116,5 +126,7 @@ public class IntegrationTest
         InsightsTestUtil.lookForEntryInLog(rootDir, FlushInformation.NAME, 30);
 
         InsightsTestUtil.lookForEntryInLog(rootDir, ExceptionInformation.NAME, 30);
+
+        InsightsTestUtil.lookForEntryInLog(rootDir, GCInformation.NAME, 30);
     }
 }
