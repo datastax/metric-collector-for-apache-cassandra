@@ -1,5 +1,6 @@
 package com.datastax.mcac;
 
+import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -17,6 +18,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
+import com.datastax.mcac.insights.events.ExceptionInformation;
 import com.datastax.mcac.insights.events.FlushInformation;
 import com.datastax.mcac.insights.events.LargePartitionInformation;
 import com.datastax.mcac.interceptors.FlushInterceptor;
@@ -101,21 +103,18 @@ public class IntegrationTest
             if (cluster != null) cluster.close();
         }
 
-        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
-                "driver.startup", 30);
+        File rootDir = Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile();
 
-        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
-                ClientConnectionInformation.NAME, 30);
+        InsightsTestUtil.lookForEntryInLog(rootDir, "driver.startup", 30);
 
-        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
-                ClientConnectionInformation.NAME_HEARTBEAT, 30);
+        InsightsTestUtil.lookForEntryInLog(rootDir, ClientConnectionInformation.NAME, 30);
 
-        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
-                LargePartitionInformation.NAME, 30);
+        InsightsTestUtil.lookForEntryInLog(rootDir, ClientConnectionInformation.NAME_HEARTBEAT, 30);
 
-        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
-                FlushInformation.NAME, 30);
+        InsightsTestUtil.lookForEntryInLog(rootDir, LargePartitionInformation.NAME, 30);
 
+        InsightsTestUtil.lookForEntryInLog(rootDir, FlushInformation.NAME, 30);
 
+        InsightsTestUtil.lookForEntryInLog(rootDir, ExceptionInformation.NAME, 30);
     }
 }
