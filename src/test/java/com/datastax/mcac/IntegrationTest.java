@@ -17,7 +17,9 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
+import com.datastax.mcac.insights.events.FlushInformation;
 import com.datastax.mcac.insights.events.LargePartitionInformation;
+import com.datastax.mcac.interceptors.FlushInterceptor;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
 
@@ -108,9 +110,12 @@ public class IntegrationTest
         InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
                 ClientConnectionInformation.NAME_HEARTBEAT, 30);
 
-
         InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
                 LargePartitionInformation.NAME, 30);
+
+        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
+                FlushInformation.NAME, 30);
+
 
     }
 }

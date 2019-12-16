@@ -45,7 +45,6 @@ public class LargePartitionInterceptor extends AbstractInterceptor
     @RuntimeType
     public static void intercept(@This Object instance, @AllArguments Object[] allArguments, @SuperCall Callable<Void> zuper) throws Throwable
     {
-
         zuper.call();
 
         try
@@ -64,7 +63,8 @@ public class LargePartitionInterceptor extends AbstractInterceptor
                             writer.metadata.ksName,
                             writer.metadata.cfName,
                             (DecoratedKey) allArguments[0],
-                            rowSize
+                            rowSize,
+                            partitionLimitOverride
                     ));
                 }
             }

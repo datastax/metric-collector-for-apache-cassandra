@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,7 +39,7 @@ public class ShellUtils
         File fCpuInfo = new File("/proc/cpuinfo");
         if (!fCpuInfo.exists())
             throw new IOError(new FileNotFoundException(fCpuInfo.getAbsolutePath()));
-        List<String> cpuinfoLines = FileUtils.readLines(fCpuInfo);
+        List<String> cpuinfoLines = readLines(fCpuInfo);
 
         return loadCpuMapFrom(cpuinfoLines);
     }
@@ -255,6 +258,21 @@ public class ShellUtils
         catch (InterruptedException t)
         {
             throw new RuntimeException(t);
+        }
+    }
+
+    public static List<String> readLines(File file)
+    {
+        try
+        {
+            return Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+        }
+        catch (IOException ex)
+        {
+            if (ex instanceof NoSuchFileException)
+                return Collections.emptyList();
+
+            throw new RuntimeException(ex);
         }
     }
 }
