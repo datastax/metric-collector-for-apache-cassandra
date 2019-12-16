@@ -8,7 +8,7 @@ import com.codahale.metrics.MetricRegistryListener;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.datastax.mcac.insights.Insight;
-import com.datastax.mcac.insights.LocalHostIdSupplier;
+import com.datastax.mcac.utils.LocalHostIdSupplier;
 import com.datastax.mcac.insights.TokenStore;
 import com.datastax.mcac.insights.events.NodeConfiguration;
 import com.datastax.mcac.insights.events.NodeSystemInformation;
@@ -637,7 +637,6 @@ public class UnixSocketClient
         logger.debug("Reporting event insights every {} intervals", reportInsightEvery);
 
         eventReportFuture = eventLoopGroup.scheduleWithFixedDelay(() -> {
-
             if (channel == null || !channel.isOpen())
                 logger.info("Event reporting skipped due to connection to collectd not being established");
 
@@ -700,7 +699,7 @@ public class UnixSocketClient
                         e
                 );
             }
-        }, interval, interval, TimeUnit.SECONDS);
+        }, 60, interval, TimeUnit.SECONDS);
     }
 
 

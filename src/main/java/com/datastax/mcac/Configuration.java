@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class Configuration
 {
     public static final long MAX_METRIC_UPDATE_GAP_IN_SECONDS = TimeUnit.MINUTES.toSeconds(5);
-    public static final long MAX_EVENT_INTERVAL = (int)TimeUnit.MINUTES.toSeconds(5);
+    public static final long MAX_EVENT_INTERVAL = (int) TimeUnit.MINUTES.toSeconds(5);
 
     public String log_dir = "/tmp/test/log";
 
