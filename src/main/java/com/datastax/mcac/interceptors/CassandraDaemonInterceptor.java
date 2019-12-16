@@ -60,8 +60,12 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
             AgentEndpointLifecycleListener gossipListener = new AgentEndpointLifecycleListener();
             StorageService.instance.register(gossipListener);
 
+            final GCListener gcListener = new GCListener();
+            gcListener.registerMBeanAndGCNotifications();
+
             //Hook into things that have hooks
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                gcListener.unregisterMBeanAndGCNotifications();
                 StorageService.instance.unregister(gossipListener);
                 client.get().close();
             }));
