@@ -1,4 +1,4 @@
-package com.datastax.mcac.insights;
+package com.datastax.mcac.utils;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
