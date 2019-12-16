@@ -2,6 +2,7 @@ package com.datastax.mcac;
 
 import com.datastax.mcac.insights.events.DroppedMessageInformation;
 import com.datastax.mcac.interceptors.CassandraDaemonInterceptor;
+import com.datastax.mcac.interceptors.CompactionStartInterceptor;
 import com.datastax.mcac.interceptors.ExceptionInterceptor;
 import com.datastax.mcac.interceptors.FlushInterceptor;
 import com.datastax.mcac.interceptors.FlushInterceptorLegacy;
@@ -44,6 +45,7 @@ public class Agent {
         injected.put(new TypeDescription.ForLoadedType(FlushInterceptor.class), ClassFileLocator.ForClassLoader.read(FlushInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(FlushInterceptorLegacy.class), ClassFileLocator.ForClassLoader.read(FlushInterceptorLegacy.class));
         injected.put(new TypeDescription.ForLoadedType(ExceptionInterceptor.class), ClassFileLocator.ForClassLoader.read(ExceptionInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(CompactionStartInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionStartInterceptor.class));
 
         ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
 
@@ -77,6 +79,9 @@ public class Agent {
                 //Exception Information
                 .type(ExceptionInterceptor.type())
                 .transform(ExceptionInterceptor.transformer())
+                //Compaction Info
+                .type(CompactionStartInterceptor.type())
+                .transform(CompactionStartInterceptor.transformer())
                 .installOn(inst);
     }
 }
