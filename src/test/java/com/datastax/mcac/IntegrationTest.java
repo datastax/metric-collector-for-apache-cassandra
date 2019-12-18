@@ -19,6 +19,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
+import com.datastax.mcac.insights.events.CompactionEndedInformation;
 import com.datastax.mcac.insights.events.CompactionStartedInformation;
 import com.datastax.mcac.insights.events.ExceptionInformation;
 import com.datastax.mcac.insights.events.FlushInformation;
@@ -130,5 +131,8 @@ public class IntegrationTest
         InsightsTestUtil.lookForEntryInLog(rootDir, GCInformation.NAME, 30);
 
         InsightsTestUtil.lookForEntryInLog(rootDir, CompactionStartedInformation.NAME, 30);
+
+        InsightsTestUtil.lookForEntryInLog(rootDir, CompactionEndedInformation.NAME, 30);
+
     }
 }

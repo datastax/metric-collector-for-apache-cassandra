@@ -67,7 +67,6 @@ public class CompactionStartInterceptor extends AbstractInterceptor
                 long totalOnDiskBytes = 0L;
                 for (SSTableReader sstable : sstables)
                 {
-
                     totalBytes += sstable.uncompressedLength();
                     totalOnDiskBytes += sstable.onDiskLength();
 
