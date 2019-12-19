@@ -32,7 +32,6 @@ import com.sun.management.GcInfo;
 import org.apache.cassandra.service.GCInspectorMXBean;
 
 import org.apache.cassandra.concurrent.NamedThreadFactory;
-import org.apache.cassandra.utils.Throwables;
 
 /**
  * Used to collect statistics and perform operations based on GC notifications.
@@ -122,11 +121,26 @@ public class GCListener extends AbstractInterceptor implements GCInspectorMXBean
 
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         for (GarbageCollectorMXBean garbageCollectorMXBean : ManagementFactory.getGarbageCollectorMXBeans())
-            err = Throwables.perform(err,
-                    () -> server.addNotificationListener(garbageCollectorMXBean.getObjectName(),
-                            notificationListener,
-                            null,
-                            null));
+        {
+            try
+            {
+                server.addNotificationListener(garbageCollectorMXBean.getObjectName(),
+                        notificationListener,
+                        null,
+                        null);
+            }
+            catch (Throwable e)
+            {
+                if (err == null)
+                {
+                    err = e;
+                }
+                else
+                {
+                    err.addSuppressed(e);
+                }
+            }
+        }
 
         if (err != null)
         {
@@ -149,11 +163,26 @@ public class GCListener extends AbstractInterceptor implements GCInspectorMXBean
 
         MBeanServer server = ManagementFactory.getPlatformMBeanServer();
         for (GarbageCollectorMXBean garbageCollectorMXBean : ManagementFactory.getGarbageCollectorMXBeans())
-            err = Throwables.perform(err,
-                    () -> server.removeNotificationListener(garbageCollectorMXBean.getObjectName(),
-                            notificationListener,
-                            null,
-                            null));
+        {
+            try
+            {
+                server.removeNotificationListener(garbageCollectorMXBean.getObjectName(),
+                        notificationListener,
+                        null,
+                        null);
+            }
+            catch (Throwable e)
+            {
+                if (err == null)
+                {
+                    err = e;
+                }
+                else
+                {
+                    err.addSuppressed(e);
+                }
+            }
+        }
 
         if (err != null)
             throw new RuntimeException(err);

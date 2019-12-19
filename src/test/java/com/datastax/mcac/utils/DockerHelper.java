@@ -1,6 +1,9 @@
 package com.datastax.mcac.utils;
 
 import java.io.File;
+import java.io.IOError;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,9 +55,13 @@ public class DockerHelper
         this.startupArgs = startupArgs;
     }
 
-    public void startCassandra()
+    public void startCassandra(String version)
     {
-        File dockerFileDir = new File(System.getProperty("dockerFileRoot"));
+        File dockerFile = new File("./docker/" + version + "/Dockerfile");
+        if (!dockerFile.exists())
+            throw new RuntimeException("Missing " + dockerFile.getAbsolutePath());
+
+        File baseDir = new File(System.getProperty("dockerFileRoot","."));
         String name = "cassandra";
         List<Integer> ports = Arrays.asList(9042);
         List<String> volumeDescList = Arrays.asList(dataDir.getAbsolutePath() + ":/var/lib/cassandra");
@@ -64,7 +71,7 @@ public class DockerHelper
         if (startupArgs != null)
             cmdList.addAll(startupArgs);
 
-        this.container = startDocker(dockerFileDir, name, ports, volumeDescList, envList, cmdList);
+        this.container = startDocker(dockerFile, baseDir, name, ports, volumeDescList, envList, cmdList);
 
         waitForPort("localhost",9042, Duration.ofMillis(50000), logger, true);
     }
@@ -107,18 +114,22 @@ public class DockerHelper
         return false;
     }
 
-    private String startDocker(File dockerFileDir, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList)
+    private String startDocker(File dockerFile, File baseDir, String name, List<Integer> ports, List<String> volumeDescList, List<String> envList, List<String> cmdList)
     {
         ListContainersCmd listContainersCmd = dockerClient.listContainersCmd().withStatusFilter(Arrays.asList("exited"));
         listContainersCmd.getFilters().put("name", Arrays.asList(name));
-        try {
+        try
+        {
             List<Container> stoppedContainers = listContainersCmd.exec();
-            for (Container stoppedContainer : stoppedContainers) {
+            for (Container stoppedContainer : stoppedContainers)
+            {
                 String id = stoppedContainer.getId();
                 logger.info("Removing exited container: " + id);
                 dockerClient.removeContainerCmd(id).exec();
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             logger.error("Unable to contact docker, make sure docker is up and try again.");
             logger.error("If docker is installed make sure this user has access to the docker group.");
             logger.error("$ sudo gpasswd -a ${USER} docker && newgrp docker");
@@ -131,15 +142,22 @@ public class DockerHelper
             return containerId.getId();
         }
 
-        BuildImageResultCallback callback = new BuildImageResultCallback() {
+        BuildImageResultCallback callback = new BuildImageResultCallback()
+        {
             @Override
-            public void onNext(BuildResponseItem item) {
+            public void onNext(BuildResponseItem item)
+            {
                 //System.out.println("" + item);
                 super.onNext(item);
             }
         };
 
-        dockerClient.buildImageCmd(dockerFileDir).withTags(Sets.newHashSet(name)).exec(callback).awaitImageId();
+        dockerClient.buildImageCmd()
+                .withBaseDirectory(baseDir)
+                .withDockerfile(dockerFile)
+                .withTags(Sets.newHashSet(name))
+                .exec(callback)
+                .awaitImageId();
 
         List<ExposedPort> tcpPorts = new ArrayList<>();
         List<PortBinding> portBindings = new ArrayList<>();
@@ -196,7 +214,7 @@ public class DockerHelper
         dockerClient.startContainerCmd(containerResponse.getId()).exec();
 
 
-        dockerClient.logContainerCmd(containerResponse.getId()).withStdOut(true).withFollowStream(true).withTailAll().exec(new LogContainerResultCallback() {
+        dockerClient.logContainerCmd(containerResponse.getId()).withStdOut(true).withStdErr(true).withFollowStream(true).withTailAll().exec(new LogContainerResultCallback() {
             @Override
             public void onNext(Frame item)
             {
