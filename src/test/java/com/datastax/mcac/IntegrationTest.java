@@ -4,16 +4,23 @@ import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
@@ -25,18 +32,33 @@ import com.datastax.mcac.insights.events.ExceptionInformation;
 import com.datastax.mcac.insights.events.FlushInformation;
 import com.datastax.mcac.insights.events.GCInformation;
 import com.datastax.mcac.insights.events.LargePartitionInformation;
-import com.datastax.mcac.interceptors.FlushInterceptor;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
 
+@RunWith(Parameterized.class)
 public class IntegrationTest
 {
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
     static DockerHelper docker;
 
-    @BeforeClass
-    public static void setup()
+    private String version;
+
+    public IntegrationTest(String version)
+    {
+        this.version = version;
+    }
+
+    @Parameterized.Parameters
+    public static Iterable<String[]> functions() {
+        return Lists.newArrayList(
+                new String[]{"2.2"},
+                new String[]{"3.0"},
+                new String[]{"3.11"});
+    }
+
+    @Before
+    public void setup()
     {
         try
         {
@@ -48,11 +70,11 @@ public class IntegrationTest
             throw new IOError(e);
         }
 
-        docker.startCassandra();
+        docker.startCassandra(version);
     }
 
-    @AfterClass
-    public static void teardown()
+    @After
+    public void teardown()
     {
         try
         {
