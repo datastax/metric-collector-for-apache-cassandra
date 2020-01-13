@@ -87,16 +87,11 @@ public class IntegrationTest
     }
 
     @Test
-    public void testStartupMessage()
+    public void testDriverMessage()
     {
         InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
                 "insights_client_started", 30);
-    }
 
-
-    @Test
-    public void testDriverMessage()
-    {
         Cluster cluster = null;
         try
         {
