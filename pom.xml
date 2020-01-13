@@ -8,18 +8,6 @@
     <name>DataStax Metrics Collector for Apache Cassandra</name>
 
     <repositories>
-	    <repository>
-  	        <id>clojars.org</id>
-  	        <url>http://clojars.org/repo</url>
-	    </repository>
-        <repository>
-            <id>jcenter</id>
-            <url>http://jcenter.bintray.com</url>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
         <repository>
             <id>datastax</id>
             <name>datastax-releases-local</name>
