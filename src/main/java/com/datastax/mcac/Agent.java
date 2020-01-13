@@ -10,18 +10,10 @@ import com.datastax.mcac.interceptors.LargePartitionInterceptor;
 import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
-import com.datastax.mcac.interceptors.StringFormatInterceptor;
-import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
-import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassInjector;
-import net.bytebuddy.dynamic.scaffold.TypeValidation;
-import net.bytebuddy.implementation.Implementation;
-import net.bytebuddy.matcher.ElementMatchers;
-import net.bytebuddy.utility.JavaModule;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
@@ -33,8 +25,6 @@ import java.util.Map;
 import static net.bytebuddy.matcher.ElementMatchers.any;
 import static net.bytebuddy.matcher.ElementMatchers.isSynthetic;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
-import static net.bytebuddy.matcher.ElementMatchers.named;
-import static net.bytebuddy.matcher.ElementMatchers.none;
 
 public class Agent {
 
@@ -50,7 +40,6 @@ public class Agent {
         injected.put(new TypeDescription.ForLoadedType(StartupMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(StartupMessageInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(OptionsMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(OptionsMessageInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(LargePartitionInterceptor.class), ClassFileLocator.ForClassLoader.read(LargePartitionInterceptor.class));
-        //  injected.put(new TypeDescription.ForLoadedType(StringFormatInterceptor.class), ClassFileLocator.ForClassLoader.read(StringFormatInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(FlushInterceptor.class), ClassFileLocator.ForClassLoader.read(FlushInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(FlushInterceptorLegacy.class), ClassFileLocator.ForClassLoader.read(FlushInterceptorLegacy.class));
         injected.put(new TypeDescription.ForLoadedType(ExceptionInterceptor.class), ClassFileLocator.ForClassLoader.read(ExceptionInterceptor.class));
