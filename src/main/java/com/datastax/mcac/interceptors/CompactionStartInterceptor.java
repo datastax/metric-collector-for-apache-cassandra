@@ -17,8 +17,6 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.implementation.SuperMethodCall;
 import net.bytebuddy.implementation.bind.annotation.AllArguments;
-import net.bytebuddy.implementation.bind.annotation.RuntimeType;
-import net.bytebuddy.implementation.bind.annotation.SuperCall;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
@@ -30,7 +28,7 @@ import org.apache.cassandra.io.sstable.format.SSTableReader;
 
 public class CompactionStartInterceptor extends AbstractInterceptor
 {
-    private static final Logger logger = LoggerFactory.getLogger(FlushInterceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(CompactionStartInterceptor.class);
 
     public static ElementMatcher<? super TypeDescription> type()
     {

@@ -156,7 +156,6 @@ public class NodeSystemInformation extends Insight
                 throw new RuntimeException(e);
             }
         }
-
     }
 }
 

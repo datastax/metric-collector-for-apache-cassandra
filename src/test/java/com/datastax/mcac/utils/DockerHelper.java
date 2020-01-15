@@ -23,6 +23,7 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.InspectExecResponse;
 import com.github.dockerjava.api.command.ListContainersCmd;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.BuildResponseItem;
@@ -65,7 +66,7 @@ public class DockerHelper
         String name = "cassandra";
         List<Integer> ports = Arrays.asList(9042);
         List<String> volumeDescList = Arrays.asList(dataDir.getAbsolutePath() + ":/var/lib/cassandra");
-        List<String> envList = null;
+        List<String> envList = Lists.newArrayList("MAX_HEAP_SIZE=500M", "HEAP_NEWSIZE=100M");
         List<String> cmdList = Lists.newArrayList("cassandra", "-f");
 
         if (startupArgs != null)
@@ -74,6 +75,33 @@ public class DockerHelper
         this.container = startDocker(dockerFile, baseDir, name, ports, volumeDescList, envList, cmdList);
 
         waitForPort("localhost",9042, Duration.ofMillis(50000), logger, true);
+    }
+
+    public String runCommand(String... commandAndArgs)
+    {
+        if (container == null)
+            throw new IllegalStateException("Container not started");
+
+        String execId = dockerClient.execCreateCmd(container).withCmd(commandAndArgs).withAttachStderr(true).withAttachStdout(true).exec().getId();
+        dockerClient.execStartCmd(execId).exec(null);
+
+        return execId;
+    }
+
+    public void waitTillFinished(String execId)
+    {
+        InspectExecResponse r = dockerClient.inspectExecCmd(execId).exec();
+
+        while (r.isRunning())
+        {
+            Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+            logger.info("SLEEPING");
+        }
+
+        if (r.getExitCode() != null && r.getExitCode() != 0)
+            throw new RuntimeException("Process error code " + r.getExitCode());
+
+        logger.info("PROCESS finished!");
     }
 
     public static boolean waitForPort(String hostname, int port, Duration timeout, Logger logger, boolean quiet)
@@ -182,38 +210,23 @@ public class DockerHelper
             volumeBindList.add(new Bind(volFrom, vol));
         }
 
-
         CreateContainerResponse containerResponse;
-        if (envList == null)
-        {
-            containerResponse = dockerClient.createContainerCmd(name)
-                    .withCmd(cmdList)
-                    .withExposedPorts(tcpPorts)
-                    .withHostConfig(
-                            new HostConfig()
-                                    .withPortBindings(portBindings)
-                                    .withPublishAllPorts(true)
-                                    .withBinds(volumeBindList)
-                    )
-                    .withName(name)
-                    .exec();
-        } else {
-            containerResponse = dockerClient.createContainerCmd(name)
-                    .withEnv(envList)
-                    .withExposedPorts(tcpPorts)
-                    .withHostConfig(
-                            new HostConfig()
-                                    .withPortBindings(portBindings)
-                                    .withPublishAllPorts(true)
-                                    .withBinds(volumeBindList)
-                    )
-                    .withName(name)
-                    .exec();
-        }
+
+        containerResponse = dockerClient.createContainerCmd(name)
+                .withCmd(cmdList)
+                .withEnv(envList)
+                .withExposedPorts(tcpPorts)
+                .withHostConfig(
+                        new HostConfig()
+                                .withPortBindings(portBindings)
+                                .withPublishAllPorts(true)
+                                .withBinds(volumeBindList)
+                )
+                .withName(name)
+                .exec();
+
 
         dockerClient.startContainerCmd(containerResponse.getId()).exec();
-
-
         dockerClient.logContainerCmd(containerResponse.getId()).withStdOut(true).withStdErr(true).withFollowStream(true).withTailAll().exec(new LogContainerResultCallback() {
             @Override
             public void onNext(Frame item)

@@ -7,6 +7,7 @@ import com.datastax.mcac.interceptors.ExceptionInterceptor;
 import com.datastax.mcac.interceptors.FlushInterceptor;
 import com.datastax.mcac.interceptors.FlushInterceptorLegacy;
 import com.datastax.mcac.interceptors.LargePartitionInterceptor;
+import com.datastax.mcac.interceptors.LegacyCompactionStartInterceptor;
 import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
@@ -80,6 +81,8 @@ public class Agent {
                 //Compaction Info Started
                 .type(CompactionStartInterceptor.type())
                 .transform(CompactionStartInterceptor.transformer())
+                .type(LegacyCompactionStartInterceptor.type())
+                .transform(LegacyCompactionStartInterceptor.transformer())
                 //Compaction Info Ended
                 .type(CompactionEndedInterceptor.type())
                 .transform(CompactionEndedInterceptor.transformer())
