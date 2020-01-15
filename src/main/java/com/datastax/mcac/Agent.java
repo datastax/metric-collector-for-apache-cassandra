@@ -8,24 +8,29 @@ import com.datastax.mcac.interceptors.FlushInterceptor;
 import com.datastax.mcac.interceptors.FlushInterceptorLegacy;
 import com.datastax.mcac.interceptors.LargePartitionInterceptor;
 import com.datastax.mcac.interceptors.LegacyCompactionStartInterceptor;
+import com.datastax.mcac.interceptors.LoggingInterceptor;
 import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassInjector;
+import net.bytebuddy.matcher.ElementMatchers;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
-
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isSynthetic;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
+import static net.bytebuddy.matcher.ElementMatchers.named;
 
 public class Agent {
 
@@ -36,24 +41,74 @@ public class Agent {
 
         Map<TypeDescription, byte[]> injected = new HashMap<>();
 
-        injected.put(new TypeDescription.ForLoadedType(CassandraDaemonInterceptor.class), ClassFileLocator.ForClassLoader.read(CassandraDaemonInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(QueryHandlerInterceptor.class), ClassFileLocator.ForClassLoader.read(QueryHandlerInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(StartupMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(StartupMessageInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(OptionsMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(OptionsMessageInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(LargePartitionInterceptor.class), ClassFileLocator.ForClassLoader.read(LargePartitionInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(FlushInterceptor.class), ClassFileLocator.ForClassLoader.read(FlushInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(FlushInterceptorLegacy.class), ClassFileLocator.ForClassLoader.read(FlushInterceptorLegacy.class));
-        injected.put(new TypeDescription.ForLoadedType(ExceptionInterceptor.class), ClassFileLocator.ForClassLoader.read(ExceptionInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(CompactionStartInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionStartInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(CompactionEndedInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionEndedInterceptor.class));
+        injected.put(
+                new TypeDescription.ForLoadedType(LoggingInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(LoggingInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(CassandraDaemonInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(CassandraDaemonInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(QueryHandlerInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(QueryHandlerInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(StartupMessageInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(StartupMessageInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(OptionsMessageInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(OptionsMessageInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(LargePartitionInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(LargePartitionInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(FlushInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(FlushInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(FlushInterceptorLegacy.class),
+                ClassFileLocator.ForClassLoader.read(FlushInterceptorLegacy.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(ExceptionInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(ExceptionInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(CompactionStartInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(CompactionStartInterceptor.class)
+        );
+        injected.put(
+                new TypeDescription.ForLoadedType(CompactionEndedInterceptor.class),
+                ClassFileLocator.ForClassLoader.read(CompactionEndedInterceptor.class)
+        );
 
-        ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
+        ClassInjector.UsingInstrumentation.of(temp,
+                ClassInjector.UsingInstrumentation.Target.BOOTSTRAP,
+                inst
+        ).inject(injected);
 
         new AgentBuilder.Default()
-                //.disableClassFormatChanges()
+                //.with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
+                .type(LoggingInterceptor.type())
+                .transform(LoggingInterceptor.transformer())
+                .installOn(inst);
+
+        new AgentBuilder.Default()
                 .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
-                .ignore(new AgentBuilder.RawMatcher.ForElementMatchers(nameStartsWith("net.bytebuddy.").or(isSynthetic()), any(), any()))
-                .enableBootstrapInjection(inst, temp)
+                //.with(AgentBuilder.Listener.StreamWriting.toSystemOut())
+                .ignore(new AgentBuilder.RawMatcher.ForElementMatchers(
+                        nameStartsWith("net.bytebuddy.").or(isSynthetic()),
+                        any(),
+                        any()
+                ))
+                .enableBootstrapInjection(
+                        inst,
+                        temp
+                )
                 //Dropped Messages
                 //Exception Information
                 .type(ExceptionInterceptor.type())
