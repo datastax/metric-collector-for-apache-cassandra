@@ -699,7 +699,7 @@ public class UnixSocketClient
                         e
                 );
             }
-        }, 60, interval, TimeUnit.SECONDS);
+        }, 5, interval, TimeUnit.SECONDS);
     }
 
 

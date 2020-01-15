@@ -1,13 +1,11 @@
 package com.datastax.mcac.interceptors;
 
-import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.datastax.mcac.insights.events.ExceptionInformation;
-import com.datastax.mcac.insights.events.FlushInformation;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;

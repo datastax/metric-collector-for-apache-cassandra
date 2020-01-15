@@ -20,7 +20,6 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
 import org.apache.cassandra.db.compaction.CompactionInfo;
-import org.apache.cassandra.db.compaction.CompactionIterator;
 
 public class CompactionEndedInterceptor extends AbstractInterceptor
 {
@@ -28,7 +27,7 @@ public class CompactionEndedInterceptor extends AbstractInterceptor
 
     public static ElementMatcher<? super TypeDescription> type()
     {
-        return ElementMatchers.nameEndsWith(".CompactionIterator");
+        return ElementMatchers.nameEndsWith(".CompactionIterator").or(ElementMatchers.nameEndsWith(".CompactionIterable"));
     }
 
     public static AgentBuilder.Transformer transformer()
@@ -49,8 +48,7 @@ public class CompactionEndedInterceptor extends AbstractInterceptor
 
         try
         {
-            CompactionIterator iter = (CompactionIterator) instance;
-            CompactionInfo ci = iter.getCompactionInfo();
+            CompactionInfo ci = (CompactionInfo) instance.getClass().getMethod("getCompactionInfo").invoke(instance);
 
             long totalRows = 0L;
             for (int i = 0; i < mergedRows.length; i++)
@@ -65,7 +63,7 @@ public class CompactionEndedInterceptor extends AbstractInterceptor
                     ci.getTaskType(),
                     ci.getCompleted(),
                     ci.getTotal(),
-                    iter.isStopRequested(),
+                    false,
                     totalRows,
                     0L, //Where oh where will I find this...
                     sstables));

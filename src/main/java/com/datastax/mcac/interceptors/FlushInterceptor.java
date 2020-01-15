@@ -26,7 +26,7 @@ public class FlushInterceptor extends AbstractInterceptor
 
     public static ElementMatcher<? super TypeDescription> type()
     {
-        return ElementMatchers.nameEndsWith("ColumnFamilyStore$Flush$1");
+        return ElementMatchers.nameEndsWith("ColumnFamilyStore$Flush$1").or(ElementMatchers.nameEndsWith("ColumnFamilyStore$Flush"));
     }
 
     public static AgentBuilder.Transformer transformer()

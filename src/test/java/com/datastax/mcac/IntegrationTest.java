@@ -4,18 +4,13 @@ import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -32,6 +27,9 @@ import com.datastax.mcac.insights.events.ExceptionInformation;
 import com.datastax.mcac.insights.events.FlushInformation;
 import com.datastax.mcac.insights.events.GCInformation;
 import com.datastax.mcac.insights.events.LargePartitionInformation;
+import com.datastax.mcac.insights.events.NodeConfiguration;
+import com.datastax.mcac.insights.events.NodeSystemInformation;
+import com.datastax.mcac.insights.events.SchemaInformation;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
 
@@ -51,10 +49,7 @@ public class IntegrationTest
 
     @Parameterized.Parameters
     public static Iterable<String[]> functions() {
-        return Lists.newArrayList(
-                new String[]{"2.2"},
-                new String[]{"3.0"},
-                new String[]{"3.11"});
+        return Lists.newArrayList(new String[]{"2.2"}, new String[]{"3.0"}, new String[]{"3.11"});
     }
 
     @Before
@@ -116,13 +111,15 @@ public class IntegrationTest
 
 
             session.execute("CREATE KEYSPACE foo with replication={'class': 'SimpleStrategy', 'replication_factor':3}");
-            session.execute("CREATE TABLE foo.bar (key text PRIMARY KEY, value text)");
+            session.execute("CREATE TABLE foo.bar (key text PRIMARY KEY, value text) with compaction = {'class': 'LeveledCompactionStrategy'}");
 
             String val = StringUtils.rightPad("1", 10000);
             for (int i = 0; i < 10000; i++)
             {
                 session.execute("INSERT into foo.bar(key, value) VALUES (?, ?)", ""+i, val);
             }
+
+            //docker.waitTillFinished(docker.runCommand("nodetool", "compact"));
 
             Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
         }
@@ -134,6 +131,12 @@ public class IntegrationTest
         File rootDir = Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile();
 
         InsightsTestUtil.lookForEntryInLog(rootDir, "driver.startup", 30);
+
+        InsightsTestUtil.lookForEntryInLog(rootDir, NodeConfiguration.NAME, 30);
+
+        InsightsTestUtil.lookForEntryInLog(rootDir, SchemaInformation.NAME, 30);
+
+        InsightsTestUtil.lookForEntryInLog(rootDir, NodeSystemInformation.NAME, 30);
 
         InsightsTestUtil.lookForEntryInLog(rootDir, ClientConnectionInformation.NAME, 30);
 
