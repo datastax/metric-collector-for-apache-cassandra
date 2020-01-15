@@ -35,7 +35,8 @@ public class FlushInterceptor extends AbstractInterceptor
             @Override
             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
             {
-                return builder.method(ElementMatchers.named("flushMemtable")).intercept(MethodDelegation.to(FlushInterceptor.class));
+                return builder.method(ElementMatchers.named("flushMemtable"))
+                        .intercept(MethodDelegation.to(FlushInterceptor.class));
             }
         };
     }
