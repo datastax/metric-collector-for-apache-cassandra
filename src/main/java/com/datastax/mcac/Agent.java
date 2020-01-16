@@ -13,12 +13,9 @@ import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassInjector;
-import net.bytebuddy.matcher.ElementMatchers;
-import org.slf4j.Logger;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
@@ -27,10 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
-import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.isSynthetic;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
-import static net.bytebuddy.matcher.ElementMatchers.named;
 
 public class Agent {
 
@@ -92,7 +87,7 @@ public class Agent {
         ).inject(injected);
 
         new AgentBuilder.Default()
-                //.with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
+                .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
                 .type(LoggingInterceptor.type())
                 .transform(LoggingInterceptor.transformer())
                 .installOn(inst);
