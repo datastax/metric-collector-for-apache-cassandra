@@ -18,10 +18,15 @@ import static net.bytebuddy.matcher.ElementMatchers.named;
 
 public final class LoggingInterceptor extends AbstractInterceptor
 {
-    private static final Pattern DROPPED_MESSAGES = Pattern.compile(
+    private static final Pattern DROPPED_MESSAGES_WITH_LATENCY_CONTEXT = Pattern.compile(
             "([_a-zA-Z].*) messages were dropped in last (\\d+) ms: (\\d+) internal and (\\d+) cross node. Mean "
                     + "internal dropped "
                     + "latency: (\\d+) ms and Mean cross-node dropped latency: (\\d+) ms"
+    );
+
+    private static final Pattern DROPPED_MESSAGES_WITHOUT_LATENCY_CONTEXT = Pattern.compile(
+            "([_a-zA-Z].*) messages were dropped in last (\\d+) ms: (\\d+) for internal timeout and (\\d+) for cross "
+                    + "node timeout"
     );
 
     public static void info(
@@ -41,7 +46,7 @@ public final class LoggingInterceptor extends AbstractInterceptor
                     String message = (String) args[0];
                     if (message.contains("messages were dropped"))
                     {
-                        Matcher matcher = DROPPED_MESSAGES.matcher((CharSequence) args[0]);
+                        Matcher matcher = DROPPED_MESSAGES_WITH_LATENCY_CONTEXT.matcher(message);
                         if (matcher.matches() && matcher.groupCount() == 6)
                         {
                             client.get().report(new DroppedMessageInformation(
@@ -52,6 +57,21 @@ public final class LoggingInterceptor extends AbstractInterceptor
                                     Long.parseLong(matcher.group(5)),
                                     Long.parseLong(matcher.group(6))
                             ));
+                        }
+                        else
+                        {
+                            matcher = DROPPED_MESSAGES_WITHOUT_LATENCY_CONTEXT.matcher(message);
+                            if (matcher.matches() && matcher.groupCount() == 4)
+                            {
+                                client.get().report(new DroppedMessageInformation(
+                                        matcher.group(1),
+                                        Integer.parseInt(matcher.group(2)),
+                                        Integer.parseInt(matcher.group(3)),
+                                        Integer.parseInt(matcher.group(4)),
+                                        null,
+                                        null
+                                ));
+                            }
                         }
                     }
                 }
