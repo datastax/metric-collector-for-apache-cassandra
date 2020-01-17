@@ -56,7 +56,7 @@ public class Agent {
                 .enableBootstrapInjection(inst, temp)
                 //Dropped Messages
                 //Exception Information
-               .type(ExceptionInterceptor.type())
+                .type(ExceptionInterceptor.type())
                 .transform(ExceptionInterceptor.transformer())
                 //Cassandra Daemon
                 .type(CassandraDaemonInterceptor.type())
