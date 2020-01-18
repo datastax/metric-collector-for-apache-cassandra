@@ -1,5 +1,6 @@
 FROM cassandra:2.2
 
+COPY config/cassandra_2_2_low_timeouts.yaml /etc/cassandra/cassandra_low_timeouts.yaml
 COPY config/metrics-collector.yaml /etc/cassandra/metrics-collector.yaml
 COPY target/datastax-mcac-agent-0.1.0-SNAPSHOT.jar /etc/cassandra/datastax-mcac-agent-0.1.0-SNAPSHOT.jar
 COPY target/collectd /etc/cassandra/collectd
