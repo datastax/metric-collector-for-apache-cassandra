@@ -56,7 +56,9 @@ public class DockerHelper
         this.startupArgs = startupArgs;
     }
 
-    public void startCassandra(String version)
+    public void startCassandra(
+            String version
+    )
     {
         File dockerFile = new File("./docker/" + version + "/Dockerfile");
         if (!dockerFile.exists())
@@ -82,7 +84,14 @@ public class DockerHelper
         if (container == null)
             throw new IllegalStateException("Container not started");
 
-        String execId = dockerClient.execCreateCmd(container).withCmd(commandAndArgs).withAttachStderr(true).withAttachStdout(true).exec().getId();
+        String execId = dockerClient
+                .execCreateCmd(container)
+                .withCmd(commandAndArgs)
+                .withAttachStderr(true)
+                .withAttachStdout(true)
+                .exec()
+                .getId();
+
         dockerClient.execStartCmd(execId).exec(null);
 
         return execId;

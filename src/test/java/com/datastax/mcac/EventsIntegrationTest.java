@@ -1,22 +1,5 @@
 package com.datastax.mcac;
 
-import java.io.File;
-import java.io.IOError;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
-
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Uninterruptibles;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
@@ -30,62 +13,29 @@ import com.datastax.mcac.insights.events.LargePartitionInformation;
 import com.datastax.mcac.insights.events.NodeConfiguration;
 import com.datastax.mcac.insights.events.NodeSystemInformation;
 import com.datastax.mcac.insights.events.SchemaInformation;
-import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
+import com.google.common.util.concurrent.Uninterruptibles;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(Parameterized.class)
-public class IntegrationTest
+public class EventsIntegrationTest extends BaseIntegrationTest
 {
-    @ClassRule
-    public static TemporaryFolder temporaryFolder = new TemporaryFolder();
-    static DockerHelper docker;
-
-    private String version;
-
-    public IntegrationTest(String version)
+    public EventsIntegrationTest(String version)
     {
-        this.version = version;
-    }
-
-    @Parameterized.Parameters
-    public static Iterable<String[]> functions() {
-        return Lists.newArrayList(new String[]{"2.2"}, new String[]{"3.0"}, new String[]{"3.11"});
-    }
-
-    @Before
-    public void setup()
-    {
-        try
-        {
-            temporaryFolder.create();
-            docker = new DockerHelper(temporaryFolder.getRoot(), Lists.newArrayList("-Dmcac.partition_limit_override_bytes=1"));
-        }
-        catch (IOException e)
-        {
-            throw new IOError(e);
-        }
-
-        docker.startCassandra(version);
-    }
-
-    @After
-    public void teardown()
-    {
-        try
-        {
-            docker.stopCassandra();
-        }
-        finally
-        {
-            temporaryFolder.delete();
-        }
+        super(version);
     }
 
     @Test
-    public void testDriverMessage()
+    public void testEvents()
     {
-        InsightsTestUtil.lookForEntryInLog(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
-                "insights_client_started", 30);
+        waitForInsightsClientStartupEvent();
 
         Cluster cluster = null;
         try
@@ -116,7 +66,11 @@ public class IntegrationTest
             String val = StringUtils.rightPad("1", 10000);
             for (int i = 0; i < 10000; i++)
             {
-                session.execute("INSERT into foo.bar(key, value) VALUES (?, ?)", ""+i, val);
+                session.execute(
+                        "INSERT into foo.bar(key, value) VALUES (?, ?)",
+                        "" + i,
+                        val
+                );
             }
 
             //docker.waitTillFinished(docker.runCommand("nodetool", "compact"));
@@ -128,7 +82,7 @@ public class IntegrationTest
             if (cluster != null) cluster.close();
         }
 
-        File rootDir = Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile();
+        File rootDir = Paths.get(getTempDir().getAbsolutePath(), "insights").toFile();
 
         InsightsTestUtil.lookForEntryInLog(rootDir, "driver.startup", 30);
 
@@ -153,6 +107,5 @@ public class IntegrationTest
         InsightsTestUtil.lookForEntryInLog(rootDir, CompactionStartedInformation.NAME, 30);
 
         InsightsTestUtil.lookForEntryInLog(rootDir, CompactionEndedInformation.NAME, 30);
-
     }
 }
