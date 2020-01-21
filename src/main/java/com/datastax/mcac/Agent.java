@@ -48,10 +48,7 @@ public class Agent {
         injected.put(new TypeDescription.ForLoadedType(CompactionStartInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionStartInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(CompactionEndedInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionEndedInterceptor.class));
 
-        ClassInjector.UsingInstrumentation.of(temp,
-                ClassInjector.UsingInstrumentation.Target.BOOTSTRAP,
-                inst
-        ).inject(injected);
+        ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
 
         new AgentBuilder.Default()
                 .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
