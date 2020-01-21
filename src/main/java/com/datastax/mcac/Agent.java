@@ -51,7 +51,7 @@ public class Agent {
 
         new AgentBuilder.Default()
                 //.disableClassFormatChanges()
-                .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
+                //.with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
                 .ignore(new AgentBuilder.RawMatcher.ForElementMatchers(nameStartsWith("net.bytebuddy.").or(isSynthetic()), any(), any()))
                 .enableBootstrapInjection(inst, temp)
                 //Dropped Messages
