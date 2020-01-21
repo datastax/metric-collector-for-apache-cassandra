@@ -1,6 +1,7 @@
 package com.datastax.mcac.interceptors;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +17,13 @@ import net.bytebuddy.implementation.bind.annotation.SuperCall;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
+import org.jctools.maps.NonBlockingHashMap;
 
 public class ExceptionInterceptor extends AbstractInterceptor
 {
     private static final Logger logger = LoggerFactory.getLogger(ExceptionInterceptor.class);
+
+    private static final NonBlockingHashMap<Class, Long> lastException = new NonBlockingHashMap<>();
 
     public static ElementMatcher<? super TypeDescription> type()
     {
@@ -50,7 +54,19 @@ public class ExceptionInterceptor extends AbstractInterceptor
                 Throwable t = (Throwable) allArguments[0];
                 if (t.getCause() == null)
                 {
-                    client.get().report(new ExceptionInformation(t));
+                    Class rootClass = t.getCause().getClass();
+                    long now = System.nanoTime();
+
+                    //Filter the same exception to once every 500ms
+                    //to avoid exception storms
+                    Long lastSeen = lastException.get(rootClass);
+                    if (lastSeen == null || (now - lastSeen) > TimeUnit.MILLISECONDS.toNanos(500))
+                    {
+                        if (lastException.putIfMatchAllowNull(rootClass, now, lastSeen) == lastSeen)
+                        {
+                            client.get().report(new ExceptionInformation(t));
+                        }
+                    }
                 }
             }
         }
