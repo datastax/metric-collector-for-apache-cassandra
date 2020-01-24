@@ -46,7 +46,6 @@ public class QueryHandlerInterceptor extends AbstractInterceptor
         if (allArguments.length > 0 && allArguments[0] != null && allArguments[0] instanceof String)
         {
             String query = (String) allArguments[0];
-            //LoggerFactory.getLogger(Agent.class).info("Intercepted {}", query);
 
             int jsonStart = query.indexOf(prefix);
             if (jsonStart >= 0)
