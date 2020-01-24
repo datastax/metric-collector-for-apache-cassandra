@@ -103,6 +103,10 @@ public class UnixSocketClient
     private final AtomicBoolean started;
     private final String socketFile;
 
+    public void logError(String log, Throwable throwable)
+    {
+        logger.error(log, throwable);
+    }
 
     @VisibleForTesting
     final ConcurrentHashMap<String, Function<String, Integer>> metricProcessors;

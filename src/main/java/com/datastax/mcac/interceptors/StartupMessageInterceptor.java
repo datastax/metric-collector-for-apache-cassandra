@@ -1,5 +1,6 @@
 package com.datastax.mcac.interceptors;
 
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -20,7 +21,6 @@ import net.bytebuddy.utility.JavaModule;
 import org.apache.cassandra.service.QueryState;
 import org.apache.cassandra.transport.Message;
 import org.apache.cassandra.transport.messages.StartupMessage;
-import org.apache.cassandra.utils.Pair;
 
 public class StartupMessageInterceptor extends AbstractInterceptor
 {
@@ -33,7 +33,8 @@ public class StartupMessageInterceptor extends AbstractInterceptor
 
     public static AgentBuilder.Transformer transformer()
     {
-        return new AgentBuilder.Transformer() {
+        return new AgentBuilder.Transformer()
+        {
             @Override
             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
             {
@@ -43,7 +44,8 @@ public class StartupMessageInterceptor extends AbstractInterceptor
     }
 
     @RuntimeType
-    public static Object intercept(@This Object instance, @AllArguments Object[] allArguments, @SuperCall Callable<Message.Response> zuper) throws Throwable {
+    public static Object intercept(@This Object instance, @AllArguments Object[] allArguments, @SuperCall Callable<Message.Response> zuper) throws Throwable
+    {
         Message.Response result = zuper.call();
 
         try
@@ -51,13 +53,28 @@ public class StartupMessageInterceptor extends AbstractInterceptor
             if (allArguments.length > 0 && allArguments[0] != null && allArguments[0] instanceof QueryState)
             {
                 QueryState queryState = (QueryState) allArguments[0];
-                StartupMessage request = ((StartupMessage)instance);
-                client.get().report(new ClientConnectionInformation(queryState.getClientState(), request.options, false));
+                StartupMessage request = ((StartupMessage) instance);
+
+                ClientConnectionCacheEntry clientConnectionCacheEntry = ClientConnectionCacheEntry.builder()
+                        .clientOptions(request.options)
+                        .sessionId(UUID.randomUUID())
+                        .lastHeartBeatSend(1)
+                        .build();
 
                 //We want to keep sending connection event information events for the duration of the session.
                 //The drivers uses OPTIONS messages as a heartbeat so we
                 //register the option information to be used by the OPTIONS interceptor
-                OptionsMessageInterceptor.stateCache.put(request.connection().channel(), Pair.create(1L, request.options));
+                OptionsMessageInterceptor.stateCache.put(
+                        request.connection().channel(),
+                        clientConnectionCacheEntry
+                );
+
+                client.get().report(new ClientConnectionInformation(
+                        clientConnectionCacheEntry.sessionId,
+                        queryState.getClientState(),
+                        clientConnectionCacheEntry.clientOptions,
+                        false
+                ));
             }
         }
         catch (Throwable t)
