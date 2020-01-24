@@ -12,6 +12,8 @@ import com.datastax.mcac.interceptors.LoggingInterceptor;
 import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
+import com.datastax.mcac.interceptors.TombstoneFailureInterceptor;
+import com.datastax.mcac.interceptors.TombstoneWarningInterceptor;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
@@ -47,6 +49,8 @@ public class Agent {
         injected.put(new TypeDescription.ForLoadedType(ExceptionInterceptor.class), ClassFileLocator.ForClassLoader.read(ExceptionInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(CompactionStartInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionStartInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(CompactionEndedInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionEndedInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(TombstoneFailureInterceptor.class), ClassFileLocator.ForClassLoader.read(TombstoneFailureInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(TombstoneWarningInterceptor.class), ClassFileLocator.ForClassLoader.read(TombstoneWarningInterceptor.class));
 
         ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
 
@@ -94,6 +98,12 @@ public class Agent {
                 //Compaction Info Ended
                 .type(CompactionEndedInterceptor.type())
                 .transform(CompactionEndedInterceptor.transformer())
+                //Tombstone Failures
+                .type(TombstoneFailureInterceptor.type())
+                .transform(TombstoneFailureInterceptor.transformer())
+                //Tombstone Warning
+                .type(TombstoneWarningInterceptor.type())
+                .transform(TombstoneWarningInterceptor.transformer())
                 .installOn(inst);
     }
 }

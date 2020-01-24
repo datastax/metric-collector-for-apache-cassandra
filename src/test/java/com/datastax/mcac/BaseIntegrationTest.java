@@ -14,32 +14,34 @@ import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public abstract class BaseIntegrationTest
 {
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    final String version;
-    private static DockerHelper docker;
+    protected final String version;
+    protected static DockerHelper docker;
 
     @Parameterized.Parameters
     public static Iterable<String[]> functions()
     {
-        return Lists.newArrayList(
-                new String[]{"2.2"},
-                new String[]{"3.0"},
-                new String[]{"3.11"}
-        );
+        return Collections.singletonList(new String [] {"3.11"});
+//        return Lists.newArrayList(
+//                //new String[]{"2.2"},
+//                new String[]{"3.0"},
+//                new String[]{"3.11"}
+//        );
     }
 
-    BaseIntegrationTest(String version)
+    protected BaseIntegrationTest(String version)
     {
         this.version = version;
     }
 
     @Before
-    public void setup()
+    public void setup() throws InterruptedException
     {
         try
         {
@@ -77,7 +79,7 @@ public abstract class BaseIntegrationTest
         );
     }
 
-    File getTempDir()
+    protected File getTempDir()
     {
         String os = System.getProperty("os.name");
         File tempDir = temporaryFolder.getRoot();

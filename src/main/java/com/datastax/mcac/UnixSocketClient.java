@@ -4,6 +4,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricRegistryListener;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
@@ -19,6 +20,7 @@ import com.datastax.mcac.utils.JacksonUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
 import io.netty.bootstrap.Bootstrap;
@@ -56,6 +58,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -75,6 +78,11 @@ public class UnixSocketClient
     public static final int DEFAULT_WRITE_BUFFER_WATERMARK_HIGH_IN_KB = 1024;
 
     private final TokenStore tokenStore;
+    /*
+     * For metrics we add enhancing what exists out of the box for C* metrics
+     */
+    public static final MetricRegistry agentAddedMetricsRegistry = new MetricRegistry();
+
 
     private static final Logger logger = LoggerFactory.getLogger(UnixSocketClient.class);
     private static final int BATCH_SIZE = 256;
@@ -125,7 +133,7 @@ public class UnixSocketClient
     private Bootstrap bootstrap;
     private EventLoopGroup eventLoopGroup;
     private volatile Configuration runtimeConfig = ConfigurationLoader.loadConfig();
-    private final CassandraMetricsRegistry metricsRegistry;
+    private final List<MetricRegistry> metricsRegistries;
     volatile Channel channel;
     private ScheduledFuture metricReportFuture;
     private ScheduledFuture eventReportFuture;
@@ -145,7 +153,7 @@ public class UnixSocketClient
     public UnixSocketClient(String socketFile, TimeUnit rateUnit, TimeUnit durationUnit)
     {
         this.tokenStore = new MCACTokenStore(runtimeConfig.token_dir);
-        this.metricsRegistry = CassandraMetricsRegistry.Metrics;
+        this.metricsRegistries = Lists.newArrayList(CassandraMetricsRegistry.Metrics, agentAddedMetricsRegistry);
         this.started = new AtomicBoolean(false);
         this.socketFile = socketFile == null ? CollectdController.defaultSocketFile.get() : socketFile;
         this.rateUnit = rateUnit;
@@ -541,90 +549,138 @@ public class UnixSocketClient
 
     private void initMetricsReporting()
     {
-        if (metricsRegistry == null)
+        if (metricsRegistries == null)
             return;
 
-        metricsRegistry.addListener(new MetricRegistryListener()
+        for(MetricRegistry metricRegistry : metricsRegistries)
         {
-            void removeMetric(String name)
+            metricRegistry.addListener(new MetricRegistryListener()
             {
-                //Keep the last value of a metric when it's removed.
-                Function<String, Integer> f = metricProcessors.remove(name);
-                if (f != null && !StorageService.instance.isInShutdownHook())
-                    f.apply("");
+                void removeMetric(String name)
+                {
+                    //Keep the last value of a metric when it's removed.
+                    Function<String, Integer> f = metricProcessors.remove(name);
+                    if (f != null && !StorageService.instance.isInShutdownHook())
+                        f.apply("");
 
-                f = insightFilteredMetricProcessors.remove(name);
-                if (f != null && !StorageService.instance.isInShutdownHook())
-                    f.apply(FILTER_INSIGHTS_TAG);
+                    f = insightFilteredMetricProcessors.remove(name);
+                    if (f != null && !StorageService.instance.isInShutdownHook())
+                        f.apply(FILTER_INSIGHTS_TAG);
 
-                globalFilteredMetricProcessors.remove(name);
-            }
+                    globalFilteredMetricProcessors.remove(name);
+                }
 
-            @Override
-            public void onGaugeAdded(String name, Gauge<?> gauge)
-            {
-                String cleanName = clean(name);
-                addMetric(name, (tags) -> writeMetric(cleanName, tags, gauge));
-            }
+                @Override
+                public void onGaugeAdded(
+                        String name,
+                        Gauge<?> gauge
+                )
+                {
+                    String cleanName = clean(name);
+                    addMetric(
+                            name,
+                            (tags) -> writeMetric(cleanName,
+                                    tags,
+                                    gauge
+                            )
+                    );
+                }
 
-            @Override
-            public void onGaugeRemoved(String name)
-            {
-                removeMetric(name);
-            }
+                @Override
+                public void onGaugeRemoved(String name)
+                {
+                    removeMetric(name);
+                }
 
-            @Override
-            public void onCounterAdded(String name, Counter counter)
-            {
-                String cleanName = clean(name);
-                addMetric(name, (tags) -> writeMetric(cleanName, tags, counter));
-            }
+                @Override
+                public void onCounterAdded(
+                        String name,
+                        Counter counter
+                )
+                {
+                    String cleanName = clean(name);
+                    addMetric(
+                            name,
+                            (tags) -> writeMetric(cleanName,
+                                    tags,
+                                    counter
+                            )
+                    );
+                }
 
-            @Override
-            public void onCounterRemoved(String name)
-            {
-                removeMetric(name);
-            }
+                @Override
+                public void onCounterRemoved(String name)
+                {
+                    removeMetric(name);
+                }
 
-            @Override
-            public void onHistogramAdded(String name, Histogram histogram)
-            {
-                String cleanName = clean(name);
-                addMetric(name, (tags) -> writeMetric(cleanName, tags, histogram));
-            }
+                @Override
+                public void onHistogramAdded(
+                        String name,
+                        Histogram histogram
+                )
+                {
+                    String cleanName = clean(name);
+                    addMetric(
+                            name,
+                            (tags) -> writeMetric(cleanName,
+                                    tags,
+                                    histogram
+                            )
+                    );
+                }
 
-            @Override
-            public void onHistogramRemoved(String name)
-            {
-                removeMetric(name);
-            }
+                @Override
+                public void onHistogramRemoved(String name)
+                {
+                    removeMetric(name);
+                }
 
-            @Override
-            public void onMeterAdded(String name, Meter meter)
-            {
-                String cleanName = clean(name);
-                addMetric(name, (tags) -> writeMetric(cleanName, tags, meter));
-            }
+                @Override
+                public void onMeterAdded(
+                        String name,
+                        Meter meter
+                )
+                {
+                    String cleanName = clean(name);
+                    addMetric(
+                            name,
+                            (tags) -> writeMetric(cleanName,
+                                    tags,
+                                    meter
+                            )
+                    );
+                }
 
-            @Override
-            public void onMeterRemoved(String name)
-            {
-                removeMetric(name);
-            }
+                @Override
+                public void onMeterRemoved(String name)
+                {
+                    removeMetric(name);
+                }
 
-            @Override
-            public void onTimerAdded(String name, Timer timer)
-            {
-                String cleanName = clean(name);
-                addMetric(name, (tags) -> writeMetric(cleanName, tags, timer));
-            }
+                @Override
+                public void onTimerAdded(
+                        String name,
+                        Timer timer
+                )
+                {
+                    String cleanName = clean(name);
+                    addMetric(
+                            name,
+                            (tags) -> writeMetric(cleanName,
+                                    tags,
+                                    timer
+                            )
+                    );
+                }
 
-            @Override
-            public void onTimerRemoved(String name)
-            {
-                removeMetric(name);
-            }
-        });
+                @Override
+                public void onTimerRemoved(String name)
+                {
+                    removeMetric(name);
+                }
+            });
+        }
     }
 
     private synchronized void restartEventReporting(Integer interval)
