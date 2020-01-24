@@ -2,5 +2,9 @@ insights_streaming_enabled: false
 insights_upload_enabled: false
 write_to_disk_enabled: true
 
+#To output tombstone counter metrics for integration tests
+metric_sampling_interval_in_seconds: 10
+upload_interval_in_seconds: 10
+
 data_dir: /var/lib/cassandra
 log_dir: /var/log/cassandra

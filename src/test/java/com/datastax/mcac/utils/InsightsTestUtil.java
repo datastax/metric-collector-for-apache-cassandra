@@ -23,11 +23,6 @@ public class InsightsTestUtil
 
     public static void lookForEntryInLog(File dataDir, String entry, int timeoutInSeconds)
     {
-        assertTrue(
-                dataDir.toString(),
-                dataDir.exists()
-        );
-
         File dataFile = getCurrentDataFile(dataDir);
 
         long start = System.nanoTime();
@@ -37,6 +32,15 @@ public class InsightsTestUtil
             String insightsContent = "";
             while (true)
             {
+                if (!dataDir.exists())
+                {
+                    Uninterruptibles.sleepUninterruptibly(
+                            100,
+                            TimeUnit.MILLISECONDS
+                    );
+                    continue;
+                }
+
                 if ((System.nanoTime() - start) > TimeUnit.SECONDS.toNanos(timeoutInSeconds))
                     throw new AssertionError("Timeout looking for " + entry + " in " + dataFile +
                             insightsContent.substring(0, Math.min(insightsContent.length(), 1024)));

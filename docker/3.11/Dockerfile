@@ -1,6 +1,7 @@
 FROM cassandra:3.11
 
 COPY config/cassandra_3_11_low_timeouts.yaml /etc/cassandra/cassandra_low_timeouts.yaml
+COPY config/cassandra_3_11_low_tombstone_thresholds.yaml /etc/cassandra/cassandra_low_tombstone_thresholds.yaml
 COPY config/metrics-collector.yaml /etc/cassandra/metrics-collector.yaml
 COPY target/datastax-mcac-agent-0.1.0-SNAPSHOT.jar /etc/cassandra/datastax-mcac-agent-0.1.0-SNAPSHOT.jar
 COPY target/collectd /etc/cassandra/collectd
@@ -14,6 +15,6 @@ RUN grep -qxF "JVM_OPTS=\"\$JVM_OPTS -javaagent:/etc/cassandra/datastax-mcac-age
 EXPOSE 9103
 
 #debugging
-#RUN echo "JVM_OPTS=\"\$JVM_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005\"" >> /etc/cassandra/cassandra-env.sh
+#RUN echo "JVM_OPTS=\"\$JVM_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005\"" >> /etc/cassandra/cassandra-env.sh
 #EXPOSE 5005
 
