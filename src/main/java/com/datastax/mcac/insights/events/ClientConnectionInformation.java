@@ -1,12 +1,13 @@
 package com.datastax.mcac.insights.events;
 
-import java.util.Map;
-import java.util.Optional;
-
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
 import org.apache.cassandra.service.ClientState;
 import org.codehaus.jackson.annotate.JsonProperty;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public class ClientConnectionInformation extends Insight
 {
@@ -25,7 +26,7 @@ public class ClientConnectionInformation extends Insight
     public static final String NAME = "oss.insights.event.client_connected";
     public static final String NAME_HEARTBEAT = "oss.insights.event.client_heartbeat";
 
-    public ClientConnectionInformation(ClientState clientState, Map<String, String> options, boolean isHeartbeat)
+    public ClientConnectionInformation(UUID sessionId, ClientState clientState, Map<String, String> options, boolean isHeartbeat)
     {
         super(new InsightMetadata(
                         isHeartbeat ? NAME_HEARTBEAT : NAME,
@@ -33,11 +34,14 @@ public class ClientConnectionInformation extends Insight
                         Optional.empty(),
                         Optional.of(InsightMetadata.InsightType.EVENT),
                         Optional.empty()),
-                new Data(clientState, options));
+                new Data(sessionId,  clientState, options));
     }
 
     static class Data
     {
+        @JsonProperty("session_id")
+        public final String sessionId;
+
         @JsonProperty("compression")
         public final String compression;
 
@@ -62,8 +66,9 @@ public class ClientConnectionInformation extends Insight
         @JsonProperty("remote_ip")
         public final String remoteIp;
 
-        Data(ClientState clientState, Map<String, String> options)
+        Data(UUID sessionId, ClientState clientState, Map<String, String> options)
         {
+            this.sessionId = sessionId.toString();
             this.compression = options.get(COMPRESSION);
             this.clientId = options.get(CLIENT_ID);
             this.applicationName = options.get(APPLICATION_NAME);
