@@ -1,9 +1,11 @@
 package com.datastax.mcac;
 
+import com.datastax.mcac.insights.events.InsightsClientStarted;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.rules.TemporaryFolder;
@@ -88,10 +90,13 @@ public abstract class BaseIntegrationTest
         return tempDir;
     }
 
-    protected void waitForInsightsClientStartupEvent()
+    File getInsightsDir()
     {
-        InsightsTestUtil.lookForEntryInLog(
-                Paths.get(getTempDir().getAbsolutePath(), "insights").toFile(),
-                "insights_client_started", 30);
+        return Paths.get(getTempDir().getAbsolutePath(), "insights").toFile();
+    }
+
+    void waitForInsightsClientStartupEvent() throws IOException
+    {
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(getInsightsDir(), InsightsClientStarted.NAME) > 0);
     }
 }
