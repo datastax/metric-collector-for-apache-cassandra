@@ -5,17 +5,20 @@ import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.exceptions.OperationTimedOutException;
+import com.datastax.driver.core.exceptions.ReadFailureException;
 import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.mcac.insights.events.DroppedMessageInformation;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +42,7 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
     }
 
     @Test(timeout = 120000)
-    public void testDriverMessage()
+    public void test() throws IOException
     {
         waitForInsightsClientStartupEvent();
 
@@ -88,15 +91,18 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
 
                 try
                 {
-                    InsightsTestUtil.lookForEntryInLog(
+                    Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(
                             rootDir,
-                            DroppedMessageInformation.NAME,
-                            30
-                    );
+                            DroppedMessageInformation.NAME
+                    ) > 0);
                     break;
                 }
                 catch (AssertionError ignore)
                 {
+                    Uninterruptibles.sleepUninterruptibly(
+                            100,
+                            TimeUnit.MILLISECONDS
+                    );
                 }
             }
         }

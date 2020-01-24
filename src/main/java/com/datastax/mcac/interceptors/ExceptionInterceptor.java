@@ -64,7 +64,7 @@ public class ExceptionInterceptor extends AbstractInterceptor
                     Long lastSeen = lastException.get(rootClass);
                     if (lastSeen == null || (now - lastSeen) > TimeUnit.MILLISECONDS.toNanos(500))
                     {
-                        if (lastSeen == null ? lastException.putIfAbsent(rootClass, now) == now : lastException.replace(rootClass, lastSeen, now))
+                        if (lastSeen == null ? lastException.computeIfAbsent(rootClass, (k) -> now) == now : lastException.replace(rootClass, lastSeen, now))
                         {
                             client.get().report(new ExceptionInformation(t));
                         }

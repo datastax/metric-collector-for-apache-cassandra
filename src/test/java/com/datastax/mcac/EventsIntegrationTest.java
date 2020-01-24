@@ -1,20 +1,13 @@
 package com.datastax.mcac;
 
 import java.io.File;
-import java.io.IOError;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -32,15 +25,6 @@ import com.datastax.mcac.insights.events.NodeConfiguration;
 import com.datastax.mcac.insights.events.NodeSystemInformation;
 import com.datastax.mcac.insights.events.SchemaInformation;
 import com.datastax.mcac.utils.InsightsTestUtil;
-import com.google.common.util.concurrent.Uninterruptibles;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(Parameterized.class)
 public class EventsIntegrationTest extends BaseIntegrationTest
@@ -53,8 +37,7 @@ public class EventsIntegrationTest extends BaseIntegrationTest
     @Test
     public void testDriverMessage() throws IOException
     {
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(Paths.get(temporaryFolder.getRoot().getAbsolutePath(), "insights").toFile(),
-                "insights_client_started") > 0);
+        waitForInsightsClientStartupEvent();
 
         Cluster cluster = null;
         try
@@ -101,7 +84,7 @@ public class EventsIntegrationTest extends BaseIntegrationTest
             if (cluster != null) cluster.close();
         }
 
-        File rootDir = Paths.get(getTempDir().getAbsolutePath(), "insights").toFile();
+        File rootDir = getInsightsDir();
 
         Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "driver.startup") > 0);
 
