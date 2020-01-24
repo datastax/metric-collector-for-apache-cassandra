@@ -1,12 +1,5 @@
 package com.datastax.mcac.interceptors;
 
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.datastax.mcac.insights.events.ClientConnectionInformation;
 import io.netty.channel.Channel;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -24,7 +17,11 @@ import org.apache.cassandra.service.QueryState;
 import org.apache.cassandra.transport.Message;
 import org.apache.cassandra.transport.messages.OptionsMessage;
 import org.apache.cassandra.utils.ExpiringMap;
-import org.apache.cassandra.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * We intercept the OPTIONS message to capture the Driver heartbeat messages.
@@ -39,7 +36,7 @@ public class OptionsMessageInterceptor extends AbstractInterceptor
     private static final Logger logger = LoggerFactory.getLogger(OptionsMessageInterceptor.class);
 
     private static final Long lifetimeMs = TimeUnit.MINUTES.toMillis(5);
-    static final ExpiringMap<Channel, Pair<Long, Map<String, String>>> stateCache = new ExpiringMap<>(lifetimeMs);
+    static final ExpiringMap<Channel, ClientConnectionCacheEntry> stateCache = new ExpiringMap<>(lifetimeMs);
 
     public static ElementMatcher<? super TypeDescription> type()
     {
@@ -48,7 +45,8 @@ public class OptionsMessageInterceptor extends AbstractInterceptor
 
     public static AgentBuilder.Transformer transformer()
     {
-        return new AgentBuilder.Transformer() {
+        return new AgentBuilder.Transformer()
+        {
             @Override
             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
             {
@@ -69,20 +67,28 @@ public class OptionsMessageInterceptor extends AbstractInterceptor
                 OptionsMessage request = (OptionsMessage) instance;
                 QueryState queryState = (QueryState) allArguments[0];
 
-                Pair<Long, Map<String, String>> options = stateCache.get(request.connection().channel());
-                if (options != null)
+                ClientConnectionCacheEntry entry = stateCache.get(request.connection().channel());
+                if (entry != null)
                 {
-                    Long now = System.currentTimeMillis();
-                    Long lastInsightSend = options.left;
+                    long now = System.currentTimeMillis();
 
-                    if (options != null && (now - lastInsightSend) > lifetimeMs)
+                    if (now - entry.lastInsightsend > lifetimeMs)
                     {
-                        client.get().report(new ClientConnectionInformation(queryState.getClientState(), options.right, true));
-                        lastInsightSend = now;
+                        client.get().report(new ClientConnectionInformation(
+                                entry.sessionId,
+                                queryState.getClientState(),
+                                entry.clientOptions,
+                                true
+                        ));
                     }
 
+                    ClientConnectionCacheEntry updated = ClientConnectionCacheEntry
+                            .newBuilder(entry)
+                            .lastHeartBeatSend(now)
+                            .build();
+
                     //Put options back in cache to keep it alive
-                    stateCache.put(request.connection().channel(), Pair.create(lastInsightSend, options.right));
+                    stateCache.put(request.connection().channel(), updated);
                 }
             }
         }
