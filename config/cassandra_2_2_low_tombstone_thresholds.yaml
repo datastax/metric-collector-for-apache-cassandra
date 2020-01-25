@@ -574,8 +574,8 @@ auto_snapshot: true
 # Adjust the thresholds here if you understand the dangers and want to
 # scan more tombstones anyway.  These thresholds may also be adjusted at runtime
 # using the StorageService mbean.
-tombstone_warn_threshold: 100
-tombstone_failure_threshold: 1000
+tombstone_warn_threshold: 10
+tombstone_failure_threshold: 100
 
 # Granularity of the collation index of rows within a partition.
 # Increase if your rows are large, or if you have a very large

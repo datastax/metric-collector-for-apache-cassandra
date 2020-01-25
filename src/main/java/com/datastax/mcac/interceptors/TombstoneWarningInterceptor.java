@@ -1,7 +1,6 @@
 package com.datastax.mcac.interceptors;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
 import com.datastax.mcac.UnixSocketClient;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
@@ -15,7 +14,6 @@ import net.bytebuddy.utility.JavaModule;
 import org.apache.cassandra.cql3.QueryProcessor;
 import org.apache.cassandra.cql3.statements.CFStatement;
 import org.apache.cassandra.cql3.statements.ParsedStatement;
-import org.apache.cassandra.metrics.CassandraMetricsRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +32,11 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
 
     private static final Pattern TOMBSTONE_WARN_PATTERN =
             Pattern.compile("Read \\d+ live rows and (\\d+) tombstone cells for query (.*) "
-                    + "\\(see tombstone_warn_threshold\\)");
+                    + "\\(see tombstone_warn_threshold\\).*$");
+
+    private static final Pattern TOMBSTONE_2_2_WARN_PATTERN =
+            Pattern.compile("Read \\d+ live and (\\d+) tombstone cells in ([_a-zA-Z].*)\\.([_a-zA-Z].*) for key.*$");
+
 
     private final static Map<String, Map<String, Counter>> keyspaceToTableCounters = new ConcurrentHashMap<>();
 
@@ -49,7 +51,7 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
         {
             String logMessage = (String) allArguments[0];
 
-            if (!logMessage.endsWith("tombstone_warn_threshold)"))
+            if (!logMessage.contains("tombstone_warn_threshold"))
             {
                 return;
             }
@@ -57,58 +59,41 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
             try
             {
                 Matcher matcher = TOMBSTONE_WARN_PATTERN.matcher(logMessage);
+                String tableName = null;
+                String keyspaceName = null;
+                Integer tombstoneCount = null;
+
                 if (matcher.matches() && matcher.groupCount() == 2)
                 {
-                    int tombstoneCount = Integer.parseInt(matcher.group(1));
+                    tombstoneCount = Integer.parseInt(matcher.group(1));
                     String cqlQuery = matcher.group(2);
                     ParsedStatement parsedStatement = QueryProcessor.parseStatement(cqlQuery);
 
                     if (parsedStatement instanceof CFStatement)
                     {
                         CFStatement cfStatement = (CFStatement) parsedStatement;
-                        String tableName = cfStatement.columnFamily();
-                        String keyspaceName = cfStatement.keyspace();
-
-                        if (isEmpty(tableName))
-                        {
-                            logger.debug(
-                                    "Could not parse table name from statement: {}",
-                                    cqlQuery
-                            );
-                            return;
-                        }
-
-                        if (isEmpty(keyspaceName))
-                        {
-                            logger.debug(
-                                    "Could not parse keyspace name from statement: {}",
-                                    cqlQuery
-                            );
-                            return;
-                        }
-
-                        if (!keyspaceToTableCounters.containsKey(keyspaceName))
-                        {
-                            keyspaceToTableCounters.put(
-                                    keyspaceName,
-                                    new ConcurrentHashMap<>()
-                            );
-                        }
-                        Map<String, Counter> tableCounters = keyspaceToTableCounters.get(keyspaceName);
-                        if (!tableCounters.containsKey(tableName))
-                        {
-                            tableCounters.put(
-                                    tableName,
-                                    UnixSocketClient.agentAddedMetricsRegistry.counter(String.format(
-                                            "com.datastax.mcac.tombstone_warnings.%s.%s",
-                                            keyspaceName,
-                                            tableName
-                                    ))
-                            );
-                        }
-                        Counter counter = tableCounters.get(tableName);
-                        counter.inc(tombstoneCount);
+                        tableName = cfStatement.columnFamily();
+                        keyspaceName = cfStatement.keyspace();
                     }
+                }
+                else
+                {
+                    matcher = TOMBSTONE_2_2_WARN_PATTERN.matcher(logMessage);
+                    if (matcher.matches() && matcher.groupCount() == 3)
+                    {
+                        tombstoneCount = Integer.parseInt(matcher.group(1));
+                        keyspaceName = matcher.group(2);
+                        tableName = matcher.group(3);
+                    }
+                }
+
+                if (tombstoneCount != null && !isEmpty(keyspaceName) && !isEmpty(tableName))
+                {
+                    incrementAssociatedCounter(
+                            tombstoneCount,
+                            keyspaceName,
+                            tableName
+                    );
                 }
             }
             catch (Exception ex)
@@ -119,6 +104,35 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
                 );
             }
         }
+    }
+
+    private static void incrementAssociatedCounter(
+            int tombstoneCount,
+            String keyspaceName,
+            String tableName
+    )
+    {
+        if (!keyspaceToTableCounters.containsKey(keyspaceName))
+        {
+            keyspaceToTableCounters.put(
+                    keyspaceName,
+                    new ConcurrentHashMap<>()
+            );
+        }
+        Map<String, Counter> tableCounters = keyspaceToTableCounters.get(keyspaceName);
+        if (!tableCounters.containsKey(tableName))
+        {
+            tableCounters.put(
+                    tableName,
+                    UnixSocketClient.agentAddedMetricsRegistry.counter(String.format(
+                            "com.datastax.mcac.tombstone_warnings.%s.%s",
+                            keyspaceName,
+                            tableName
+                    ))
+            );
+        }
+        Counter counter = tableCounters.get(tableName);
+        counter.inc(tombstoneCount);
     }
 
     public static ElementMatcher<? super TypeDescription> type()
