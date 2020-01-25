@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.bytebuddy.implementation.MethodDelegation.to;
+import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
+import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 
 public class TombstoneFailureInterceptor extends AbstractInterceptor
 {
@@ -29,17 +31,8 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
             @AllArguments Object[] allArguments
     )
     {
-        /*
-         * int numTombstones
-         * String query
-         * CFMetaData metadata
-         * DecoratedKey lastPartitionKey
-         * ClusteringPrefix lastClustering
-         */
         try
         {
-            int numTombstones = (int) allArguments[0];
-
             String keyspaceName = null;
             String tableName = null;
             if (allArguments.length == 5)
@@ -49,11 +42,18 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
                 keyspaceName = (String) ksName.get(allArguments[2]);
                 tableName = (String) cfName.get(allArguments[2]);
             }
-            else
+            else if(allArguments.length == 7)
             {
+                //2.x
                 keyspaceName = (String) allArguments[2];
                 tableName = (String) allArguments[3];
             }
+            else
+            {
+                return;
+            }
+
+            int numTombstones = (int) allArguments[0];
 
             if (!keyspaceToTableCounters.containsKey(keyspaceName))
             {
@@ -104,8 +104,9 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
             )
             {
                 //return builder.constructor((ElementMatchers.takesArguments(5).or(ElementMatchers.takesArguments(7)))
-                return builder.constructor(ElementMatchers.takesArguments(5)
-                        .and(ElementMatchers.isConstructor()))
+                return builder.constructor(
+                        (takesArguments(5).or(takesArguments(7))
+                        .and(isConstructor())))
                         .intercept(to(TombstoneFailureInterceptor.class).andThen(SuperMethodCall.INSTANCE));
             }
         };

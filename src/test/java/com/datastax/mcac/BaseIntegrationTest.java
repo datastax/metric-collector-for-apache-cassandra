@@ -14,7 +14,6 @@ import java.io.IOError;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public abstract class BaseIntegrationTest
 {
@@ -27,12 +26,11 @@ public abstract class BaseIntegrationTest
     @Parameterized.Parameters
     public static Iterable<String[]> functions()
     {
-        return Collections.singletonList(new String [] {"3.11"});
-//        return Lists.newArrayList(
-//                //new String[]{"2.2"},
-//                new String[]{"3.0"},
-//                new String[]{"3.11"}
-//        );
+        return Lists.newArrayList(
+                new String[]{"2.2"},
+                new String[]{"3.0"},
+                new String[]{"3.11"}
+        );
     }
 
     protected BaseIntegrationTest(String version)
