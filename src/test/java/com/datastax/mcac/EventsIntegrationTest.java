@@ -1,5 +1,16 @@
 package com.datastax.mcac;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.util.concurrent.Uninterruptibles;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
@@ -14,15 +25,6 @@ import com.datastax.mcac.insights.events.NodeConfiguration;
 import com.datastax.mcac.insights.events.NodeSystemInformation;
 import com.datastax.mcac.insights.events.SchemaInformation;
 import com.datastax.mcac.utils.InsightsTestUtil;
-import com.google.common.util.concurrent.Uninterruptibles;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(Parameterized.class)
 public class EventsIntegrationTest extends BaseIntegrationTest
@@ -33,7 +35,7 @@ public class EventsIntegrationTest extends BaseIntegrationTest
     }
 
     @Test
-    public void testEvents()
+    public void testDriverMessage() throws IOException
     {
         waitForInsightsClientStartupEvent();
 
@@ -82,30 +84,30 @@ public class EventsIntegrationTest extends BaseIntegrationTest
             if (cluster != null) cluster.close();
         }
 
-        File rootDir = Paths.get(getTempDir().getAbsolutePath(), "insights").toFile();
+        File rootDir = getInsightsDir();
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, "driver.startup", 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "driver.startup") > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, NodeConfiguration.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, NodeConfiguration.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, SchemaInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, SchemaInformation.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, NodeSystemInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, NodeSystemInformation.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, ClientConnectionInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, ClientConnectionInformation.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, ClientConnectionInformation.NAME_HEARTBEAT, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, ClientConnectionInformation.NAME_HEARTBEAT) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, LargePartitionInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, LargePartitionInformation.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, FlushInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, FlushInformation.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, ExceptionInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, ExceptionInformation.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, GCInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, GCInformation.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, CompactionStartedInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, CompactionStartedInformation.NAME) > 0);
 
-        InsightsTestUtil.lookForEntryInLog(rootDir, CompactionEndedInformation.NAME, 30);
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, CompactionEndedInformation.NAME) > 0);
     }
 }
