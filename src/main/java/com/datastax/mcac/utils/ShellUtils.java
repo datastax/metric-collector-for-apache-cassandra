@@ -2,7 +2,6 @@ package com.datastax.mcac.utils;
 
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
-import org.apache.cassandra.io.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

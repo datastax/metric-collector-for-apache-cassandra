@@ -1,5 +1,13 @@
 package com.datastax.mcac.interceptors;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.datastax.mcac.insights.events.ExceptionInformation;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
@@ -11,14 +19,12 @@ import net.bytebuddy.implementation.bind.annotation.SuperCall;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Callable;
 
 public class ExceptionInterceptor extends AbstractInterceptor
 {
     private static final Logger logger = LoggerFactory.getLogger(ExceptionInterceptor.class);
+
+    private static final ConcurrentMap<Class, Long> lastException = Maps.newConcurrentMap();
 
     public static ElementMatcher<? super TypeDescription> type()
     {
@@ -47,9 +53,22 @@ public class ExceptionInterceptor extends AbstractInterceptor
             {
                 //Only throw the innermost exception
                 Throwable t = (Throwable) allArguments[0];
-                if (t.getCause() == null)
+                Throwable inner = t.getCause() == null ? t : t.getCause();
+                if (inner != null)
                 {
-                    client.get().report(new ExceptionInformation(t));
+                    Class rootClass = inner.getClass();
+                    long now = System.nanoTime();
+
+                    //Filter the same exception to once every 500ms
+                    //to avoid exception storms
+                    Long lastSeen = lastException.get(rootClass);
+                    if (lastSeen == null || (now - lastSeen) > TimeUnit.MILLISECONDS.toNanos(500))
+                    {
+                        if (lastSeen == null ? lastException.computeIfAbsent(rootClass, (k) -> now) == now : lastException.replace(rootClass, lastSeen, now))
+                        {
+                            client.get().report(new ExceptionInformation(t));
+                        }
+                    }
                 }
             }
         }
