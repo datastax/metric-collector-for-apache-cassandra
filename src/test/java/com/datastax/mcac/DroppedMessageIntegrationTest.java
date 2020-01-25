@@ -3,13 +3,10 @@ package com.datastax.mcac;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.core.exceptions.OperationTimedOutException;
-import com.datastax.driver.core.exceptions.ReadFailureException;
-import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.mcac.insights.events.DroppedMessageInformation;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(Parameterized.class)
 public class DroppedMessageIntegrationTest extends BaseIntegrationTest

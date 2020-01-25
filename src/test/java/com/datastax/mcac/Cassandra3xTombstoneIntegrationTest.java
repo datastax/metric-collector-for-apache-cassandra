@@ -6,11 +6,13 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.ReadFailureException;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -41,7 +43,7 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
     }
 
     @Test(timeout = 120000)
-    public void test()
+    public void test() throws IOException
     {
         waitForInsightsClientStartupEvent();
 
@@ -97,16 +99,16 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
                         //expected as we have crossed failure threshold
                     }
 
-                    InsightsTestUtil.lookForEntryInLog(
+                    Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(
                             rootDir,
-                            "com.datastax.mcac.tombstone_warnings.foo.bar",
-                            30
-                    );
-                    InsightsTestUtil.lookForEntryInLog(
+                            "com.datastax.mcac.tombstone_warnings.foo.bar"
+                    ) > 0);
+
+                    Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(
                             rootDir,
-                            "com.datastax.mcac.tombstone_failures.foo.bar",
-                            30
-                    );
+                            "com.datastax.mcac.tombstone_failures.foo.bar"
+                    ) > 0);
+
                     break;
                 }
                 catch (AssertionError ignore)
