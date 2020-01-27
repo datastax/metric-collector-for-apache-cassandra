@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MCACFingerprint extends Insight
 {
-    public static final String NAME = "dse.insights.event.ossfingerprint";
+    public static final String NAME = "oss.insights.event.fingerprint";
 
     @JsonCreator
     public MCACFingerprint(

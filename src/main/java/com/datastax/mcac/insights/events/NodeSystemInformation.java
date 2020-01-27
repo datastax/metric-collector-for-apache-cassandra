@@ -34,7 +34,7 @@ public class NodeSystemInformation extends Insight
 {
     private static final Logger logger = LoggerFactory.getLogger(NodeSystemInformation.class);
 
-    public static final String NAME = "dse.insights.event.node_system_information";
+    public static final String NAME = "oss.insights.event.node_system_information";
     private static final String MAPPING_VERSION = "oss-node-config-v1";
 
     public static final String LOCAL = "local";
@@ -156,7 +156,6 @@ public class NodeSystemInformation extends Insight
                 throw new RuntimeException(e);
             }
         }
-
     }
 }
 

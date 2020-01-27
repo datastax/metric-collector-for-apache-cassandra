@@ -103,6 +103,10 @@ public class UnixSocketClient
     private final AtomicBoolean started;
     private final String socketFile;
 
+    public void logError(String log, Throwable throwable)
+    {
+        logger.error(log, throwable);
+    }
 
     @VisibleForTesting
     final ConcurrentHashMap<String, Function<String, Integer>> metricProcessors;
@@ -546,11 +550,11 @@ public class UnixSocketClient
             {
                 //Keep the last value of a metric when it's removed.
                 Function<String, Integer> f = metricProcessors.remove(name);
-                if (f != null && !StorageService.instance.isShutdown())
+                if (f != null && !StorageService.instance.isInShutdownHook())
                     f.apply("");
 
                 f = insightFilteredMetricProcessors.remove(name);
-                if (f != null && !StorageService.instance.isShutdown())
+                if (f != null && !StorageService.instance.isInShutdownHook())
                     f.apply(FILTER_INSIGHTS_TAG);
 
                 globalFilteredMetricProcessors.remove(name);
@@ -699,7 +703,7 @@ public class UnixSocketClient
                         e
                 );
             }
-        }, 60, interval, TimeUnit.SECONDS);
+        }, 5, interval, TimeUnit.SECONDS);
     }
 
 
@@ -1273,7 +1277,6 @@ public class UnixSocketClient
         }
         else
         {
-            logger.warn("Insights Client is not started");
             return false;
         }
     }
