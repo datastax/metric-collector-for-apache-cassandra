@@ -14,7 +14,9 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static net.bytebuddy.matcher.ElementMatchers.isInterface;
 import static net.bytebuddy.matcher.ElementMatchers.named;
+import static net.bytebuddy.matcher.ElementMatchers.not;
 
 public final class LoggingInterceptor extends AbstractInterceptor
 {
@@ -91,7 +93,7 @@ public final class LoggingInterceptor extends AbstractInterceptor
 
     public static ElementMatcher<? super TypeDescription> type()
     {
-        return ElementMatchers.hasSuperType(named("org.slf4j.Logger"));
+        return ElementMatchers.hasSuperType(named("org.slf4j.Logger")).and(not(isInterface()));
     }
 
     public static AgentBuilder.Transformer transformer()
