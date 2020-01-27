@@ -27,9 +27,7 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
 
     private final static Map<String, Map<String, Counter>> keyspaceToTableCounters = new ConcurrentHashMap<>();
 
-    public static void construct(
-            @AllArguments Object[] allArguments
-    )
+    public static void construct(@AllArguments Object[] allArguments)
     {
         try
         {
@@ -57,10 +55,7 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
 
             if (!keyspaceToTableCounters.containsKey(keyspaceName))
             {
-                keyspaceToTableCounters.put(
-                        keyspaceName,
-                        new ConcurrentHashMap<>()
-                );
+                keyspaceToTableCounters.put(keyspaceName, new ConcurrentHashMap<>());
             }
             Map<String, Counter> tableCounters = keyspaceToTableCounters.get(keyspaceName);
             if (!tableCounters.containsKey(tableName))
@@ -79,10 +74,7 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
         }
         catch (Exception ex)
         {
-            logger.error(
-                    "Error intercepting TombstoneOverwhelmingException to count tombstone failures:  ",
-                    ex
-            );
+            logger.error("Error intercepting TombstoneOverwhelmingException to count tombstone failures:  ", ex);
         }
     }
 
@@ -104,9 +96,7 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
             )
             {
                 //return builder.constructor((ElementMatchers.takesArguments(5).or(ElementMatchers.takesArguments(7)))
-                return builder.constructor(
-                        (takesArguments(5).or(takesArguments(7))
-                        .and(isConstructor())))
+                return builder.constructor((takesArguments(5).or(takesArguments(7)).and(isConstructor())))
                         .intercept(to(TombstoneFailureInterceptor.class).andThen(SuperMethodCall.INSTANCE));
             }
         };

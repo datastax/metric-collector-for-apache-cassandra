@@ -40,10 +40,7 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
 
     private final static Map<String, Map<String, Counter>> keyspaceToTableCounters = new ConcurrentHashMap<>();
 
-    public static void warn(
-            @AllArguments Object[] allArguments,
-            @SuperCall Callable<?> zuper
-    ) throws Throwable
+    public static void warn(@AllArguments Object[] allArguments, @SuperCall Callable<?> zuper) throws Throwable
     {
         zuper.call();
 
@@ -89,11 +86,7 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
 
                 if (tombstoneCount != null && !isEmpty(keyspaceName) && !isEmpty(tableName))
                 {
-                    incrementAssociatedCounter(
-                            tombstoneCount,
-                            keyspaceName,
-                            tableName
-                    );
+                    incrementAssociatedCounter(tombstoneCount, keyspaceName, tableName);
                 }
             }
             catch (Exception ex)
@@ -106,18 +99,11 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
         }
     }
 
-    private static void incrementAssociatedCounter(
-            int tombstoneCount,
-            String keyspaceName,
-            String tableName
-    )
+    private static void incrementAssociatedCounter(int tombstoneCount, String keyspaceName, String tableName)
     {
         if (!keyspaceToTableCounters.containsKey(keyspaceName))
         {
-            keyspaceToTableCounters.put(
-                    keyspaceName,
-                    new ConcurrentHashMap<>()
-            );
+            keyspaceToTableCounters.put(keyspaceName, new ConcurrentHashMap<>());
         }
         Map<String, Counter> tableCounters = keyspaceToTableCounters.get(keyspaceName);
         if (!tableCounters.containsKey(tableName))
@@ -125,7 +111,7 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
             tableCounters.put(
                     tableName,
                     UnixSocketClient.agentAddedMetricsRegistry.counter(String.format(
-                            "com.datastax.mcac.tombstone_warnings.%s.%s",
+                    "com.datastax.mcac.tombstone_warnings.%s.%s",
                             keyspaceName,
                             tableName
                     ))
@@ -145,15 +131,10 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
         return new AgentBuilder.Transformer()
         {
             @Override
-            public DynamicType.Builder<?> transform(
-                    DynamicType.Builder<?> builder,
-                    TypeDescription typeDescription,
-                    ClassLoader classLoader,
-                    JavaModule javaModule
+            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule
             )
             {
-                return builder.method(named("warn"))
-                        .intercept(MethodDelegation.to(TombstoneWarningInterceptor.class));
+                return builder.method(named("warn")).intercept(MethodDelegation.to(TombstoneWarningInterceptor.class));
             }
         };
     }

@@ -571,19 +571,10 @@ public class UnixSocketClient
                 }
 
                 @Override
-                public void onGaugeAdded(
-                        String name,
-                        Gauge<?> gauge
-                )
+                public void onGaugeAdded(String name, Gauge<?> gauge)
                 {
                     String cleanName = clean(name);
-                    addMetric(
-                            name,
-                            (tags) -> writeMetric(cleanName,
-                                    tags,
-                                    gauge
-                            )
-                    );
+                    addMetric(name, (tags) -> writeMetric(cleanName, tags, gauge));
                 }
 
                 @Override
@@ -593,19 +584,10 @@ public class UnixSocketClient
                 }
 
                 @Override
-                public void onCounterAdded(
-                        String name,
-                        Counter counter
-                )
+                public void onCounterAdded(String name, Counter counter)
                 {
                     String cleanName = clean(name);
-                    addMetric(
-                            name,
-                            (tags) -> writeMetric(cleanName,
-                                    tags,
-                                    counter
-                            )
-                    );
+                    addMetric(name, (tags) -> writeMetric(cleanName, tags, counter));
                 }
 
                 @Override
@@ -615,19 +597,10 @@ public class UnixSocketClient
                 }
 
                 @Override
-                public void onHistogramAdded(
-                        String name,
-                        Histogram histogram
-                )
+                public void onHistogramAdded(String name, Histogram histogram)
                 {
                     String cleanName = clean(name);
-                    addMetric(
-                            name,
-                            (tags) -> writeMetric(cleanName,
-                                    tags,
-                                    histogram
-                            )
-                    );
+                    addMetric(name, (tags) -> writeMetric(cleanName, tags, histogram));
                 }
 
                 @Override
@@ -637,19 +610,10 @@ public class UnixSocketClient
                 }
 
                 @Override
-                public void onMeterAdded(
-                        String name,
-                        Meter meter
-                )
+                public void onMeterAdded(String name, Meter meter)
                 {
                     String cleanName = clean(name);
-                    addMetric(
-                            name,
-                            (tags) -> writeMetric(cleanName,
-                                    tags,
-                                    meter
-                            )
-                    );
+                    addMetric(name, (tags) -> writeMetric(cleanName, tags, meter));
                 }
 
                 @Override
@@ -659,19 +623,10 @@ public class UnixSocketClient
                 }
 
                 @Override
-                public void onTimerAdded(
-                        String name,
-                        Timer timer
-                )
+                public void onTimerAdded(String name, Timer timer)
                 {
                     String cleanName = clean(name);
-                    addMetric(
-                            name,
-                            (tags) -> writeMetric(cleanName,
-                                    tags,
-                                    timer
-                            )
-                    );
+                    addMetric(name, (tags) -> writeMetric(cleanName, tags, timer));
                 }
 
                 @Override
