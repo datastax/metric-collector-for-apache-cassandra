@@ -22,8 +22,8 @@ public abstract class BaseIntegrationTest
     @ClassRule
     public static TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    final String version;
-    private static DockerHelper docker;
+    protected final String version;
+    protected static DockerHelper docker;
 
     @Parameterized.Parameters
     public static Iterable<String[]> functions()
@@ -35,13 +35,13 @@ public abstract class BaseIntegrationTest
         );
     }
 
-    BaseIntegrationTest(String version)
+    protected BaseIntegrationTest(String version)
     {
         this.version = version;
     }
 
     @Before
-    public void setup()
+    public void setup() throws InterruptedException
     {
         try
         {
@@ -79,7 +79,7 @@ public abstract class BaseIntegrationTest
         );
     }
 
-    File getTempDir()
+    protected File getTempDir()
     {
         String os = System.getProperty("os.name");
         File tempDir = temporaryFolder.getRoot();
