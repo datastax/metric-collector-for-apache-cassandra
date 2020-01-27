@@ -51,7 +51,8 @@ public class Agent {
         ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
 
         new AgentBuilder.Default()
-                .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
+                //.with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
+                //Dropped Messages
                 .type(LoggingInterceptor.type())
                 .transform(LoggingInterceptor.transformer())
                 .installOn(inst);
@@ -61,7 +62,6 @@ public class Agent {
                 //.with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
                 .ignore(new AgentBuilder.RawMatcher.ForElementMatchers(nameStartsWith("net.bytebuddy.").or(isSynthetic()), any(), any()))
                 .enableBootstrapInjection(inst, temp)
-                //Dropped Messages
                 //Exception Information
                 .type(ExceptionInterceptor.type())
                 .transform(ExceptionInterceptor.transformer())
