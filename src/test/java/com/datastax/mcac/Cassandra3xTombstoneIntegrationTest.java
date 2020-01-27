@@ -36,10 +36,7 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
     @Parameterized.Parameters
     public static Iterable<String[]> functions()
     {
-        return Lists.newArrayList(
-                new String[]{"3.0"},
-                new String[]{"3.11"}
-        );
+        return Lists.newArrayList(new String[]{"3.0"}, new String[]{"3.11"});
     }
 
     @Test(timeout = 120000)
@@ -47,10 +44,7 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
     {
         waitForInsightsClientStartupEvent();
 
-        File rootDir = Paths.get(
-                getTempDir().getAbsolutePath(),
-                "insights"
-        ).toFile();
+        File rootDir = Paths.get(getTempDir().getAbsolutePath(), "insights").toFile();
 
         try (Cluster cluster = Cluster.builder()
                 .addContactPoint("127.0.0.1")
@@ -72,22 +66,13 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
                 try
                 {
                     writeData(session);
-                    docker.waitTillFinished(docker.runCommand(
-                            "nodetool",
-                            "flush"
-                    ));
+                    docker.waitTillFinished(docker.runCommand("nodetool", "flush"));
                     deleteDataUpToWarnThreshold(session);
-                    docker.waitTillFinished(docker.runCommand(
-                            "nodetool",
-                            "flush"
-                    ));
+                    docker.waitTillFinished(docker.runCommand("nodetool", "flush"));
                     //induce warning
                     selectData(session);
                     deleteDataUpToFailureThreshold(session);
-                    docker.waitTillFinished(docker.runCommand(
-                            "nodetool",
-                            "flush"
-                    ));
+                    docker.waitTillFinished(docker.runCommand("nodetool", "flush"));
 
                     try
                     {
@@ -99,15 +84,8 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
                         //expected as we have crossed failure threshold
                     }
 
-                    Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(
-                            rootDir,
-                            "com.datastax.mcac.tombstone_warnings.foo.bar"
-                    ) > 0);
-
-                    Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(
-                            rootDir,
-                            "com.datastax.mcac.tombstone_failures.foo.bar"
-                    ) > 0);
+                    Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "com.datastax.mcac.tombstone_warnings.foo.bar") > 0);
+                    Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "com.datastax.mcac.tombstone_failures.foo.bar") > 0);
 
                     break;
                 }
@@ -159,11 +137,7 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
         for (int i = 1; i <= 10000; i++)
         {
             session.execute(
-                    "INSERT into foo.bar(key, k2, k3, value) VALUES (?, ?, ?, ?)",
-                    0,
-                    i % 2 == 0 ? rangeVal++ : rangeVal,
-                    i,
-                    "1"
+                    "INSERT into foo.bar(key, k2, k3, value) VALUES (?, ?, ?, ?)", 0, i % 2 == 0 ? rangeVal++ : rangeVal, i, "1"
             );
         }
     }
