@@ -10,7 +10,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import org.apache.cassandra.cql3.QueryProcessor;
 import org.apache.cassandra.cql3.UntypedResultSet;
-import org.apache.cassandra.schema.SchemaKeyspace;
+import org.apache.cassandra.utils.FBUtilities;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +27,29 @@ import java.util.Optional;
  */
 public class SchemaInformation extends Insight
 {
-    private static final String NAME = "dse.insights.events.schema_information";
+    public static final String NAME = "oss.insights.events.schema_information";
     private static final String MAPPING_VERSION = "oss-node-config-v1";
+
+    public static final String KEYSPACES = "keyspaces";
+    public static final String TABLES = "tables";
+    public static final String COLUMNS = "columns";
+    public static final String DROPPED_COLUMNS = "dropped_columns";
+    public static final String TRIGGERS = "triggers";
+    public static final String VIEWS = "views";
+    public static final String TYPES = "types";
+    public static final String FUNCTIONS = "functions";
+    public static final String AGGREGATES = "aggregates";
+    public static final String INDEXES = "indexes";
+
+
+    public static final String LEGACY_KEYSPACES = "schema_keyspaces";
+    public static final String LEGACY_COLUMNFAMILIES = "schema_columnfamilies";
+    public static final String LEGACY_COLUMNS = "schema_columns";
+    public static final String LEGACY_TRIGGERS = "schema_triggers";
+    public static final String LEGACY_USERTYPES = "schema_usertypes";
+    public static final String LEGACY_FUNCTIONS = "schema_functions";
+    public static final String LEGACY_AGGREGATES = "schema_aggregates";
+
 
     private static final Logger logger = LoggerFactory.getLogger(SchemaInformation.class);
 
@@ -66,7 +88,10 @@ public class SchemaInformation extends Insight
 
     public static class Data
     {
-        private static final Object SCHEMA_KEYSPACE_NAME = "system_schema";
+        private static final String SCHEMA_KEYSPACE_NAME = "system_schema";
+        private static final String LEGACY_SCHEMA_KEYSPACE_NAME = "system";
+
+
         @JsonRawValue
         @JsonProperty("keyspaces")
         public final String keyspaces;
@@ -143,22 +168,38 @@ public class SchemaInformation extends Insight
 
         private Data()
         {
-            this.keyspaces = tableToJson(SchemaKeyspace.KEYSPACES);
-            this.tables = tableToJson(SchemaKeyspace.TABLES);
-            this.columns = tableToJson(SchemaKeyspace.COLUMNS);
-            this.dropped_columns = tableToJson(SchemaKeyspace.DROPPED_COLUMNS);
-            this.triggers = tableToJson(SchemaKeyspace.TRIGGERS);
-            this.views = tableToJson(SchemaKeyspace.VIEWS);
-            this.types = tableToJson(SchemaKeyspace.TYPES);
-            this.functions = tableToJson(SchemaKeyspace.FUNCTIONS);
-            this.aggregates = tableToJson(SchemaKeyspace.AGGREGATES);
-            this.indexes = tableToJson(SchemaKeyspace.INDEXES);
+            if (FBUtilities.getReleaseVersionMajor().equals("2"))
+            {
+                this.keyspaces = tableToJson(LEGACY_SCHEMA_KEYSPACE_NAME, LEGACY_KEYSPACES);
+                this.tables = tableToJson(LEGACY_SCHEMA_KEYSPACE_NAME, LEGACY_COLUMNFAMILIES);
+                this.columns = tableToJson(LEGACY_SCHEMA_KEYSPACE_NAME, LEGACY_COLUMNS);
+                this.dropped_columns = "[]";
+                this.triggers = tableToJson(LEGACY_SCHEMA_KEYSPACE_NAME, LEGACY_TRIGGERS);
+                this.views = "[]";
+                this.types = tableToJson(LEGACY_SCHEMA_KEYSPACE_NAME, LEGACY_USERTYPES);
+                this.functions = tableToJson(LEGACY_SCHEMA_KEYSPACE_NAME, LEGACY_FUNCTIONS);
+                this.aggregates = tableToJson(LEGACY_SCHEMA_KEYSPACE_NAME, LEGACY_AGGREGATES);
+                this.indexes = "[]";
+            }
+            else
+            {
+                this.keyspaces = tableToJson(SCHEMA_KEYSPACE_NAME, KEYSPACES);
+                this.tables = tableToJson(SCHEMA_KEYSPACE_NAME, TABLES);
+                this.columns = tableToJson(SCHEMA_KEYSPACE_NAME, COLUMNS);
+                this.dropped_columns = tableToJson(SCHEMA_KEYSPACE_NAME, DROPPED_COLUMNS);
+                this.triggers = tableToJson(SCHEMA_KEYSPACE_NAME, TRIGGERS);
+                this.views = tableToJson(SCHEMA_KEYSPACE_NAME, VIEWS);
+                this.types = tableToJson(SCHEMA_KEYSPACE_NAME, TYPES);
+                this.functions = tableToJson(SCHEMA_KEYSPACE_NAME, FUNCTIONS);
+                this.aggregates = tableToJson(SCHEMA_KEYSPACE_NAME, AGGREGATES);
+                this.indexes = tableToJson(SCHEMA_KEYSPACE_NAME, INDEXES);
+            }
         }
 
 
-        private String tableToJson(String table)
+        private String tableToJson(String keyspace, String table)
         {
-            String cql = String.format("SELECT JSON * from %s.%s", SCHEMA_KEYSPACE_NAME, table);
+            String cql = String.format("SELECT JSON * from %s.%s", keyspace, table);
             String json = "[";
             try
             {
@@ -173,7 +214,7 @@ public class SchemaInformation extends Insight
             }
             catch (Exception e)
             {
-                logger.warn("Error fetching schema information on {}.{}", SCHEMA_KEYSPACE_NAME, table, e);
+                logger.warn("Error fetching schema information on {}.{}", keyspace, table, e);
             }
 
             json += "]";

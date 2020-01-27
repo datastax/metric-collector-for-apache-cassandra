@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  */
 public class InsightsClientStarted extends Insight
 {
-    public static final String NAME = "dse.insights.event.insights_client_started";
+    public static final String NAME = "oss.insights.event.insights_client_started";
 
     @JsonCreator
     public InsightsClientStarted()
