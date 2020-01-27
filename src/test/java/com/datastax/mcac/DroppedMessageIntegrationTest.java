@@ -3,10 +3,6 @@ package com.datastax.mcac;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.core.exceptions.OperationTimedOutException;
-import com.datastax.driver.core.exceptions.ReadFailureException;
-import com.datastax.driver.core.exceptions.WriteTimeoutException;
 import com.datastax.mcac.insights.events.DroppedMessageInformation;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
@@ -18,10 +14,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Parameterized.class)
@@ -42,7 +39,7 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
     }
 
     @Test(timeout = 120000)
-    public void test() throws IOException
+    public void test() throws Exception
     {
         waitForInsightsClientStartupEvent();
 
@@ -111,8 +108,9 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
     private void readWriteData(
             Session session,
             String val
-    )
+    ) throws ExecutionException, InterruptedException
     {
+        List<CompletableFuture> completableFutures = new ArrayList<>();
         CompletableFuture write = CompletableFuture.runAsync(
                 () ->
                 {
@@ -120,7 +118,7 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
                     {
                         try
                         {
-                            session.executeAsync(
+                            session.execute(
                                     "INSERT into foo.bar(key, value) VALUES (?, ?)",
                                     "" + i,
                                     val
@@ -131,6 +129,7 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
                         }
                     }
                 });
+        completableFutures.add(write);
 
         CompletableFuture read = CompletableFuture.runAsync(
                 () ->
@@ -144,9 +143,9 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
                         {
                             try
                             {
-                                session.executeAsync(
+                                session.execute(
                                         "SELECT * from foo.bar where key='" + i + "'"
-                                ).getUninterruptibly();
+                                );
                             }
                             catch (Exception ignore)
                             {
@@ -155,10 +154,6 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
                     }
                 });
 
-        CompletableFuture.allOf(
-                write,
-                read
-        );
+        CompletableFuture.allOf(read, write).get();
     }
-
 }
