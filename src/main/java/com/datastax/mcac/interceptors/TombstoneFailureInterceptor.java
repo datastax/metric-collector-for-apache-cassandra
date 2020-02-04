@@ -51,8 +51,6 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
                 return;
             }
 
-            int numTombstones = (int) allArguments[0];
-
             if (!keyspaceToTableCounters.containsKey(keyspaceName))
             {
                 keyspaceToTableCounters.put(keyspaceName, new ConcurrentHashMap<>());
@@ -70,7 +68,7 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
                 );
             }
             Counter counter = tableCounters.get(tableName);
-            counter.inc(numTombstones);
+            counter.inc();
         }
         catch (Exception ex)
         {
