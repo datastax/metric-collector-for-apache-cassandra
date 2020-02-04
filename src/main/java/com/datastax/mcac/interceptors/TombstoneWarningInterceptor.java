@@ -58,11 +58,9 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
                 Matcher matcher = TOMBSTONE_WARN_PATTERN.matcher(logMessage);
                 String tableName = null;
                 String keyspaceName = null;
-                Integer tombstoneCount = null;
 
                 if (matcher.matches() && matcher.groupCount() == 2)
                 {
-                    tombstoneCount = Integer.parseInt(matcher.group(1));
                     String cqlQuery = matcher.group(2);
                     ParsedStatement parsedStatement = QueryProcessor.parseStatement(cqlQuery);
 
@@ -78,15 +76,14 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
                     matcher = TOMBSTONE_2_2_WARN_PATTERN.matcher(logMessage);
                     if (matcher.matches() && matcher.groupCount() == 3)
                     {
-                        tombstoneCount = Integer.parseInt(matcher.group(1));
                         keyspaceName = matcher.group(2);
                         tableName = matcher.group(3);
                     }
                 }
 
-                if (tombstoneCount != null && !isEmpty(keyspaceName) && !isEmpty(tableName))
+                if (!isEmpty(keyspaceName) && !isEmpty(tableName))
                 {
-                    incrementAssociatedCounter(tombstoneCount, keyspaceName, tableName);
+                    incrementAssociatedCounter(keyspaceName, tableName);
                 }
             }
             catch (Exception ex)
@@ -99,7 +96,7 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
         }
     }
 
-    private static void incrementAssociatedCounter(int tombstoneCount, String keyspaceName, String tableName)
+    private static void incrementAssociatedCounter(String keyspaceName, String tableName)
     {
         if (!keyspaceToTableCounters.containsKey(keyspaceName))
         {
@@ -118,7 +115,7 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
             );
         }
         Counter counter = tableCounters.get(tableName);
-        counter.inc(tombstoneCount);
+        counter.inc();
     }
 
     public static ElementMatcher<? super TypeDescription> type()
