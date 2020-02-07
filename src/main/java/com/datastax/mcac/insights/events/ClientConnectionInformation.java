@@ -2,6 +2,7 @@ package com.datastax.mcac.insights.events;
 
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
+import com.datastax.mcac.utils.LocalDcSupplier;
 import org.apache.cassandra.service.ClientState;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -66,6 +67,9 @@ public class ClientConnectionInformation extends Insight
         @JsonProperty("remote_ip")
         public final String remoteIp;
 
+        @JsonProperty("data_center")
+        public final String dataCenter;
+
         Data(UUID sessionId, ClientState clientState, Map<String, String> options)
         {
             this.sessionId = sessionId.toString();
@@ -78,6 +82,7 @@ public class ClientConnectionInformation extends Insight
 
             this.keyspace = clientState.getRawKeyspace();
             this.remoteIp = clientState.getRemoteAddress() == null ? null : clientState.getRemoteAddress().getAddress().toString();
+            this.dataCenter = LocalDcSupplier.getLocalDc();
         }
     }
 }
