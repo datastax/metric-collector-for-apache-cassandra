@@ -5,11 +5,14 @@ BaseDir "{{collectdRoot}}"
 Hostname "{{hostName}}"
 FQDNLookup false
 
-Interval 1
+#Timeout needs to be high otherwise we can
+#cause a invalidation storm on large # of tables
+Interval 10
+Timeout 10
 ReadThreads 5
 WriteThreads 5
 WriteQueueLimitHigh 500000
-WriteQueueLimitLow  400000
+WriteQueueLimitLow  500000
 CollectInternalStats true
 
 LoadPlugin logfile
