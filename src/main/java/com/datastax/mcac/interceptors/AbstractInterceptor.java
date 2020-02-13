@@ -7,5 +7,8 @@ import com.datastax.mcac.UnixSocketClient;
 
 public abstract class AbstractInterceptor
 {
-    protected static final Supplier<UnixSocketClient> client = Suppliers.memoize(() -> new UnixSocketClient());
+    /*
+     * Needs to be visible for Advice that cannot add fields
+     */
+    public static final Supplier<UnixSocketClient> client = Suppliers.memoize(() -> new UnixSocketClient());
 }

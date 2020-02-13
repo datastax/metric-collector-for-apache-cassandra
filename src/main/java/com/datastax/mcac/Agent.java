@@ -8,7 +8,7 @@ import com.datastax.mcac.interceptors.FlushInterceptor;
 import com.datastax.mcac.interceptors.FlushInterceptorLegacy;
 import com.datastax.mcac.interceptors.LargePartitionInterceptor;
 import com.datastax.mcac.interceptors.LegacyCompactionStartInterceptor;
-import com.datastax.mcac.interceptors.LoggingInterceptor;
+import com.datastax.mcac.interceptors.DroppedMessageLoggingAdvice;
 import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
 import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
@@ -38,7 +38,7 @@ public class Agent {
 
         Map<TypeDescription, byte[]> injected = new HashMap<>();
 
-        injected.put(new TypeDescription.ForLoadedType(LoggingInterceptor.class), ClassFileLocator.ForClassLoader.read(LoggingInterceptor.class));
+        injected.put(new TypeDescription.ForLoadedType(DroppedMessageLoggingAdvice.class), ClassFileLocator.ForClassLoader.read(DroppedMessageLoggingAdvice.class));
         injected.put(new TypeDescription.ForLoadedType(CassandraDaemonInterceptor.class), ClassFileLocator.ForClassLoader.read(CassandraDaemonInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(QueryHandlerInterceptor.class), ClassFileLocator.ForClassLoader.read(QueryHandlerInterceptor.class));
         injected.put(new TypeDescription.ForLoadedType(StartupMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(StartupMessageInterceptor.class));
@@ -55,11 +55,15 @@ public class Agent {
         ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
 
         new AgentBuilder.Default()
-                //.with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
+                .disableClassFormatChanges()
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                //For debug
+                //.with(AgentBuilder.Listener.StreamWriting.toSystemOut())
                 //Dropped Messages
-                .type(LoggingInterceptor.type())
-                .transform(LoggingInterceptor.transformer())
-                .installOn(inst);
+                .type(DroppedMessageLoggingAdvice.type())
+                .transform(
+                        DroppedMessageLoggingAdvice.transformer()
+                ).installOn(inst);
 
         new AgentBuilder.Default()
                 //.disableClassFormatChanges()

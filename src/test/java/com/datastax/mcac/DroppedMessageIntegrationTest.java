@@ -55,20 +55,6 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
         {
             Session session = cluster.connect();
 
-            session.execute("CALL InsightsRpc.reportInsight('{\n" +
-                    "  \"metadata\": {\n" +
-                    "    \"name\": \"driver.startup\",\n" +
-                    "    \"insightMappingId\": \"v1\",\n" +
-                    "    \"insightType\": \"EVENT\",\n" +
-                    "    \"timestamp\": 1542285611120,\n" +
-                    "    \"tags\": {\n" +
-                    "      \"language\": \"nodejs\"\n" +
-                    "    }\n" +
-                    "  },\n" +
-                    "  \"data\": {}" +
-                    "}')");
-
-
             session.execute("CREATE KEYSPACE foo with replication={'class': 'SimpleStrategy', 'replication_factor':3}");
             session.execute(
                     "CREATE TABLE foo.bar (key text PRIMARY KEY, value text) with compaction = {'class': "
