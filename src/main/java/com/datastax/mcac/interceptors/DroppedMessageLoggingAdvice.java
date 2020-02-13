@@ -35,37 +35,40 @@ public final class DroppedMessageLoggingAdvice extends AbstractInterceptor
     );
 
     @Advice.OnMethodEnter
-    private static void enterInfo(@Advice.Argument(0) String message)
+    private static void enterInfo(@Advice.Argument(0) String message, @Advice.FieldValue("name") String loggerName)
     {
         try
         {
-            if (message.contains("messages were dropped"))
+            if (loggerName != null && loggerName.endsWith("MessagingService"))
             {
-                Matcher matcher = DROPPED_MESSAGES_WITH_LATENCY_CONTEXT.matcher(message);
-                if (matcher.matches() && matcher.groupCount() == 6)
+                if (message.contains("messages were dropped"))
                 {
-                    client.get().report(new DroppedMessageInformation(
-                            matcher.group(1),
-                            Integer.parseInt(matcher.group(2)),
-                            Integer.parseInt(matcher.group(3)),
-                            Integer.parseInt(matcher.group(4)),
-                            Long.parseLong(matcher.group(5)),
-                            Long.parseLong(matcher.group(6))
-                    ));
-                }
-                else
-                {
-                    matcher = DROPPED_MESSAGES_WITHOUT_LATENCY_CONTEXT.matcher(message);
-                    if (matcher.matches() && matcher.groupCount() == 4)
+                    Matcher matcher = DROPPED_MESSAGES_WITH_LATENCY_CONTEXT.matcher(message);
+                    if (matcher.matches() && matcher.groupCount() == 6)
                     {
                         client.get().report(new DroppedMessageInformation(
                                 matcher.group(1),
                                 Integer.parseInt(matcher.group(2)),
                                 Integer.parseInt(matcher.group(3)),
                                 Integer.parseInt(matcher.group(4)),
-                                null,
-                                null
+                                Long.parseLong(matcher.group(5)),
+                                Long.parseLong(matcher.group(6))
                         ));
+                    }
+                    else
+                    {
+                        matcher = DROPPED_MESSAGES_WITHOUT_LATENCY_CONTEXT.matcher(message);
+                        if (matcher.matches() && matcher.groupCount() == 4)
+                        {
+                            client.get().report(new DroppedMessageInformation(
+                                    matcher.group(1),
+                                    Integer.parseInt(matcher.group(2)),
+                                    Integer.parseInt(matcher.group(3)),
+                                    Integer.parseInt(matcher.group(4)),
+                                    null,
+                                    null
+                            ));
+                        }
                     }
                 }
             }
