@@ -1220,7 +1220,7 @@ public class UnixSocketClient
                 }
             }
             // fallback in case ChannelOutboundBuffer is not accessible
-            else if (channel != null && !channel.isWritable())
+            else if (channel != null)
             {
                 flush();
             }
@@ -1244,12 +1244,6 @@ public class UnixSocketClient
                 return false;
             }
 
-            if (!channel.isWritable())
-            {
-                NoSpamLogger.getLogger(logger, 30, TimeUnit.SECONDS).info("Channel is not writeable, dropping report");
-                return false;
-            }
-
             try
             {
                 channel.write(collectdAction + " " + insightJsonString + "\n");
@@ -1264,6 +1258,7 @@ public class UnixSocketClient
                         channel.close().syncUninterruptibly();
 
                     channel = null;
+                    NoSpamLogger.getLogger(logger, 30, TimeUnit.SECONDS).info("Channel closed: ", t);
                 }
                 else if (t instanceof RejectedExecutionException)
                 {
