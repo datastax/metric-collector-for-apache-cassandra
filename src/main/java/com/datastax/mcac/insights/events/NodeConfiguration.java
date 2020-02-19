@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.databind.ser.std.MapProperty;
 import org.apache.cassandra.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -271,7 +272,19 @@ public class NodeConfiguration extends Insight
             {
                 if (!pattern.matcher(path).find())
                 {
-                    writer.serializeAsField(pojo, jgen, provider);
+                    if (writer instanceof MapProperty &&
+                            writer.getType().getContentType().getRawClass() == String.class &&
+                            ((MapProperty) writer).getValue() != null &&
+                            ((MapProperty) writer).getValue().getClass() != String.class
+                    )
+                    {
+                        ((MapProperty) writer).setValue(((MapProperty) writer).getValue().toString());
+                        writer.serializeAsField(pojo, jgen, provider);
+                    }
+                    else
+                    {
+                        writer.serializeAsField(pojo, jgen, provider);
+                    }
                 }
                 else if (!jgen.canOmitFields())
                 {
@@ -280,8 +293,17 @@ public class NodeConfiguration extends Insight
             }
             catch (Throwable t)
             {
-                //Handle errors by just omitting the field
-                writer.serializeAsOmittedField(pojo, jgen, provider);
+                if(writer instanceof MapProperty)
+                {
+                    ((MapProperty) writer).setValue(((MapProperty) writer)
+                            .getValue().toString());
+                    writer.serializeAsField(pojo, jgen, provider);
+                }
+                else
+                {
+                    //Handle errors by just omitting the field
+                    writer.serializeAsOmittedField(pojo, jgen, provider);
+                }
             }
         }
     }
