@@ -293,17 +293,8 @@ public class NodeConfiguration extends Insight
             }
             catch (Throwable t)
             {
-                if(writer instanceof MapProperty)
-                {
-                    ((MapProperty) writer).setValue(((MapProperty) writer)
-                            .getValue().toString());
-                    writer.serializeAsField(pojo, jgen, provider);
-                }
-                else
-                {
-                    //Handle errors by just omitting the field
-                    writer.serializeAsOmittedField(pojo, jgen, provider);
-                }
+                //Handle errors by just omitting the field
+                writer.serializeAsOmittedField(pojo, jgen, provider);
             }
         }
     }
