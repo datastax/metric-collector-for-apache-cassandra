@@ -1,5 +1,8 @@
 package com.datastax.mcac;
 
+import org.apache.cassandra.config.DatabaseDescriptor;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -10,9 +13,11 @@ public class Configuration
     public static final long MAX_METRIC_UPDATE_GAP_IN_SECONDS = TimeUnit.MINUTES.toSeconds(5);
     public static final long MAX_EVENT_INTERVAL = (int) TimeUnit.MINUTES.toSeconds(5);
 
-    public String log_dir = "/tmp/test/log";
+    public String log_dir = System.getProperty("cassandra.logdir", System.getProperty("dse.collectd.logdir", "/tmp"));
 
-    public String data_dir = "/tmp/test/data";
+    public String data_dir = DatabaseDescriptor.isDaemonInitialized()
+            ? new File(DatabaseDescriptor.getCommitLogLocation()).toPath().getParent().resolve("insights_data").normalize().toFile().getAbsolutePath()
+            : System.getProperty("cassandra.storagedir") + "/insights_data";
 
     public String token_dir = "/tmp/";
 
