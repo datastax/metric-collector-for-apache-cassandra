@@ -1,4 +1,12 @@
-package com.datastax.mcac;
+package com.datastax.mcac; 
+
+import java.io.IOError; 
+import java.io.IOException; 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import java.beans.IntrospectionException;
 import java.io.ByteArrayInputStream;
@@ -30,8 +38,6 @@ public class ConfigurationLoader
 {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationLoader.class);
 
-    private final static String DEFAULT_CONFIGURATION = "metrics-collector.yaml";
-
     /**
      * Inspect the classpath to find storage configuration file
      */
@@ -39,7 +45,17 @@ public class ConfigurationLoader
     {
         String configUrl = System.getProperty("ds-metric-collector.config");
         if (configUrl == null)
-            configUrl = DEFAULT_CONFIGURATION;
+        {
+            try
+            {
+                configUrl = "file:" + File.separator + File.separator + Paths.get(ConfigurationLoader.class.getProtectionDomain().getCodeSource().getLocation()
+                    .toURI()).getParent().getParent().toAbsolutePath().toString() + "/config/metrics-collector.yaml";
+            }
+            catch (URISyntaxException e)
+            {
+                throw new RuntimeException("Cannot locate " + configUrl + ".");
+            }
+        }
 
         URL url;
         try
@@ -47,14 +63,13 @@ public class ConfigurationLoader
             url = new URL(configUrl);
             url.openStream().close(); // catches well-formed but bogus URLs
         }
-        catch (Exception e)
+        catch (Exception er)
         {
             ClassLoader loader = Configuration.class.getClassLoader();
             url = loader.getResource(configUrl);
             if (url == null)
             {
-                String required = "file:" + File.separator + File.separator;
-                throw new RuntimeException("Cannot locate " + configUrl + ".  If this is a local file, please confirm you've provided " + required + File.separator + " as a URI prefix.");
+                throw new RuntimeException("Cannot locate " + configUrl + ".");
             }
         }
 
