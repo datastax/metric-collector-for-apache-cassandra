@@ -100,8 +100,8 @@ public class LargePartitionInterceptor extends AbstractInterceptor
                 if (rowSize > getParitionLimit())
                 {
                     client.get().report(new LargePartitionInformation(
-                            writer.metadata.ksName,
-                            writer.metadata.cfName,
+                            writer.descriptor.ksname,
+                            writer.descriptor.cfname,
                             (DecoratedKey) allArguments[0],
                             rowSize,
                             paritionLimit

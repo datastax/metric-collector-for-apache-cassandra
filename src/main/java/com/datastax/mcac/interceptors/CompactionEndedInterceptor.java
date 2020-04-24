@@ -1,7 +1,11 @@
 package com.datastax.mcac.interceptors;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -20,6 +24,7 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
 import org.apache.cassandra.db.compaction.CompactionInfo;
+import org.apache.cassandra.service.StorageService;
 
 public class CompactionEndedInterceptor extends AbstractInterceptor
 {
@@ -32,7 +37,8 @@ public class CompactionEndedInterceptor extends AbstractInterceptor
 
     public static AgentBuilder.Transformer transformer()
     {
-        return new AgentBuilder.Transformer() {
+        return new AgentBuilder.Transformer()
+        {
             @Override
             public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
             {
@@ -56,18 +62,9 @@ public class CompactionEndedInterceptor extends AbstractInterceptor
 
             List<SSTableCompactionInformation> sstables = Collections.emptyList();
 
-            client.get().report(new CompactionEndedInformation(
-                    ci.compactionId(),
-                    ci.getKeyspace(),
-                    ci.getColumnFamily(),
-                    ci.getTaskType(),
-                    ci.getCompleted(),
-                    ci.getTotal(),
-                    false,
-                    totalRows,
-                    0L, //Where oh where will I find this...
-                    sstables));
-
+            client.get().report(StorageService.instance.getReleaseVersion().startsWith("4") ?
+                                getCompactionEnded40(totalRows, ci, sstables) :
+                                getCompactionEnded(totalRows, ci, sstables));
         }
         catch (Throwable t)
         {
@@ -75,5 +72,36 @@ public class CompactionEndedInterceptor extends AbstractInterceptor
         }
 
         return mergedRows;
+    }
+
+
+    private static CompactionEndedInformation getCompactionEnded40(long totalRows, CompactionInfo ci,  List<SSTableCompactionInformation> sstables) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
+    {
+        return new CompactionEndedInformation(
+                (UUID)ci.getClass().getMethod("getTaskId").invoke(ci),
+                ((Optional<String>)ci.getClass().getMethod("getKeyspace").invoke(ci)).orElse(""),
+                ((Optional<String>)ci.getClass().getMethod("getTable").invoke(ci)).orElse(""),
+                ci.getTaskType(),
+                ci.getCompleted(),
+                ci.getTotal(),
+                false,
+                totalRows,
+                0L, //Where oh where will I find this...
+                sstables);
+    }
+
+    private static CompactionEndedInformation getCompactionEnded(long totalRows, CompactionInfo ci,  List<SSTableCompactionInformation> sstables)
+    {
+        return new CompactionEndedInformation(
+                ci.compactionId(),
+                ci.getKeyspace(),
+                ci.getColumnFamily(),
+                ci.getTaskType(),
+                ci.getCompleted(),
+                ci.getTotal(),
+                false,
+                totalRows,
+                0L, //Where oh where will I find this...
+                sstables);
     }
 }

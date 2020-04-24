@@ -439,9 +439,9 @@ public class CollectdController
         public final String pidFile;
         public final String socketFile;
         public final Boolean isMac = isMacOSX;
-        public final String hostName = FBUtilities.getBroadcastAddress().getHostAddress();
-        public final String dataCenter = DatabaseDescriptor.getEndpointSnitch().getDatacenter(FBUtilities.getBroadcastAddress());
-        public final String rack = DatabaseDescriptor.getEndpointSnitch().getDatacenter(FBUtilities.getBroadcastAddress());
+        public final String hostName = UnixSocketClient.getBroadcastAddress().getHostAddress();
+        public final String dataCenter = UnixSocketClient.getDataCenter();
+        public final String rack = UnixSocketClient.getRack();
         public final String cluster = DatabaseDescriptor.getClusterName();
         public final File configFile;
         public final File scribeConfigFile;

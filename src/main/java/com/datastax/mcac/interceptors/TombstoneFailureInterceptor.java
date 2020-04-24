@@ -10,6 +10,8 @@ import net.bytebuddy.implementation.bind.annotation.AllArguments;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
+import org.apache.cassandra.service.StorageService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +37,20 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
             String tableName = null;
             if (allArguments.length == 5)
             {
-                Field ksName = allArguments[2].getClass().getField("ksName");
-                Field cfName = allArguments[2].getClass().getField("cfName");
-                keyspaceName = (String) ksName.get(allArguments[2]);
-                tableName = (String) cfName.get(allArguments[2]);
+                if (StorageService.instance.getReleaseVersion().startsWith("4"))
+                {
+                    Field ksName = allArguments[2].getClass().getField("keyspace");
+                    Field cfName = allArguments[2].getClass().getField("name");
+                    keyspaceName = (String) ksName.get(allArguments[2]);
+                    tableName = (String) cfName.get(allArguments[2]);
+                }
+                else
+                {
+                    Field ksName = allArguments[2].getClass().getField("ksName");
+                    Field cfName = allArguments[2].getClass().getField("cfName");
+                    keyspaceName = (String) ksName.get(allArguments[2]);
+                    tableName = (String) cfName.get(allArguments[2]);
+                }
             }
             else if(allArguments.length == 7)
             {
@@ -70,7 +82,7 @@ public class TombstoneFailureInterceptor extends AbstractInterceptor
             Counter counter = tableCounters.get(tableName);
             counter.inc();
         }
-        catch (Exception ex)
+        catch (Throwable ex)
         {
             logger.error("Error intercepting TombstoneOverwhelmingException to count tombstone failures:  ", ex);
         }

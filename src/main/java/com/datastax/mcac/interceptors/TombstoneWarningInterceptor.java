@@ -14,9 +14,12 @@ import net.bytebuddy.utility.JavaModule;
 import org.apache.cassandra.cql3.QueryProcessor;
 import org.apache.cassandra.cql3.statements.CFStatement;
 import org.apache.cassandra.cql3.statements.ParsedStatement;
+import org.apache.cassandra.service.StorageService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,14 +65,14 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
                 if (matcher.matches() && matcher.groupCount() == 2)
                 {
                     String cqlQuery = matcher.group(2);
-                    ParsedStatement parsedStatement = QueryProcessor.parseStatement(cqlQuery);
+                    Object statement = QueryProcessor.class.getMethod("parseStatement", String.class).invoke(null, cqlQuery);
 
-                    if (parsedStatement instanceof CFStatement)
-                    {
-                        CFStatement cfStatement = (CFStatement) parsedStatement;
-                        tableName = cfStatement.columnFamily();
-                        keyspaceName = cfStatement.keyspace();
-                    }
+                    Method ks = statement.getClass().getMethod("keyspace");
+                    Method table = statement.getClass()
+                            .getMethod(StorageService.instance.getReleaseVersion().startsWith("4") ? "name" : "columnFamily");
+
+                    tableName = (String)table.invoke(statement);
+                    keyspaceName = (String)ks.invoke(statement);
                 }
                 else
                 {
@@ -86,7 +89,7 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
                     incrementAssociatedCounter(keyspaceName, tableName);
                 }
             }
-            catch (Exception ex)
+            catch (Throwable ex)
             {
                 logger.error(
                         "Error intercepting tombstone warning message:  ",
@@ -113,6 +116,11 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
                             tableName
                     ))
             );
+            logger.info("Added {}", String.format(
+                    "com.datastax.mcac.tombstone_warnings.%s.%s",
+                    keyspaceName,
+                    tableName
+            ));
         }
         Counter counter = tableCounters.get(tableName);
         counter.inc();
@@ -128,8 +136,7 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
         return new AgentBuilder.Transformer()
         {
             @Override
-            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule
-            )
+            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
             {
                 return builder.method(named("warn")).intercept(MethodDelegation.to(TombstoneWarningInterceptor.class));
             }

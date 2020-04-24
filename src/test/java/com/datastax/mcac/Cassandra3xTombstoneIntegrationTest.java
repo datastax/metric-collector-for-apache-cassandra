@@ -6,6 +6,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.ReadFailureException;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +14,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -29,14 +31,22 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
     {
         return Lists.newArrayList(
                 "-Dmcac.partition_limit_override_bytes=1",
-                "-Dcassandra.config=file:///etc/cassandra/cassandra_low_tombstone_thresholds.yaml"
+                "-Dcassandra.config=file:///var/lib/cassandra/cassandra_low_tombstone_thresholds.yaml"
+        );
+    }
+
+    @Override
+    protected ArrayList<URL> getTestResources()
+    {
+        return Lists.newArrayList(
+                Resources.getResource(version + "/cassandra_low_tombstone_thresholds.yaml")
         );
     }
 
     @Parameterized.Parameters
     public static Iterable<String[]> functions()
     {
-        return Lists.newArrayList(new String[]{"3.0"}, new String[]{"3.11"});
+        return Lists.newArrayList(new String[]{"3.0"}, new String[]{"3.11"}, new String[]{"4.0"});
     }
 
     @Test(timeout = 120000)

@@ -4,6 +4,7 @@ import com.datastax.mcac.insights.events.InsightsClientStarted;
 import com.datastax.mcac.utils.DockerHelper;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,8 +13,12 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOError;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -29,9 +34,10 @@ public abstract class BaseIntegrationTest
     public static Iterable<String[]> functions()
     {
         return Lists.newArrayList(
-                new String[]{"2.2"},
+                new String[]{"4.0"},
+                new String[]{"3.11"},
                 new String[]{"3.0"},
-                new String[]{"3.11"}
+                new String[]{"2.2"}
         );
     }
 
@@ -41,7 +47,7 @@ public abstract class BaseIntegrationTest
     }
 
     @Before
-    public void setup() throws InterruptedException
+    public void setup() throws InterruptedException, IOException
     {
         try
         {
@@ -54,6 +60,14 @@ public abstract class BaseIntegrationTest
         catch (IOException e)
         {
             throw new IOError(e);
+        }
+
+        //Copy resources to temp dir based on version
+        for (URL url : getTestResources())
+        {
+            OutputStream os = new FileOutputStream(Paths.get(getTempDir().getPath(), Paths.get(url.getPath()).getFileName().toString()).toFile());
+            Resources.copy(url, os);
+            os.close();
         }
 
         docker.startCassandra(version);
@@ -77,6 +91,11 @@ public abstract class BaseIntegrationTest
         return Lists.newArrayList(
                 "-Dmcac.partition_limit_override_bytes=1"
         );
+    }
+
+    protected ArrayList<URL> getTestResources()
+    {
+        return Lists.newArrayList();
     }
 
     protected File getTempDir()

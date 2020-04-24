@@ -16,12 +16,14 @@ import net.bytebuddy.utility.JavaModule;
 import org.apache.cassandra.service.QueryState;
 import org.apache.cassandra.transport.Message;
 import org.apache.cassandra.transport.messages.OptionsMessage;
-import org.apache.cassandra.utils.ExpiringMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * We intercept the OPTIONS message to capture the Driver heartbeat messages.
@@ -36,7 +38,8 @@ public class OptionsMessageInterceptor extends AbstractInterceptor
     private static final Logger logger = LoggerFactory.getLogger(OptionsMessageInterceptor.class);
 
     private static final Long lifetimeMs = TimeUnit.MINUTES.toMillis(5);
-    static final ExpiringMap<Channel, ClientConnectionCacheEntry> stateCache = new ExpiringMap<>(lifetimeMs);
+    static final Cache<Channel, ClientConnectionCacheEntry> stateCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(5 , TimeUnit.MINUTES).build();
 
     public static ElementMatcher<? super TypeDescription> type()
     {
@@ -67,7 +70,7 @@ public class OptionsMessageInterceptor extends AbstractInterceptor
                 OptionsMessage request = (OptionsMessage) instance;
                 QueryState queryState = (QueryState) allArguments[0];
 
-                ClientConnectionCacheEntry entry = stateCache.get(request.connection().channel());
+                ClientConnectionCacheEntry entry = stateCache.getIfPresent(request.connection().channel());
                 if (entry != null)
                 {
                     long now = System.currentTimeMillis();
