@@ -6,6 +6,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.mcac.insights.events.DroppedMessageInformation;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
@@ -14,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,15 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
     {
         return Lists.newArrayList(
                 "-Dmcac.partition_limit_override_bytes=1",
-                "-Dcassandra.config=file:///etc/cassandra/cassandra_low_timeouts.yaml"
+                "-Dcassandra.config=file:///var/lib/cassandra/cassandra_low_timeouts.yaml"
+        );
+    }
+
+    @Override
+    protected ArrayList<URL> getTestResources()
+    {
+        return Lists.newArrayList(
+                Resources.getResource(version + "/cassandra_low_timeouts.yaml")
         );
     }
 

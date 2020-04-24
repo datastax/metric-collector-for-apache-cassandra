@@ -41,10 +41,10 @@ import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import org.apache.cassandra.concurrent.ScheduledExecutors;
 import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.locator.IEndpointSnitch;
 import org.apache.cassandra.metrics.CassandraMetricsRegistry;
 import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.utils.EstimatedHistogram;
-import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.NoSpamLogger;
 import org.apache.cassandra.utils.Pair;
 import org.apache.commons.lang3.SystemUtils;
@@ -53,9 +53,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -160,12 +163,12 @@ public class UnixSocketClient
         this.durationUnit = durationUnit;
         this.rateFactor = rateUnit.toSeconds(1);
         this.durationFactor = 1.0 / durationUnit.toNanos(1);
-        this.ip = FBUtilities.getBroadcastAddress().getHostAddress();
+        this.ip = getBroadcastAddress().getHostAddress();
         this.globalTags = ImmutableMap.of(
                 "host", ip,
                 "cluster", DatabaseDescriptor.getClusterName(),
-                "datacenter", DatabaseDescriptor.getEndpointSnitch().getDatacenter(FBUtilities.getBroadcastAddress()),
-                "rack", DatabaseDescriptor.getEndpointSnitch().getRack(FBUtilities.getBroadcastAddress())
+                "datacenter", getDataCenter(),
+                "rack", getRack()
         );
         this.metricProcessors = new ConcurrentHashMap<>();
         this.globalFilteredMetricProcessors = new ConcurrentHashMap<>();
@@ -179,6 +182,50 @@ public class UnixSocketClient
         this.metricReportingIntervalCount = new AtomicLong(0);
         this.eventReportingIntervalCount = new AtomicLong(0);
         this.lastTokenRefreshNanos = 0L;
+    }
+
+    public static InetAddress getBroadcastAddress()
+    {
+        try
+        {
+
+            return DatabaseDescriptor.getBroadcastAddress() == null ?
+                   DatabaseDescriptor.getListenAddress() == null ?
+                   InetAddress.getLocalHost() : DatabaseDescriptor.getListenAddress()
+                                                                    : DatabaseDescriptor.getBroadcastAddress();
+        }
+        catch (UnknownHostException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String getRack()
+    {
+        try
+        {
+            return (String) IEndpointSnitch.class.getMethod("getLocalRack").invoke(DatabaseDescriptor.getEndpointSnitch());
+        }
+        catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException | IllegalAccessException e)
+        {
+            //No biggie
+        }
+
+        return DatabaseDescriptor.getEndpointSnitch().getRack(DatabaseDescriptor.getBroadcastAddress());
+    }
+
+    public static String getDataCenter()
+    {
+        try
+        {
+            return (String) IEndpointSnitch.class.getMethod("getLocalDatacenter").invoke(DatabaseDescriptor.getEndpointSnitch());
+        }
+        catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException | IllegalAccessException e)
+        {
+            //No biggie
+        }
+
+        return DatabaseDescriptor.getEndpointSnitch().getDatacenter(DatabaseDescriptor.getBroadcastAddress());
     }
 
     private EventLoopGroup epollGroup()
@@ -554,87 +601,94 @@ public class UnixSocketClient
 
         for(MetricRegistry metricRegistry : metricsRegistries)
         {
-            metricRegistry.addListener(new MetricRegistryListener()
+            try
             {
-                void removeMetric(String name)
+                metricRegistry.addListener(new MetricRegistryListener()
                 {
-                    //Keep the last value of a metric when it's removed.
-                    Function<String, Integer> f = metricProcessors.remove(name);
-                    if (f != null && !StorageService.instance.isInShutdownHook())
-                        f.apply("");
+                    void removeMetric(String name)
+                    {
+                        //Keep the last value of a metric when it's removed.
+                        Function<String, Integer> f = metricProcessors.remove(name);
+                        if (f != null && !StorageService.instance.isInShutdownHook())
+                            f.apply("");
 
-                    f = insightFilteredMetricProcessors.remove(name);
-                    if (f != null && !StorageService.instance.isInShutdownHook())
-                        f.apply(FILTER_INSIGHTS_TAG);
+                        f = insightFilteredMetricProcessors.remove(name);
+                        if (f != null && !StorageService.instance.isInShutdownHook())
+                            f.apply(FILTER_INSIGHTS_TAG);
 
-                    globalFilteredMetricProcessors.remove(name);
-                }
+                        globalFilteredMetricProcessors.remove(name);
+                    }
 
-                @Override
-                public void onGaugeAdded(String name, Gauge<?> gauge)
-                {
-                    String cleanName = clean(name);
-                    addMetric(name, (tags) -> writeMetric(cleanName, tags, gauge));
-                }
+                    @Override
+                    public void onGaugeAdded(String name, Gauge<?> gauge)
+                    {
+                        String cleanName = clean(name);
+                        addMetric(name, (tags) -> writeMetric(cleanName, tags, gauge));
+                    }
 
-                @Override
-                public void onGaugeRemoved(String name)
-                {
-                    removeMetric(name);
-                }
+                    @Override
+                    public void onGaugeRemoved(String name)
+                    {
+                        removeMetric(name);
+                    }
 
-                @Override
-                public void onCounterAdded(String name, Counter counter)
-                {
-                    String cleanName = clean(name);
-                    addMetric(name, (tags) -> writeMetric(cleanName, tags, counter));
-                }
+                    @Override
+                    public void onCounterAdded(String name, Counter counter)
+                    {
+                        String cleanName = clean(name);
+                        addMetric(name, (tags) -> writeMetric(cleanName, tags, counter));
+                    }
 
-                @Override
-                public void onCounterRemoved(String name)
-                {
-                    removeMetric(name);
-                }
+                    @Override
+                    public void onCounterRemoved(String name)
+                    {
+                        removeMetric(name);
+                    }
 
-                @Override
-                public void onHistogramAdded(String name, Histogram histogram)
-                {
-                    String cleanName = clean(name);
-                    addMetric(name, (tags) -> writeMetric(cleanName, tags, histogram));
-                }
+                    @Override
+                    public void onHistogramAdded(String name, Histogram histogram)
+                    {
+                        String cleanName = clean(name);
+                        addMetric(name, (tags) -> writeMetric(cleanName, tags, histogram));
+                    }
 
-                @Override
-                public void onHistogramRemoved(String name)
-                {
-                    removeMetric(name);
-                }
+                    @Override
+                    public void onHistogramRemoved(String name)
+                    {
+                        removeMetric(name);
+                    }
 
-                @Override
-                public void onMeterAdded(String name, Meter meter)
-                {
-                    String cleanName = clean(name);
-                    addMetric(name, (tags) -> writeMetric(cleanName, tags, meter));
-                }
+                    @Override
+                    public void onMeterAdded(String name, Meter meter)
+                    {
+                        String cleanName = clean(name);
+                        addMetric(name, (tags) -> writeMetric(cleanName, tags, meter));
+                    }
 
-                @Override
-                public void onMeterRemoved(String name)
-                {
-                    removeMetric(name);
-                }
+                    @Override
+                    public void onMeterRemoved(String name)
+                    {
+                        removeMetric(name);
+                    }
 
-                @Override
-                public void onTimerAdded(String name, Timer timer)
-                {
-                    String cleanName = clean(name);
-                    addMetric(name, (tags) -> writeMetric(cleanName, tags, timer));
-                }
+                    @Override
+                    public void onTimerAdded(String name, Timer timer)
+                    {
+                        String cleanName = clean(name);
+                        addMetric(name, (tags) -> writeMetric(cleanName, tags, timer));
+                    }
 
-                @Override
-                public void onTimerRemoved(String name)
-                {
-                    removeMetric(name);
-                }
-            });
+                    @Override
+                    public void onTimerRemoved(String name)
+                    {
+                        removeMetric(name);
+                    }
+                });
+            }
+            catch (IllegalArgumentException e)
+            {
+                logger.debug("Unknown metric class", e);
+            }
         }
     }
 

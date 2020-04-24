@@ -252,7 +252,6 @@ public class DockerHelper
         }
 
         if (runningContainers.size() >= 1) {
-            //Container test = runningContainers.get(0);
             logger.info(String.format("The container %s is already running", name));
 
             return runningContainers.get(0);

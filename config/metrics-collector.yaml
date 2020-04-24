@@ -6,16 +6,16 @@ write_to_disk_enabled: true
 
 #To output tombstone counter metrics for integration tests
 #metric_sampling_interval - The frequency that metrics are reported to Cassandra Metrics Collector.
-#Default: 10
+#Default: 30
 metric_sampling_interval_in_seconds: 10
 #upload_interval_in_seconds - The frequency that metrics are uploaded.
-#Default: 10
+#Default: 300
 upload_interval_in_seconds: 10
 
 #Directory to store collected metrics.
 #When not set, the default directory is Cassandra log directory. You can customize the location by uncomment and correct data_dir
-#data_dir: /var/lib/cassandra
+data_dir: /var/lib/cassandra
 
 #Directory to store logs for collected metrics. The log file is cassandra-collectd.log
 #When not set, the default directory is Cassandra log directory. You can customize the location by uncomment and correct log_dir
-#log_dir: /var/log/cassandra
+log_dir: /var/log/cassandra

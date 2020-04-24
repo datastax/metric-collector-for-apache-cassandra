@@ -5,18 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
-import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.Uninterruptibles;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.LineIterator;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +18,17 @@ public class InsightsTestUtil
 {
     private static final Logger logger = LoggerFactory.getLogger(InsightsTestUtil.class);
 
+    static final int MAX_ATTEMPTS = 3;
+
     public static int checkInsightLogFor(File dataDir, String entry) throws IOException
     {
         int numFound = 0;
+        int attempts = 0;
+        while (attempts++ < MAX_ATTEMPTS && !dataDir.isDirectory())
+        {
+            Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+        }
+
         Assert.assertTrue(dataDir.getCanonicalPath(), dataDir.isDirectory());
         for (File file : dataDir.listFiles())
         {
