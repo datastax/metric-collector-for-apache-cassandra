@@ -133,7 +133,7 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
                     /*
                      * 3.11 won't allow a write timeout < 10ms, so induce with READ timeout
                      */
-                    if (version.equals("3.11"))
+                    if (version.equals("3.11") || version.equals("4.0"))
                     {
                         for (int i = 0; i < 10000; i++)
                         {

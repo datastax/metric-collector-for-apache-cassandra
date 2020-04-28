@@ -39,7 +39,7 @@ public final class DroppedMessageLoggingAdvice extends AbstractInterceptor
     {
         try
         {
-            if (loggerName != null && loggerName.endsWith("MessagingService"))
+            if (loggerName != null && (loggerName.endsWith("MessagingService") || loggerName.endsWith("MessagingMetrics")))
             {
                 if (message.contains("messages were dropped"))
                 {

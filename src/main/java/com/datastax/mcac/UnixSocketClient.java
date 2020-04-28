@@ -315,7 +315,7 @@ public class UnixSocketClient
             }
             else
             {
-                throw new RuntimeException("Insights Client is already started");
+                throw new RuntimeException("MCAC Client is already started");
             }
         }
     }
@@ -350,7 +350,7 @@ public class UnixSocketClient
             }
             else
             {
-                throw new RuntimeException("Insights Client has already been stopped");
+                throw new RuntimeException("MCAC Client has already been stopped");
             }
         }
     }

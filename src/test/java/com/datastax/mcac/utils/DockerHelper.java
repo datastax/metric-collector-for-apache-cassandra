@@ -58,7 +58,7 @@ public class DockerHelper
 
     public void startCassandra(String version)
     {
-        File dockerFile = new File("./docker/" + version + "/Dockerfile");
+        File dockerFile = new File("./src/test/resources/docker/" + version + "/Dockerfile");
         if (!dockerFile.exists())
             throw new RuntimeException("Missing " + dockerFile.getAbsolutePath());
 
