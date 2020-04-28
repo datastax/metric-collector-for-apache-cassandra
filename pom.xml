@@ -7,14 +7,6 @@
     <version>0.1.0-SNAPSHOT</version>
     <name>DataStax Metrics Collector for Apache Cassandra</name>
 
-    <repositories>
-        <repository>
-            <id>datastax</id>
-            <name>datastax-releases-local</name>
-            <url>http://repo.sjc.dsinternal.org/artifactory/local-repos</url>
-        </repository>
-    </repositories>
-
     <properties>
         <dropwizard.version>1.0.2</dropwizard.version>
         <!--<cassandra.version>4.0-alpha2</cassandra.version>-->
@@ -23,7 +15,7 @@
         <driver.version>3.6.0</driver.version> <!-- Needed for guava 18 compat-->
         <bytebuddy.version>1.9.15</bytebuddy.version>
         <mustache.version>0.9.6</mustache.version>
-        <collectd.version>0.1.0-96</collectd.version>
+        <collectd.version>0.1.0</collectd.version>
         <docker.java.version>3.1.2</docker.java.version>
         <build.version.file>build_version.sh</build.version.file>
     </properties>
@@ -43,12 +35,6 @@
             <groupId>com.github.spullara.mustache.java</groupId>
             <artifactId>compiler</artifactId>
             <version>${mustache.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.datastax.dse</groupId>
-            <artifactId>insights-collectd</artifactId>
-            <type>tar.gz</type>
-            <version>${collectd.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cassandra</groupId>
@@ -156,18 +142,19 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.5.1</version>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.5.1</version>
                 <executions>
                     <execution>
+                        <id>install-collectd</id>
                         <phase>generate-resources</phase>
                         <goals>
-                            <goal>unpack-dependencies</goal>
+                            <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <includeTypes>tar.gz</includeTypes>
-                            <includeArtifactIds>insights-collectd</includeArtifactIds>
+                            <url>https://github.com/riptano/collectd/releases/download/v${collectd.version}/insights-collectd-${collectd.version}.tar.gz</url>
+                            <unpack>true</unpack>
                             <outputDirectory>target</outputDirectory>
                         </configuration>
                     </execution>

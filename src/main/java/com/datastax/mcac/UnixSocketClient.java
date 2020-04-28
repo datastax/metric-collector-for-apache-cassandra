@@ -76,9 +76,8 @@ import java.util.function.Function;
 
 public class UnixSocketClient
 {
-
-    public static final int DEFAULT_WRITE_BUFFER_WATERMARK_LOW_IN_KB = 512;
-    public static final int DEFAULT_WRITE_BUFFER_WATERMARK_HIGH_IN_KB = 1024;
+    public static final int DEFAULT_WRITE_BUFFER_WATERMARK_LOW_IN_KB = 4096;
+    public static final int DEFAULT_WRITE_BUFFER_WATERMARK_HIGH_IN_KB = 8192;
 
     private final TokenStore tokenStore;
     /*
