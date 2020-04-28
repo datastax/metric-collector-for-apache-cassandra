@@ -1,9 +1,15 @@
 #!/bin/bash
 
-VERSION=$(cat src/main/resources/build_version)
-PROJECT_DIR_NAME=mcac-$VERSION
+VERSION=$1
 
-mvn -DskipTests package
+if [ "$VERSION" == "" ]; then
+  echo "Missing version arg"
+  exit 1
+fi
+
+PROJECT_DIR_NAME=datastax-mcac-$VERSION
+
+mvn -DskipTests clean package -Drevision=$VERSION
 mkdir -p $PROJECT_DIR_NAME/config
 cp config/collectd.conf.tmpl $PROJECT_DIR_NAME/config
 cp config/metrics-collector.yaml $PROJECT_DIR_NAME/config

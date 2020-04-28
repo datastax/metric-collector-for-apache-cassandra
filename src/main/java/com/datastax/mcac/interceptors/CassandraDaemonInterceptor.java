@@ -1,8 +1,10 @@
 package com.datastax.mcac.interceptors;
 
+import java.nio.charset.Charset;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.io.Resources;
 import com.google.common.util.concurrent.Uninterruptibles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,7 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
 
         try
         {
-            logger.info("Starting DataStax Metric Collector for Apache Cassandra v0.1");
+            logger.info("Starting DataStax Metric Collector for Apache Cassandra " + Resources.toString(Resources.getResource("build_version"), Charset.defaultCharset()));
             client.get().start();
 
             //Client may drop initial messages during startup, so try a few times
