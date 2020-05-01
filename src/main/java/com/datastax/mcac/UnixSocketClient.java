@@ -326,7 +326,7 @@ public class UnixSocketClient
         {
             if (started.compareAndSet(true, false))
             {
-                logger.info("Stopping Insights Client...");
+                logger.info("Stopping MCAC Client...");
 
                 if (metricReportFuture != null)
                     metricReportFuture.cancel(true);
@@ -1104,7 +1104,7 @@ public class UnixSocketClient
     {
         int n = runtimeConfig.metric_sampling_interval_in_seconds;
         String msg = new StringBuilder(256)
-                .append(ip).append("/dse-")
+                .append(ip).append("/mcac-")
                 .append(name).append("/")
                 .append("histogram interval=")
                 .append(n).append(" ")
@@ -1131,7 +1131,7 @@ public class UnixSocketClient
     {
         int n = runtimeConfig.metric_sampling_interval_in_seconds;
         String msg = new StringBuilder(256)
-                .append(ip).append("/dse-")
+                .append(ip).append("/mcac-")
                 .append(name).append("/")
                 .append("meter interval=")
                 .append(n).append(" ")
@@ -1157,7 +1157,7 @@ public class UnixSocketClient
     {
         int n = runtimeConfig.metric_sampling_interval_in_seconds;
         StringBuilder msg = new StringBuilder(512)
-                .append(ip).append("/dse-")
+                .append(ip).append("/mcac-")
                 .append(name).append("/")
                 .append("micros interval=")
                 .append(n).append(" ")
@@ -1219,7 +1219,7 @@ public class UnixSocketClient
     {
         int n = runtimeConfig.metric_sampling_interval_in_seconds;
         String msg = new StringBuilder(256)
-                .append(ip).append("/dse-")
+                .append(ip).append("/mcac-")
                 .append(name).append("/")
                 .append(type).append("-")
                 .append(typeInstance).append(" ")
@@ -1236,7 +1236,7 @@ public class UnixSocketClient
     {
         int n = runtimeConfig.metric_sampling_interval_in_seconds;
         String msg = new StringBuilder(256)
-                .append(ip).append("/dse-")
+                .append(ip).append("/mcac-")
                 .append(name).append("/")
                 .append(type).append(" ")
                 .append("interval=").append(n).append(" ")
