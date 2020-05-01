@@ -451,13 +451,13 @@ public class CollectdController
         {
             this.collectdRoot = collectdRoot;
             this.logDir = logDir;
-            this.pidFile = Paths.get(logDir, "ds-collectd.pid").toFile().getAbsolutePath();
+            this.pidFile = Paths.get(logDir, "mcac-collectd.pid").toFile().getAbsolutePath();
             this.socketFile = socketFile;
 
             try
             {
                 this.configFile = Files.createTempFile(
-                        "ds-collectd-",
+                        "mcac-collectd-",
                         ".conf",
                         PosixFilePermissions.asFileAttribute(ImmutableSet.of(
                                 PosixFilePermission.OWNER_READ,
@@ -466,7 +466,7 @@ public class CollectdController
                 ).toFile();
 
                 this.scribeConfigFile = Files.createTempFile(
-                        "ds-collectd-insights-",
+                        "mcac-collectd-scribe-",
                         ".conf",
                         PosixFilePermissions.asFileAttribute(ImmutableSet.of(
                                 PosixFilePermission.OWNER_READ,
@@ -725,7 +725,7 @@ public class CollectdController
                             //FIXME: These checks should happen in scribe
                             //Avoiding an NPE for now..
                             logger.warn("Insights service url {} is unreachable, no insights will be sent."
-                                    + " This can be fixed with dsetool insights_config --upload_url", serviceUrl.toString());
+                                    + " This can be fixed by changing the mcac yaml config file", serviceUrl.toString());
                             host = null;
                         }
                     }

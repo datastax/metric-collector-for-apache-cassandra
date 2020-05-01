@@ -13,7 +13,7 @@ public class Configuration
     public static final long MAX_METRIC_UPDATE_GAP_IN_SECONDS = TimeUnit.MINUTES.toSeconds(5);
     public static final long MAX_EVENT_INTERVAL = (int) TimeUnit.MINUTES.toSeconds(5);
 
-    public String log_dir = System.getProperty("cassandra.logdir", System.getProperty("dse.collectd.logdir", "/tmp"));
+    public String log_dir = System.getProperty("cassandra.logdir", System.getProperty("mcac.collectd.logdir", "/tmp"));
 
     public String data_dir = DatabaseDescriptor.isDaemonInitialized()
             ? new File(DatabaseDescriptor.getCommitLogLocation()).toPath().getParent().resolve("insights_data").normalize().toFile().getAbsolutePath()
