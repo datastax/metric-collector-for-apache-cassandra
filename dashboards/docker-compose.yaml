@@ -1,0 +1,32 @@
+version: "3"
+services:
+  prometheus:
+    container_name: mcac-dashboards_prometheus_1
+    image: "prom/prometheus:v2.17.1"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=365d'
+      - '--storage.tsdb.allow-overlapping-blocks'
+    ports:
+      - "9090:9090"
+    volumes:
+      - "${PROMETHEUS_DATA_DIR:-prometheus}:/prometheus"
+      - "./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml"
+      - "./prometheus/tg_mcac.json:/etc/prometheus/tg_mcac.json"
+  grafana:
+    container_name: mcac-metric-dashboards_grafana_1
+    image: "grafana/grafana:5.3.2"
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    volumes:
+      - "${GRAFANA_DATA_DIR:-grafana}:/var/lib/grafana"
+      - "./grafana/prometheus-datasource.yaml:/etc/grafana/provisioning/datasources/prometheus-datasource.yaml"
+      - "./grafana/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml"
+      - "./grafana/generated-dashboards:/var/lib/grafana/dashboards:ro"
+volumes:
+  grafana:
+  prometheus:

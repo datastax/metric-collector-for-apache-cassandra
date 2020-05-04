@@ -1,22 +1,60 @@
-#The default mode enables metrics collection and reporting with local storage on disk
-#in the location defined by data_dir.
+###
+### Metric Collector for Apache Cassandra Configuration
+###
 
-# Stores metrics and events on disk under data_dir
+### The frequency that metrics are reported to the Metrics Collector.
+### Default - 30s
+metric_sampling_interval_in_seconds: 30
+
+#####################################################################
+### List of metrics to allow or deny
+###
+### pattern: regex pattern to search, can be a sub-match or full match
+### scope: 'global' will affect all data. 'datalog' will only affect the datalog
+### policy: 'allow' or 'deny'
+###
+### The following logic is applied to each metric name name
+### ====================================
+### || allow    | deny     | behavior ||
+### ||----------|----------|----------||
+### || empty    | empty    | allowed  ||
+### || match    | empty    | allowed  ||
+### || no-match | empty    | denied   ||
+### || empty    | match    | denied   ||
+### || empty    | no-match | allowed  ||
+### || match    | match    | denied   ||
+### || no-match | match    | denied   ||
+### || match    | no-match | allowed  ||
+### || no-match | no-match | denied   ||
+### ====================================
+### Default - allow all
+
+#filtering_rules:
+#  - policy: deny
+#    pattern: system_auth
+#    scope: global
+
+
+#######################################################################
+### Disk Logging of Metrics and Events (DataLog)
+###
+### The default mode enables metrics collection and diagnostic events
+### to be stored on local on disk in the location defined by data_dir.
+###
+### This data can be used to help diagnose cluster / node level problems
+### by DataStax support: https://www.datastax.com/keepcalm
+###
+### The raw data can be parsed using the included datalog-parser.py script
 write_to_disk_enabled: true
 
-# The maximum number amount of on disk data to store in MB
-# Default: 5000
+### The maximum number amount of on disk data to store in MB
+### Default - 5000
 #data_dir_max_size_in_mb: 5000
 
-#To output tombstone counter metrics for integration tests
-#metric_sampling_interval - The frequency that metrics are reported to Cassandra Metrics Collector.
-#Default: 30
-#metric_sampling_interval_in_seconds: 30
-
-#Directory to store collected metrics.
-#When not set, the default directory is Cassandra data directory. You can customize the location by uncomment and correct data_dir
+### Directory to store collected metrics.
+### Default directory is Cassandra data directory. You can customize the location by uncomment and correct data_dir
 #data_dir: /var/lib/cassandra
 
-#Directory to store logs for collected metrics. The log file is cassandra-collectd.log
-#When not set, the default directory is Cassandra log directory. You can customize the location by uncomment and correct log_dir
+### Directory to store logs for collected metrics. The log file is cassandra-collectd.log
+### Default directory is Cassandra log directory. You can customize the location by uncomment and correct log_dir
 #log_dir: /var/log/cassandra
