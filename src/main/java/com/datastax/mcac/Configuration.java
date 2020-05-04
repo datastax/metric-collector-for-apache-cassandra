@@ -16,8 +16,8 @@ public class Configuration
     public String log_dir = System.getProperty("cassandra.logdir", System.getProperty("mcac.collectd.logdir", "/tmp"));
 
     public String data_dir = DatabaseDescriptor.isDaemonInitialized()
-            ? new File(DatabaseDescriptor.getCommitLogLocation()).toPath().getParent().resolve("insights_data").normalize().toFile().getAbsolutePath()
-            : System.getProperty("cassandra.storagedir") + "/insights_data";
+            ? new File(DatabaseDescriptor.getCommitLogLocation()).toPath().getParent().resolve("mcac_data").normalize().toFile().getAbsolutePath()
+            : System.getProperty("cassandra.storagedir") + "/mcsc_data";
 
     public String token_dir = "/tmp/";
 

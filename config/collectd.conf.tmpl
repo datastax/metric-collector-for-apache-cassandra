@@ -31,6 +31,11 @@ LoadPlugin write_scribe
   SocketFile "{{socketFile}}"
 </Plugin>
 
+LoadPlugin write_prometheus
+<Plugin write_prometheus>
+    Port "9103"
+</Plugin>
+
 LoadPlugin cpu
 LoadPlugin df
 <Plugin df>

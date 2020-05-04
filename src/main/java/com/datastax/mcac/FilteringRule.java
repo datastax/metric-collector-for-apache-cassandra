@@ -17,12 +17,12 @@ public class FilteringRule
     public static final String ALLOW = "allow";
     public static final String DENY = "deny";
     public static final String GLOBAL = "global";
-    public static final String INSIGHT_ONLY = "insights";
+    public static final String DATALOG_ONLY = "datalog";
 
     public static final FilteringRule FILTERED_GLOBALLY = new FilteringRule(DENY, ".*", GLOBAL);
-    public static final FilteringRule FILTERED_INSIGHTS = new FilteringRule(DENY, ".*", INSIGHT_ONLY);
+    public static final FilteringRule FILTERED_INSIGHTS = new FilteringRule(DENY, ".*", DATALOG_ONLY);
     public static final FilteringRule ALLOWED_GLOBALLY = new FilteringRule(ALLOW, ".*", GLOBAL);
-    public static final FilteringRule ALLOWED_INSIGHTS = new FilteringRule(ALLOW, ".*", INSIGHT_ONLY);
+    public static final FilteringRule ALLOWED_INSIGHTS = new FilteringRule(ALLOW, ".*", DATALOG_ONLY);
 
     @JsonProperty("policy")
     public final String policy;
@@ -46,8 +46,8 @@ public class FilteringRule
         if (!(policy.equalsIgnoreCase(ALLOW) || policy.equalsIgnoreCase(DENY)))
             throw new IllegalArgumentException(String.format("Policy must be '%s' or '%s'", ALLOW, DENY));
 
-        if (!(scope.equalsIgnoreCase(GLOBAL) || scope.equalsIgnoreCase(INSIGHT_ONLY)))
-            throw new IllegalArgumentException(String.format("Scope must be '%s' or '%s'", GLOBAL, INSIGHT_ONLY));
+        if (!(scope.equalsIgnoreCase(GLOBAL) || scope.equalsIgnoreCase(DATALOG_ONLY)))
+            throw new IllegalArgumentException(String.format("Scope must be '%s' or '%s'", GLOBAL, DATALOG_ONLY));
 
         this.scope = scope;
         this.isGlobal = scope.equalsIgnoreCase(GLOBAL);

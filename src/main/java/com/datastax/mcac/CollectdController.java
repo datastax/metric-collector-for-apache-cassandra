@@ -1,8 +1,10 @@
 package com.datastax.mcac;
 
 
-
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOError;
 import java.io.IOException;
@@ -33,13 +35,13 @@ import org.slf4j.LoggerFactory;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.github.mustachejava.MustacheNotFoundException;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.io.util.FileUtils;
-import org.apache.cassandra.utils.FBUtilities;
 
 
 /**
- * Responsible for managing the lifecycle and settings of Collectd and the Insights plugin
+ * Responsible for managing the lifecycle and settings of Collectd and the MCAC plugin
  */
 public class CollectdController
 {
@@ -55,7 +57,7 @@ public class CollectdController
     private static final Logger logger = LoggerFactory.getLogger(CollectdController.class);
     private static final String errorPreamble = isLinux ? "" : "Collectd is only supported on Linux, ";
 
-    public static final String DSE_OVERRIDE_SOCKET_FILE_PROP = System.getProperty("dse.insights_socket_file_override");
+    public static final String DSE_OVERRIDE_SOCKET_FILE_PROP = System.getProperty("mcac.insights_socket_file_override");
 
     // http://man7.org/linux/man-pages/man7/unix.7.html
     // note: osx has a limit of 104 so using that as the lower bound
@@ -168,7 +170,7 @@ public class CollectdController
             if (!Files.isDirectory(Paths.get(collectdRoot)))
             {
                 logger.error(
-                        "{}Collectd root directory wrong. Please fix in datastax-metric-collector.yaml : {}",
+                        "{}Collectd root directory wrong. Please fix in metric-collector.yaml : {}",
                         errorPreamble, Paths.get(collectdRoot).toAbsolutePath()
                 );
 
@@ -431,8 +433,7 @@ public class CollectdController
     static class CollectdConfig
     {
         private static String COLLECTD_CONF_TEMPLATE = "collectd.conf.tmpl";
-        private static final Mustache collectdConf = mf.compile(COLLECTD_CONF_TEMPLATE);
-
+        private final Mustache collectdConf;
 
         public final String collectdRoot;
         public final String logDir;
@@ -453,6 +454,38 @@ public class CollectdController
             this.logDir = logDir;
             this.pidFile = Paths.get(logDir, "mcac-collectd.pid").toFile().getAbsolutePath();
             this.socketFile = socketFile;
+
+
+            Mustache m = null;
+            try
+            {
+                m = mf.compile(COLLECTD_CONF_TEMPLATE);
+            }
+            catch (MustacheNotFoundException e)
+            {
+                try
+                {
+                    String templateFile = Paths.get(CollectdController.class.getProtectionDomain().getCodeSource().getLocation()
+                            .toURI()).getParent().getParent().toAbsolutePath().toString() + "/config/" + COLLECTD_CONF_TEMPLATE;
+
+                    logger.info(templateFile);
+
+                    if (new File(templateFile).exists())
+                    {
+                        FileReader reader = new FileReader(templateFile);
+                        m = mf.compile(reader, COLLECTD_CONF_TEMPLATE);
+                    }
+                }
+                catch (URISyntaxException | FileNotFoundException ex)
+                {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            if (m == null)
+                throw new RuntimeException("Unable to locate " + COLLECTD_CONF_TEMPLATE);
+
+            collectdConf = m;
 
             try
             {

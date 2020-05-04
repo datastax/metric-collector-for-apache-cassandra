@@ -88,7 +88,7 @@ public class UnixSocketClient
 
     private static final Logger logger = LoggerFactory.getLogger(UnixSocketClient.class);
     private static final int BATCH_SIZE = 256;
-    private static final String FILTER_INSIGHTS_TAG = "insight_filtered=true";
+    private static final String FILTER_INSIGHTS_TAG = "mcac_filtered=true";
     private static final String INF_BUCKET = "bucket_inf";
     private static final long[] inputBuckets = new EstimatedHistogram(90).getBucketOffsets();
     private static final long[] decayingBuckets = new EstimatedHistogram(165).getBucketOffsets();
@@ -439,8 +439,6 @@ public class UnixSocketClient
             }
         }
     }
-
-
 
     private void getAndStoreToken(HttpURLConnection connection) throws IOException
     {
