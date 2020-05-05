@@ -3,8 +3,9 @@ Metric Collector for Apache Cassandra&reg; (MCAC)
 
 Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clusters.
 
-![CI](https://github.com/datastax/metric-collector-for-apache-cassandra/workflows/Java%20CI/badge.svg)
-![Release](https://github.com/datastax/metric-collector-for-apache-cassandra/workflows/Docker%20Release/badge.svg)
+![Testing](https://github.com/datastax/metric-collector-for-apache-cassandra/workflows/Testing/badge.svg)
+![Release](https://github.com/datastax/metric-collector-for-apache-cassandra/workflows/Release/badge.svg)
+
 ## Introduction
 
    Metric Collector for Apache Cassandra (MCAC) aggregates OS and C* metrics along with diagnostic events
@@ -12,12 +13,13 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
    It supports existing Apache Cassandra clusters and is a self contained drop in agent.
 
    * Built on [collectd](https://collectd.org), a popular, well-supported, open source metric collection agent. 
-   With over 90 plugins, you can tailor the solution to collect metrics most important to you.
+   With over 90 plugins, you can tailor the solution to collect metrics most important to you and ship them to 
+   wherever you need. 
    
    * Easily added to Cassandra nodes as a java agent, Apache Cassandra sends metrics and other structured events 
    to collectd over a local unix socket.  
    
-   * Fast and efficient.  It can track over 100k unique metric series per node series. 
+   * Fast and efficient.  It can track over 100k unique metric series per node (i.e. hundreds of tables). 
      
    * Comes with extensive dashboards out of the box, built on [prometheus](http://prometheus.io) and [grafana](http://grafana.com).  
      The Cassandra dashboards let you aggregate latency accurately across all nodes, dc or rack, down to an individual table.   
