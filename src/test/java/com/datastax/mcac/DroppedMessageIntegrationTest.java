@@ -3,6 +3,7 @@ package com.datastax.mcac;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.mcac.insights.events.DroppedMessageInformation;
 import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
@@ -63,7 +64,18 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
                 .withPoolingOptions(new PoolingOptions().setHeartbeatIntervalSeconds(1))
                 .build())
         {
-            Session session = cluster.connect();
+            Session session = null;
+
+            while (session == null) {
+                try
+                {
+                    session = cluster.connect();
+                }
+                catch (NoHostAvailableException e)
+                {
+                    //Flakey
+                }
+            }
 
             session.execute("CREATE KEYSPACE foo with replication={'class': 'SimpleStrategy', 'replication_factor':3}");
             session.execute(
