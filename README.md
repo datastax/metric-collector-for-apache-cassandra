@@ -8,22 +8,21 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
 ## Introduction
 
    Metric Collector for Apache Cassandra (MCAC) aggregates OS and C* metrics along with diagnostic events
-   to facilitate problem resolution and remediation. It works easily with existing Apache Cassandra clusters.
+   to facilitate problem resolution and remediation. 
+   It supports existing Apache Cassandra clusters and is a self contained drop in agent.
 
-   MCAC comes bundled with and is built on [collectd](https://collectd.org), a popular, well-supported, open source metric collection agent. 
+   * Built on [collectd](https://collectd.org), a popular, well-supported, open source metric collection agent. 
    With over 90 plugins, you can tailor the solution to collect metrics most important to you.
    
-   MCAC is easily added to Cassandra nodes as a java agent, Apache Cassandra sends metrics and other structured events 
-   to collectd over a local unix socket.  The config file to enable and configure the frequency and type of metrics that are sent to DSE Metrics Collector. 
-   After setting the configuration properties, you can export the aggregated metrics to monitoring tools like Prometheus, Graphite, or Splunk, 
-   which can then be visualized in a dashboard such as Grafana.
-       
-   MCAC is fast and efficient.  It can track over 100k unique metric series per node series. 
+   * Easily added to Cassandra nodes as a java agent, Apache Cassandra sends metrics and other structured events 
+   to collectd over a local unix socket.  
+   
+   * Fast and efficient.  It can track over 100k unique metric series per node series. 
      
-   Finally, MCAC comes with useful dashboards for prometheus and grafana.  The Cassandra dashboard
-   lets you aggregate latency accurately across all nodes, dc or rack. Down to an individual table.   
+   * Comes with extensive dashboards out of the box, built on [prometheus](http://prometheus.io) and [grafana](http://grafana.com).  The Cassandra dashboards let you aggregate latency accurately across all nodes, dc or rack, down to an individual table.   
      
 ## Design Principles
+
   * Little/No performance impact to C* 
   * Simple to install and self managed
   * Collect all OS and C* metrics by default
@@ -32,16 +31,18 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
       
 ## Installation of Agent
     
- Download the [latest release]() of the agent onto your Cassandra nodes.
+ 1. Download the [latest release]() of the agent onto your Cassandra nodes.
  The archive is self contained so no need do anything other than `tar -zxf latest.tar.gz` 
  into any location you prefer like `/usr/local` or `/opt`.
 
- Finally place the following line into the `cassandra-env.sh` file:
+ 2. Add the following line into the `cassandra-env.sh` file:
      
      MCAC_ROOT=/path/to/directory 
      JVM_OPTS="$JVM_OPTS -javaagent:${MCAC_ROOT}/lib/cassandra-mcac-agent.jar"
 
- And bounce the node.  On restart you should see `Starting DataStax Metric Collector for Apache Cassandra` in `system.log` 
+ 3. Bounce the node.  
+ 
+ On restart you should see `'Starting DataStax Metric Collector for Apache Cassandra'` in the Cassandra system.log 
 
  The [config/metric-collector.yaml](config/metrics-collector.yaml) file requires no changes by default but please read and add any customizations like
  filtering of metrics you don't need. 
@@ -62,15 +63,17 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
 
  5. The Grafana web ui runs on port `3000` and the prometheus web ui runs on port `9000`
      
- If you have an existing prometheus setup you will need the dashboards and re-labeling rules from the
+ If you have an existing prometheus setup you will need the dashboards and [relabel config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config) from the
  included [prometheus.yaml](dashboards/prometheus/prometheus.yaml) file.
+ 
+ 
 ## FAQ
   1. Where is the list of all Cassandra metrics?
   
   The full list is located on [Apache Cassandra docs](https://cassandra.apache.org/doc/latest/operating/metrics.html) site.
   The names are automatically changes from CamelCase to snake_case.
   
-  In the case of prometheus the metrics are further renamed based on relabeling rules which live in the 
+  In the case of prometheus the metrics are further renamed based on [relabel config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config) which live in the 
   [prometheus.yaml](dashboards/prometheus/prometheus.yaml) file.
   
   2. How can I filter out metrics I don't care about?
@@ -81,10 +84,15 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
       
      The datalog is a space limited JSON based structured log of metrics and events which are optionally kept on each node.  
      It can be useful to diagnose issues that come up with your cluster.  If you wish to use the logs yourself
-     there's a script included to parse these logs which can be analyzed or piped into [jq](https://stedolan.github.io/jq/).
+     there's a [script](scripts/datalog-parser.py) included to parse these logs which can be analyzed or piped 
+     into [jq](https://stedolan.github.io/jq/).
      
      Alternatively, DataStax offers free support for issues as part of our [keep calm](https://www.datastax.com/keepcalm) 
      initiative and these logs can help our support engineers help diagnose your problem.
+     
+  4. Will the MCAC agent work on a Mac?
+     
+     No. It can be made to but it's currently only supported on Linux based OS.
           
 ## License
 
