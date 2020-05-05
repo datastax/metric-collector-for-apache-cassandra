@@ -69,7 +69,7 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
   
  4. `docker-compose up` will start everything and begin collection of metrics
 
- 5. The Grafana web ui runs on port `3000` and the prometheus web ui runs on port `9000`
+ 5. The Grafana web ui runs on port `3000` and the prometheus web ui runs on port `9090`
      
  If you have an existing prometheus setup you will need the dashboards and [relabel config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config) from the
  included [prometheus.yaml](dashboards/prometheus/prometheus.yaml) file.
