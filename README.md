@@ -22,8 +22,8 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
    * Comes with extensive dashboards out of the box, built on [prometheus](http://prometheus.io) and [grafana](http://grafana.com).  
      The Cassandra dashboards let you aggregate latency accurately across all nodes, dc or rack, down to an individual table.   
      
-     ![](.screenshots/os.png =250x)
-     ![](.screenshots/cluster.png =250x)
+     ![](.screenshots/os.png)
+     ![](.screenshots/cluster.png)
    
 ## Design Principles
 
