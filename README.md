@@ -19,8 +19,12 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
    
    * Fast and efficient.  It can track over 100k unique metric series per node series. 
      
-   * Comes with extensive dashboards out of the box, built on [prometheus](http://prometheus.io) and [grafana](http://grafana.com).  The Cassandra dashboards let you aggregate latency accurately across all nodes, dc or rack, down to an individual table.   
+   * Comes with extensive dashboards out of the box, built on [prometheus](http://prometheus.io) and [grafana](http://grafana.com).  
+     The Cassandra dashboards let you aggregate latency accurately across all nodes, dc or rack, down to an individual table.   
      
+     ![](.screenshots/os.png =250x)
+     ![](.screenshots/cluster.png =250x)
+   
 ## Design Principles
 
   * Little/No performance impact to C* 
@@ -43,7 +47,8 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
  3. Bounce the node.  
  
  On restart you should see `'Starting DataStax Metric Collector for Apache Cassandra'` in the Cassandra system.log 
-
+ and the prometheus exporter will be available on port `9103`
+ 
  The [config/metric-collector.yaml](config/metrics-collector.yaml) file requires no changes by default but please read and add any customizations like
  filtering of metrics you don't need. 
  
@@ -70,11 +75,11 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
 ## FAQ
   1. Where is the list of all Cassandra metrics?
   
-  The full list is located on [Apache Cassandra docs](https://cassandra.apache.org/doc/latest/operating/metrics.html) site.
-  The names are automatically changes from CamelCase to snake_case.
+     The full list is located on [Apache Cassandra docs](https://cassandra.apache.org/doc/latest/operating/metrics.html) site.
+     The names are automatically changed from CamelCase to snake_case.
   
-  In the case of prometheus the metrics are further renamed based on [relabel config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config) which live in the 
-  [prometheus.yaml](dashboards/prometheus/prometheus.yaml) file.
+     In the case of prometheus the metrics are further renamed based on [relabel config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config) which live in the 
+     [prometheus.yaml](dashboards/prometheus/prometheus.yaml) file.
   
   2. How can I filter out metrics I don't care about?
      
