@@ -851,7 +851,7 @@ sstable_preemptive_open_interval_in_mb: 50
 
 # How long the coordinator should wait for read operations to complete.
 # Lowest acceptable value is 10 ms.
-read_request_timeout_in_ms: 10
+read_request_timeout_in_ms: 50
 # How long the coordinator should wait for seq or index scans to complete.
 # Lowest acceptable value is 10 ms.
 range_request_timeout_in_ms: 100
