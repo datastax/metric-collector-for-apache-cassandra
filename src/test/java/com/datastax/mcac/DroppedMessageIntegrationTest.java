@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.EOFException;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -102,7 +103,7 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
                     ) > 0);
                     break;
                 }
-                catch (AssertionError ignore)
+                catch (AssertionError | EOFException ignore)
                 {
                     Uninterruptibles.sleepUninterruptibly(
                             100,
