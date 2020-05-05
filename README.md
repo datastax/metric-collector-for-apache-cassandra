@@ -41,6 +41,7 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
 
  2. Add the following line into the `cassandra-env.sh` file:
      
+     
      MCAC_ROOT=/path/to/directory 
      JVM_OPTS="$JVM_OPTS -javaagent:${MCAC_ROOT}/lib/cassandra-mcac-agent.jar"
 
