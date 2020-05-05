@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -99,7 +100,7 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
 
                     break;
                 }
-                catch (AssertionError ignore)
+                catch (AssertionError | EOFException ignore)
                 {
                 }
             }
