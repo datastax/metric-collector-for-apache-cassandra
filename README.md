@@ -37,7 +37,7 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
       
 ## Installation of Agent
     
- 1. Download the [latest release]() of the agent onto your Cassandra nodes.
+ 1. Download the [latest release](https://github.com/datastax/metric-collector-for-apache-cassandra/releases/latest) of the agent onto your Cassandra nodes.
  The archive is self contained so no need do anything other than `tar -zxf latest.tar.gz` 
  into any location you prefer like `/usr/local` or `/opt`.
 
@@ -61,7 +61,7 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
 
 ## Installing the Prometheus Dashboards
 
- 1. Download the [latest release]() of the dashboards and unzip.
+ 1. Download the [latest release](https://github.com/datastax/metric-collector-for-apache-cassandra/releases/latest) of the dashboards and unzip.
  
  2. Install [Docker compose](https://docs.docker.com/compose/install/)
  
