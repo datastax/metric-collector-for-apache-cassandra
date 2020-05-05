@@ -61,7 +61,7 @@ public class InsightsTestUtil
                     if (str.contains(entry))
                     {
                         ++numFound;
-                        System.err.println(str);
+                        //System.err.println(str);
                     }
                 }
             }
