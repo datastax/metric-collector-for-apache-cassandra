@@ -15,7 +15,7 @@ mkdir $PACKAGE_DIR
 mvn -DskipTests clean package -Drevision=$VERSION
 mkdir -p $PACKAGE_DIR/$PROJECT_DIR_NAME/config
 cp config/collectd.conf.tmpl $PACKAGE_DIR/$PROJECT_DIR_NAME/config
-cp config/metrics-collector.yaml $PACKAGE_DIR/$PROJECT_DIR_NAME/config
+cp config/metric-collector.yaml $PACKAGE_DIR/$PROJECT_DIR_NAME/config
 
 cp README.md $PACKAGE_DIR/$PROJECT_DIR_NAME
 cp LICENSE.txt $PACKAGE_DIR/$PROJECT_DIR_NAME
