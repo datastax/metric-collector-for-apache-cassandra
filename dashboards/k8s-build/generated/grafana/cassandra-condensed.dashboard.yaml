@@ -812,4 +812,4 @@ spec:
     \   },\n   \"timezone\": \"browser\",\n   \"title\": \"Cassandra Cluster Condensed\"\
     ,\n   \"version\": 0\n}\n"
   name: cassandra-condensed.json
-  url: https://raw.githubusercontent.com/datastax/metrics-collector-for=apache-cassandra/master/dashboards/grafana/generated-dashboards/cassandra-condensed.json
+  url: https://raw.githubusercontent.com/datastax/metric-collector-for-apache-cassandra/master/dashboards/grafana/generated-dashboards/cassandra-condensed.json
