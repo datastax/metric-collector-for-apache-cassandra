@@ -5,6 +5,6 @@ metadata:
     app: grafana
   name: empty
 spec:
-  url: https://raw.githubusercontent.com/datastax/metric-collector-for-apache-cassandra/master/dashboards/grafana/generated-dashboards/dashboard.yaml
+  url: ""
   json: "{}"
   name: empty.json
