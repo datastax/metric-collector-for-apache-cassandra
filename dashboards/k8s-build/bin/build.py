@@ -45,7 +45,7 @@ with open(dashboard_template_path, "r") as template_file:
         k8s_dashboard = deepcopy(k8s_template)
         k8s_dashboard["metadata"]["name"] = os.path.splitext(os.path.basename(json_dashboard))[0]
         k8s_dashboard["spec"]["name"] = os.path.basename(json_dashboard)
-        k8s_dashboard["spec"]["url"] = f"https://raw.githubusercontent.com/datastax/metrics-collector-for=apache-cassandra/master/dashboards/grafana/generated-dashboards/{os.path.basename(json_dashboard)}"
+        k8s_dashboard["spec"]["url"] = f"https://raw.githubusercontent.com/datastax/metric-collector-for-apache-cassandra/master/dashboards/grafana/generated-dashboards/{os.path.basename(json_dashboard)}"
 
         # Read in JSON dashboard
         with open(json_dashboard, "r") as json_file:

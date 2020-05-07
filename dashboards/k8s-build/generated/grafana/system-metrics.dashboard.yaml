@@ -3515,4 +3515,4 @@ spec:
        "version": 0
     }
   name: system-metrics.json
-  url: https://raw.githubusercontent.com/datastax/metrics-collector-for=apache-cassandra/master/dashboards/grafana/generated-dashboards/system-metrics.json
+  url: https://raw.githubusercontent.com/datastax/metric-collector-for-apache-cassandra/master/dashboards/grafana/generated-dashboards/system-metrics.json
