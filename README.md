@@ -52,7 +52,7 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
  On restart you should see `'Starting DataStax Metric Collector for Apache Cassandra'` in the Cassandra system.log 
  and the prometheus exporter will be available on port `9103`
  
- The [config/metric-collector.yaml](config/metrics-collector.yaml) file requires no changes by default but please read and add any customizations like
+ The [config/metric-collector.yaml](config/metric-collector.yaml) file requires no changes by default but please read and add any customizations like
  filtering of metrics you don't need. 
  
  The [config/collectd.conf.tmpl](config/collectd.conf.tmpl) file can also be edited to change default collectd plugins enabled.  But it's recommended
@@ -86,7 +86,7 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
   
   2. How can I filter out metrics I don't care about?
      
-     Please read the [metric-collector.yaml](config/metrics-collector.yaml) section on how to add filtering rules.
+     Please read the [metric-collector.yaml](config/metric-collector.yaml) section on how to add filtering rules.
   
   3. What is the datalog? and what is it for?
       

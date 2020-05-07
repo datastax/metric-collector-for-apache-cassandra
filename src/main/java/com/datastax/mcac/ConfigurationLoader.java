@@ -49,7 +49,7 @@ public class ConfigurationLoader
             try
             {
                 configUrl = "file:" + File.separator + File.separator + Paths.get(ConfigurationLoader.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI()).getParent().getParent().toAbsolutePath().toString() + "/config/metrics-collector.yaml";
+                    .toURI()).getParent().getParent().toAbsolutePath().toString() + "/config/metric-collector.yaml";
             }
             catch (URISyntaxException e)
             {
