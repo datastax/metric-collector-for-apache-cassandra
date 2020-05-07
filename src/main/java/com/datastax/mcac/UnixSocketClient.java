@@ -210,7 +210,8 @@ public class UnixSocketClient
             //No biggie
         }
 
-        return DatabaseDescriptor.getEndpointSnitch().getRack(DatabaseDescriptor.getBroadcastAddress());
+
+        return DatabaseDescriptor.getEndpointSnitch().getRack(getBroadcastAddress());
     }
 
     public static String getDataCenter()
@@ -224,7 +225,7 @@ public class UnixSocketClient
             //No biggie
         }
 
-        return DatabaseDescriptor.getEndpointSnitch().getDatacenter(DatabaseDescriptor.getBroadcastAddress());
+        return DatabaseDescriptor.getEndpointSnitch().getDatacenter(getBroadcastAddress());
     }
 
     private EventLoopGroup epollGroup()
