@@ -45,7 +45,7 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
      
      ````
      MCAC_ROOT=/path/to/directory 
-     JVM_OPTS="$JVM_OPTS -javaagent:${MCAC_ROOT}/lib/cassandra-mcac-agent.jar"
+     JVM_OPTS="$JVM_OPTS -javaagent:${MCAC_ROOT}/lib/datastax-mcac-agent.jar"
      ````
  3. Bounce the node.  
  
