@@ -34,6 +34,10 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
   * Collect all OS and C* metrics by default
   * Keep historical metrics on node for analysis
   * Provide useful integration with prometheus and grafana
+
+## Try the demo
+`docker-compose up` is all you need from the [dashboards/demo](dashboards/demo) directory to get a cluster with a light
+workload and dashboards connected to kick the tires.
       
 ## Installation of Agent
     
@@ -73,7 +77,9 @@ Metric collection and Dashboards for Apache Cassandra (2.2, 3.0, 3.11, 4.0) clus
      
  If you have an existing prometheus setup you will need the dashboards and [relabel config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config) from the
  included [prometheus.yaml](dashboards/prometheus/prometheus.yaml) file.
- 
+
+## Kubernetes Support
+Check out the [dashboards/k8s-build](dashboards/k8s-build) directory for a guide on using this project along with Kubernetes.
  
 ## FAQ
   1. Where is the list of all Cassandra metrics?
@@ -112,5 +118,3 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-## Kubernetes Support
-Check out the [dashboards/k8s-build](dashboards/k8s-build) directory for a guide on using this project along with Kubernetes.
