@@ -1,6 +1,9 @@
 package com.datastax.mcac.interceptors;
 
+import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +12,12 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.jvm.BufferPoolMetricSet;
+import com.codahale.metrics.jvm.FileDescriptorRatioGauge;
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.datastax.mcac.UnixSocketClient;
 import com.datastax.mcac.insights.events.InsightsClientStarted;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
@@ -18,6 +27,7 @@ import net.bytebuddy.implementation.bind.annotation.SuperCall;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
+import org.apache.cassandra.metrics.CassandraMetricsRegistry;
 import org.apache.cassandra.service.StorageService;
 
 public class CassandraDaemonInterceptor extends AbstractInterceptor
@@ -64,6 +74,8 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
             final GCListener gcListener = new GCListener();
             gcListener.registerMBeanAndGCNotifications();
 
+            addJvmMetrics();
+
             //Hook into things that have hooks
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 gcListener.unregisterMBeanAndGCNotifications();
@@ -74,6 +86,35 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
         catch (Exception e)
         {
             logger.warn("Problem starting DataStax Metric Collector for Apache Cassandra", e);
+        }
+    }
+
+    private static void addJvmMetrics()
+    {
+        try
+        {
+            Map<String, Metric> metrics = new HashMap<>();
+            metrics.put("jvm.buffers", new BufferPoolMetricSet(ManagementFactory.getPlatformMBeanServer()));
+            metrics.put("jvm.gc", new GarbageCollectorMetricSet());
+            metrics.put("jvm.memory", new MemoryUsageGaugeSet());
+            metrics.put("jvm.fd.usage", new FileDescriptorRatioGauge());
+            //Add in the JVM metrics
+            //ignore IllegalArgumentException thrown if metrics already exist
+            for(Map.Entry<String, Metric> entry: metrics.entrySet())
+            {
+                try
+                {
+                    CassandraMetricsRegistry.Metrics.register(entry.getKey(), entry.getValue());
+                }
+                catch (IllegalArgumentException ex)
+                {
+                    logger.debug(ex.toString());
+                }
+            }
+        }
+        catch (Throwable t)
+        {
+            logger.debug("Error adding jvm metrics", t);
         }
     }
 }
