@@ -26,7 +26,10 @@ services:
     environment:
       - "GF_INSTALL_PLUGINS=grafana-polystat-panel"
       - "GF_AUTH_ANONYMOUS_ENABLED=true"
-
+  mcac:
+    build: ../../
+    volumes:
+      - "mcac_data:/mcac"
   cassandra:
     image: cassandra:3.11
     ports:
@@ -35,12 +38,12 @@ services:
       - "7000"
       - "9103"
     volumes:
-      - "../../target/:/mcac/lib:ro"
+      - "mcac_data:/mcac"
       - "../../config:/mcac/config:ro"
     environment:
       MAX_HEAP_SIZE: "500M"
       HEAP_NEWSIZE: "100M"
-      JVM_EXTRA_OPTS: '-javaagent:/mcac/lib/datastax-mcac-agent-0.1.0-SNAPSHOT.jar -Dcassandra.consistent.rangemovement=false -Dcassandra.ring_delay_ms=100'
+      JVM_EXTRA_OPTS: '-javaagent:/mcac/lib/datastax-mcac-agent-0.1.0-SNAPSHOT.jar  -Dcassandra.consistent.rangemovement=false -Dcassandra.ring_delay_ms=100'
       CASSANDRA_NUM_TOKENS: 1
       CASSANDRA_SEEDS: "cassandra, cassandra2"
     healthcheck:
@@ -59,7 +62,7 @@ services:
       - "7000"
       - "9103"
     volumes:
-      - "../../target/:/mcac/lib:ro"
+      - "mcac_data:/mcac"
       - "../../config:/mcac/config:ro"
     networks:
       - demo_net
@@ -106,3 +109,6 @@ services:
 networks:
   demo_net:
     driver: bridge
+volumes:
+  mcac_data:
+    driver: local
