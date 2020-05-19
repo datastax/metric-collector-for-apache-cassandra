@@ -1,8 +1,11 @@
 package com.datastax.mcac;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.utils.FBUtilities;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -15,10 +18,7 @@ public class Configuration
 
     public String log_dir = System.getProperty("cassandra.logdir", System.getProperty("mcac.collectd.logdir", "/tmp"));
 
-    public String data_dir = DatabaseDescriptor.isDaemonInitialized()
-            ? new File(DatabaseDescriptor.getCommitLogLocation()).toPath().getParent().resolve("mcac_data").normalize().toFile().getAbsolutePath()
-            : System.getProperty("cassandra.storagedir") + "/mcsc_data";
-
+    public String data_dir = getDataDir();
     public String token_dir = "/tmp/";
 
     public Long data_dir_max_size_in_mb = 5000L;
@@ -66,5 +66,26 @@ public class Configuration
             return MAX_METRIC_UPDATE_GAP_IN_SECONDS;
         else
             return upload_interval_in_seconds;
+    }
+
+    private static final String getDataDir()
+    {
+        try
+        {
+            if (DatabaseDescriptor.isDaemonInitialized())
+            {
+               Method method =  DatabaseDescriptor.class.getMethod("getCommitLogLocation");
+               Object clDir = method.invoke(null);
+
+               File location = clDir instanceof File ? (File) clDir : new File((String) clDir);
+               return location.toPath().getParent().resolve("mcac_data").normalize().toFile().getAbsolutePath();
+            }
+        }
+        catch (Throwable e)
+        {
+            //Use default below
+        }
+
+        return System.getProperty("cassandra.storagedir", "/tmp") + "/mcac_data";
     }
 }

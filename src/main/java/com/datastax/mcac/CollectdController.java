@@ -2,7 +2,6 @@ package com.datastax.mcac;
 
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -37,7 +36,6 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.github.mustachejava.MustacheNotFoundException;
 import org.apache.cassandra.config.DatabaseDescriptor;
-import org.apache.cassandra.io.util.FileUtils;
 
 
 /**
@@ -545,7 +543,9 @@ public class CollectdController
             {
                 assert logDir != null;
 
-                FileUtils.createDirectory(logDir);
+                File ldir = new File(logDir);
+                if (!ldir.exists() && !ldir.mkdirs())
+                    throw new RuntimeException("not able to create logDir " + logDir);
 
                 Path path = Paths.get(logDir);
 
@@ -673,7 +673,9 @@ public class CollectdController
             {
                 Path path = Paths.get(dataDir);
 
-                FileUtils.createDirectory(dataDir);
+                File ddir = new File(dataDir);
+                if (!ddir.exists() && !ddir.mkdirs())
+                    throw new RuntimeException("not able to create dataDir " + dataDir);
 
                 if (!Files.isWritable(path))
                     throw new RuntimeException("dataDir not writable " + dataDir);
