@@ -114,8 +114,7 @@ public class ConfigurationLoader
         }
         catch (YAMLException e)
         {
-            throw new RuntimeException("Invalid yaml: " + url + SystemUtils.LINE_SEPARATOR
-                    +  " Error: " + e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
