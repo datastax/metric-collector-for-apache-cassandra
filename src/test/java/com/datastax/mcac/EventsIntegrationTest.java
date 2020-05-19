@@ -86,6 +86,8 @@ public class EventsIntegrationTest extends BaseIntegrationTest
 
         File rootDir = getInsightsDir();
 
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "jvm") > 0);
+
         Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "driver.startup") > 0);
 
         Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, NodeConfiguration.NAME) > 0);

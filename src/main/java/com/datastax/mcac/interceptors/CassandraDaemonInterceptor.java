@@ -56,6 +56,8 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
 
         try
         {
+            addJvmMetrics();
+
             logger.info("Starting DataStax Metric Collector for Apache Cassandra " + Resources.toString(Resources.getResource("build_version"), Charset.defaultCharset()));
             client.get().start();
 
@@ -73,8 +75,6 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
 
             final GCListener gcListener = new GCListener();
             gcListener.registerMBeanAndGCNotifications();
-
-            addJvmMetrics();
 
             //Hook into things that have hooks
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -108,13 +108,13 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
                 }
                 catch (IllegalArgumentException ex)
                 {
-                    logger.debug(ex.toString());
+                    logger.info(ex.toString());
                 }
             }
         }
         catch (Throwable t)
         {
-            logger.debug("Error adding jvm metrics", t);
+            logger.info("Error adding jvm metrics", t);
         }
     }
 }
