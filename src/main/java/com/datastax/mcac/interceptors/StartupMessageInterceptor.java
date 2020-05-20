@@ -46,12 +46,12 @@ public class StartupMessageInterceptor extends AbstractInterceptor
     @RuntimeType
     public static Object intercept(@This Object instance, @AllArguments Object[] allArguments, @SuperCall Callable<Message.Response> zuper) throws Throwable
     {
-        Message.Response result = zuper.call();
+        Object result = zuper.call();
 
         try
         {
-            if (allArguments.length > 1 && allArguments[0] != null && allArguments[0] instanceof QueryState &&
-               allArguments[1] instanceof StartupMessage)
+            if (allArguments.length > 0 && allArguments[0] != null && allArguments[0] instanceof QueryState &&
+               instance instanceof StartupMessage)
             {
                 QueryState queryState = (QueryState) allArguments[0];
                 StartupMessage request = ((StartupMessage) instance);
