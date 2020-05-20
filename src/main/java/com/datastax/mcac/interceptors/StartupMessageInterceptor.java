@@ -50,7 +50,8 @@ public class StartupMessageInterceptor extends AbstractInterceptor
 
         try
         {
-            if (allArguments.length > 0 && allArguments[0] != null && allArguments[0] instanceof QueryState)
+            if (allArguments.length > 1 && allArguments[0] != null && allArguments[0] instanceof QueryState &&
+               allArguments[1] instanceof StartupMessage)
             {
                 QueryState queryState = (QueryState) allArguments[0];
                 StartupMessage request = ((StartupMessage) instance);
