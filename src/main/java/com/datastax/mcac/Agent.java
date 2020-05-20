@@ -33,27 +33,6 @@ public class Agent {
 
     public static void premain(String arg, Instrumentation inst) throws Exception {
 
-        File temp = Files.createTempDirectory("tmp").toFile();
-        temp.deleteOnExit();
-
-        Map<TypeDescription, byte[]> injected = new HashMap<>();
-
-        injected.put(new TypeDescription.ForLoadedType(DroppedMessageLoggingAdvice.class), ClassFileLocator.ForClassLoader.read(DroppedMessageLoggingAdvice.class));
-        injected.put(new TypeDescription.ForLoadedType(CassandraDaemonInterceptor.class), ClassFileLocator.ForClassLoader.read(CassandraDaemonInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(QueryHandlerInterceptor.class), ClassFileLocator.ForClassLoader.read(QueryHandlerInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(StartupMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(StartupMessageInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(OptionsMessageInterceptor.class), ClassFileLocator.ForClassLoader.read(OptionsMessageInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(LargePartitionInterceptor.class), ClassFileLocator.ForClassLoader.read(LargePartitionInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(FlushInterceptor.class), ClassFileLocator.ForClassLoader.read(FlushInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(FlushInterceptorLegacy.class), ClassFileLocator.ForClassLoader.read(FlushInterceptorLegacy.class));
-        injected.put(new TypeDescription.ForLoadedType(ExceptionInterceptor.class), ClassFileLocator.ForClassLoader.read(ExceptionInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(CompactionStartInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionStartInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(CompactionEndedInterceptor.class), ClassFileLocator.ForClassLoader.read(CompactionEndedInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(TombstoneFailureInterceptor.class), ClassFileLocator.ForClassLoader.read(TombstoneFailureInterceptor.class));
-        injected.put(new TypeDescription.ForLoadedType(TombstoneWarningInterceptor.class), ClassFileLocator.ForClassLoader.read(TombstoneWarningInterceptor.class));
-
-        ClassInjector.UsingInstrumentation.of(temp, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, inst).inject(injected);
-
         new AgentBuilder.Default()
                 .disableClassFormatChanges()
                 .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
@@ -69,7 +48,6 @@ public class Agent {
                 //.disableClassFormatChanges()
                 //.with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly()) //For debug
                 .ignore(new AgentBuilder.RawMatcher.ForElementMatchers(nameStartsWith("net.bytebuddy.").or(isSynthetic()), any(), any()))
-                .enableBootstrapInjection(inst, temp)
                 //Exception Information
                 .type(ExceptionInterceptor.type())
                 .transform(ExceptionInterceptor.transformer())
