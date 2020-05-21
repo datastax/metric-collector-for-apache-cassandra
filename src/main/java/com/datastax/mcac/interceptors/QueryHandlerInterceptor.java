@@ -40,9 +40,9 @@ public class QueryHandlerInterceptor extends AbstractInterceptor
         };
     }
 
-
     @RuntimeType
-    public static Object intercept(@AllArguments Object[] allArguments, @SuperCall Callable<ResultMessage> zuper) throws Throwable {
+    public static Object intercept(@AllArguments Object[] allArguments, @SuperCall Callable<ResultMessage> zuper) throws Throwable
+    {
         if (allArguments.length > 0 && allArguments[0] != null && allArguments[0] instanceof String)
         {
             String query = (String) allArguments[0];

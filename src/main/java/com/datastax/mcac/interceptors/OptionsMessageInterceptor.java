@@ -61,7 +61,7 @@ public class OptionsMessageInterceptor extends AbstractInterceptor
     @RuntimeType
     public static Object intercept(@This Object instance, @AllArguments Object[] allArguments, @SuperCall Callable<Message.Response> zuper) throws Throwable
     {
-        Message.Response result = zuper.call();
+        Object result = zuper.call();
 
         try
         {
