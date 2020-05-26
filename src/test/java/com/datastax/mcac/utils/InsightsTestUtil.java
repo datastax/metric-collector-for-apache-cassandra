@@ -3,6 +3,7 @@ package com.datastax.mcac.utils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +23,7 @@ public class InsightsTestUtil
 
     public static int checkInsightLogFor(File dataDir, String entry) throws IOException
     {
+        String sample = null;
         int numFound = 0;
         int attempts = 0;
         while (attempts++ < MAX_ATTEMPTS && !dataDir.isDirectory())
@@ -41,7 +43,16 @@ public class InsightsTestUtil
                 }
                 else
                 {
-                    reader = new BufferedInputStream(new FileInputStream(file));
+                    try
+                    {
+                        reader = new BufferedInputStream(new FileInputStream(file));
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        //File might be compressed after the listing
+                        File gzFile = new File(file.getAbsolutePath() + ".gz");
+                        reader = new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(gzFile))));
+                    }
                 }
 
                 byte[] bytes = new byte[Ints.BYTES];
@@ -61,6 +72,7 @@ public class InsightsTestUtil
                     if (str.contains(entry))
                     {
                         ++numFound;
+                        sample = str;
                         //System.err.println(str);
                     }
                 }
@@ -72,7 +84,7 @@ public class InsightsTestUtil
             }
         }
 
-        System.err.println("Found " + numFound + " instances of " + entry);
+        System.err.println("Found " + numFound + " instances of " + entry + ": " + sample);
         return numFound;
     }
 
