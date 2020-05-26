@@ -49,6 +49,7 @@ public class InsightsTestUtil
                     }
                     catch (FileNotFoundException e)
                     {
+                        Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                         //File might be compressed after the listing
                         File gzFile = new File(file.getAbsolutePath() + ".gz");
                         reader = new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(gzFile))));
