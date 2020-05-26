@@ -17,7 +17,7 @@ filtering_rules:
 #metric_sampling_interval - The frequency that metrics are reported to Cassandra Metrics Collector.
 #Default: 30
 metric_sampling_interval_in_seconds: 10
-upload_interval_in_seconds: 10
+upload_interval_in_seconds: 20
 
 #Directory to store collected metrics.
 #When not set, the default directory is Cassandra data directory. You can customize the location by uncomment and correct data_dir
