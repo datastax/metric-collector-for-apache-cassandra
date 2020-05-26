@@ -8,10 +8,16 @@ write_to_disk_enabled: true
 # Default: 5000
 #data_dir_max_size_in_mb: 5000
 
+filtering_rules:
+  - policy: deny
+    pattern: jvm.fd.usage
+    scope: global
+
 #To output tombstone counter metrics for integration tests
 #metric_sampling_interval - The frequency that metrics are reported to Cassandra Metrics Collector.
 #Default: 30
 metric_sampling_interval_in_seconds: 10
+upload_interval_in_seconds: 10
 
 #Directory to store collected metrics.
 #When not set, the default directory is Cassandra data directory. You can customize the location by uncomment and correct data_dir

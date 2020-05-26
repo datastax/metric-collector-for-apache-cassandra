@@ -110,6 +110,12 @@ public class ConfigurationLoader
             Yaml yaml = new Yaml(constructor);
             Configuration result = loadConfig(yaml, configBytes);
             propertiesChecker.check();
+
+            for (FilteringRule rule : result.filtering_rules)
+            {
+                rule.init();
+            }
+
             return result;
         }
         catch (YAMLException e)
