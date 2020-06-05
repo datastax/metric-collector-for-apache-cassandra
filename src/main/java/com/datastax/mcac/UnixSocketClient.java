@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.Proxy;
@@ -84,7 +85,6 @@ public class UnixSocketClient
      * For metrics we add enhancing what exists out of the box for C* metrics
      */
     public static final MetricRegistry agentAddedMetricsRegistry = new MetricRegistry();
-
 
     private static final Logger logger = LoggerFactory.getLogger(UnixSocketClient.class);
     private static final int BATCH_SIZE = 256;
@@ -146,6 +146,8 @@ public class UnixSocketClient
     private final AtomicLong metricReportingIntervalCount;
     private final AtomicLong eventReportingIntervalCount;
     private Long lastTokenRefreshNanos;
+
+    private Method decayingHistogramOffsetMethod = null;
 
     public UnixSocketClient()
     {
@@ -1170,16 +1172,37 @@ public class UnixSocketClient
 
         long[] buckets = inputBuckets;
         long[] values = snapshot.getValues();
-        if (snapshot.getClass().getSimpleName().contains("EstimatedHistogramReservoirSnapshot"))
+        String snapshotClass = snapshot.getClass().getName();
+
+        if (snapshotClass.contains("EstimatedHistogramReservoirSnapshot"))
         {
             buckets = decayingBuckets;
+        }
+        else if (snapshotClass.contains("DecayingEstimatedHistogram"))
+        {
+            try
+            {
+                Method m = decayingHistogramOffsetMethod;
+
+                if (m == null)
+                {
+                    m = snapshot.getClass().getMethod("getOffsets");
+                    decayingHistogramOffsetMethod = m;
+                }
+
+                buckets = (long[]) m.invoke(snapshot);
+            }
+            catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)
+            {
+                //nothing we can do
+            }
         }
 
         // This can happen if histogram isn't EstimatedDecay or EstimatedHistogram
         if (values.length != buckets.length)
         {
             NoSpamLogger.getLogger(logger, 1, TimeUnit.HOURS)
-                    .info("Not able to get buckets for {} {} type {}", name, values.length, snapshot);
+                    .info("Not able to get buckets for {} {} type {}", name, values.length, snapshot.getClass().getName());
             return bucketTags;
         }
 
