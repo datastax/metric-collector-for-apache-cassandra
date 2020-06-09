@@ -15,6 +15,50 @@
       {
          "collapse": false,
          "collapsed": false,
+         "height": "50px",
+         "panels": [
+            {
+               "content": "",
+               "datasource": null,
+               "gridPos": { },
+               "id": 2,
+               "mode": "markdown",
+               "title": "",
+               "transparent": true,
+               "type": "text"
+            },
+            {
+               "content": "<a href=\"https://cassandra.apache.org\" target=\"new\"><img src=\"https://cassandra.apache.org/img/cassandra_logo.png\"/></a>",
+               "datasource": null,
+               "gridPos": { },
+               "id": 3,
+               "mode": "html",
+               "title": "",
+               "transparent": true,
+               "type": "text"
+            },
+            {
+               "content": "",
+               "datasource": null,
+               "gridPos": { },
+               "id": 4,
+               "mode": "markdown",
+               "title": "",
+               "transparent": true,
+               "type": "text"
+            }
+         ],
+         "repeat": null,
+         "repeatIteration": null,
+         "repeatRowId": null,
+         "showTitle": true,
+         "title": "",
+         "titleSize": "h6",
+         "type": "row"
+      },
+      {
+         "collapse": false,
+         "collapsed": false,
          "panels": [
             {
                "aliasColors": { },
@@ -25,7 +69,7 @@
                "description": "Total Requests Per Cluster, by Request Type",
                "fill": 0,
                "gridPos": { },
-               "id": 2,
+               "id": 5,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -107,7 +151,7 @@
                "description": "Total Timeouts, Failures, Unavailable Rates for each cluster",
                "fill": 0,
                "gridPos": { },
-               "id": 3,
+               "id": 6,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -236,7 +280,7 @@
                   "thresholdMarkers": false
                },
                "gridPos": { },
-               "id": 4,
+               "id": 7,
                "interval": null,
                "links": [ ],
                "mappingType": 1,
@@ -304,7 +348,7 @@
                "description": "p99 Read latency maximum for coordinated reads",
                "fill": 0,
                "gridPos": { },
-               "id": 5,
+               "id": 8,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -410,7 +454,7 @@
                "description": "p99 Write latency maximum for coordinated reads",
                "fill": 0,
                "gridPos": { },
-               "id": 6,
+               "id": 9,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -516,7 +560,7 @@
                "description": "Other p99 latencies for coordinated requests",
                "fill": 0,
                "gridPos": { },
-               "id": 7,
+               "id": 10,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -606,7 +650,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Nodes Status uses Internal/Gossip activity. Be mindful that if Native or Thrift protocol are disabled, the nodes won't be reachable, and still marked up",
                "gridPos": { },
-               "id": 8,
+               "id": 11,
                "polystat": {
                   "globalOperatorName": "current",
                   "globalThresholds": [
@@ -659,7 +703,7 @@
                   "thresholdMarkers": true
                },
                "gridPos": { },
-               "id": 9,
+               "id": 12,
                "interval": null,
                "links": [ ],
                "mappingType": 1,
@@ -728,7 +772,7 @@
                "description": "Nodes up and down in the cluster per protocol/activity",
                "fill": 0,
                "gridPos": { },
-               "id": 10,
+               "id": 13,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -841,7 +885,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Disk space used ordered (fullest disks first)",
                "gridPos": { },
-               "id": 11,
+               "id": 14,
                "sort": {
                   "col": 1,
                   "desc": true
@@ -912,7 +956,7 @@
                "description": "Total sizes of the data on distinct nodes",
                "fill": 0,
                "gridPos": { },
-               "id": 12,
+               "id": 15,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1001,7 +1045,7 @@
                "description": "SSTable Count Max and Average per table",
                "fill": 0,
                "gridPos": { },
-               "id": 13,
+               "id": 16,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1091,7 +1135,7 @@
                "description": "Maximum pending compactions on any node in the cluster",
                "fill": 0,
                "gridPos": { },
-               "id": 14,
+               "id": 17,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1200,7 +1244,7 @@
                "description": "Maximum pending compactions per table",
                "fill": 0,
                "gridPos": { },
-               "id": 15,
+               "id": 18,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1297,7 +1341,7 @@
                "description": "Cluster wide pending threads, by thread pool name",
                "fill": 0,
                "gridPos": { },
-               "id": 16,
+               "id": 19,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1379,7 +1423,7 @@
                "description": "Cluster wide blocked threads, by thread pool name",
                "fill": 0,
                "gridPos": { },
-               "id": 17,
+               "id": 20,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1461,7 +1505,7 @@
                "description": "Dropped messages rate summed by message type and cluster",
                "fill": 0,
                "gridPos": { },
-               "id": 18,
+               "id": 21,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1543,7 +1587,7 @@
                "description": "active threads summed per cluster",
                "fill": 0,
                "gridPos": { },
-               "id": 19,
+               "id": 22,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1625,7 +1669,7 @@
                "description": "Sum of hints being handed off per cluster.",
                "fill": 0,
                "gridPos": { },
-               "id": 20,
+               "id": 23,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1721,7 +1765,7 @@
                "description": "Maximum CPU utilisation (max 100%)",
                "fill": 0,
                "gridPos": { },
-               "id": 21,
+               "id": 24,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1829,7 +1873,7 @@
                "description": "Max Unix load on a node for a cluster",
                "fill": 0,
                "gridPos": { },
-               "id": 22,
+               "id": 25,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1935,7 +1979,7 @@
                "description": "Maximum Memory allocated per usage (worst node) - excludes caches, buffers, etc",
                "fill": 1,
                "gridPos": { },
-               "id": 23,
+               "id": 26,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2024,7 +2068,7 @@
                "description": "Disk read throughput",
                "fill": 0,
                "gridPos": { },
-               "id": 24,
+               "id": 27,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2130,7 +2174,7 @@
                "description": "Disk write throughput",
                "fill": 0,
                "gridPos": { },
-               "id": 25,
+               "id": 28,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2236,7 +2280,7 @@
                "description": "Network In and Out per cluster",
                "fill": 1,
                "gridPos": { },
-               "id": 26,
+               "id": 29,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2344,7 +2388,7 @@
                "description": "Percentage of the time the node is *not* doing a GC, thus Cassandra is not stopped for GC",
                "fill": 0,
                "gridPos": { },
-               "id": 27,
+               "id": 30,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2452,7 +2496,7 @@
                "description": "Garbage collection duration",
                "fill": 0,
                "gridPos": { },
-               "id": 28,
+               "id": 31,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2558,7 +2602,7 @@
                "description": "Maximum JVM Heap Memory size (worst node) and minimum available heap size",
                "fill": 1,
                "gridPos": { },
-               "id": 29,
+               "id": 32,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,

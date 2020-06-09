@@ -89,6 +89,18 @@ dashboard.new(
   )
 )
 .addRow(
+  row.new(title='', height='50px')
+  .addPanel(textPanel.new(transparent=true))
+  .addPanel(
+    textPanel.new(
+      transparent=true,
+      mode="html",
+      content='<a href="https://cassandra.apache.org" target="new"><img src="https://cassandra.apache.org/img/cassandra_logo.png"/></a>',
+    )
+  )
+  .addPanel(textPanel.new(transparent=true))
+)
+.addRow(
   row.new(title='Request Throughputs (Coordinator Perspective)')
   .addPanel(
     graphPanel.new(

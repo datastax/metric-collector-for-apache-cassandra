@@ -78,6 +78,7 @@ LoadPlugin swap
 LoadPlugin uptime
 LoadPlugin processes
 LoadPlugin tcpconns
+LoadPlugin ntpd
 
 <Plugin "processes">
   ProcessMatch "all" ".*"
@@ -106,7 +107,7 @@ PreCacheChain "PreCache"
 
   <Rule "add_series_tag">
     <Match regex>
-      Plugin "^(cpu|interfaces|disk)$"   
+      Plugin "^(cpu|interfaces|disk)$"
     </Match>
 
     <Target "set">
