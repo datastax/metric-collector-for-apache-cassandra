@@ -345,7 +345,7 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "p99 Read latency maximum for coordinated reads",
+               "description": "Read latency for coordinated reads",
                "fill": 0,
                "gridPos": { },
                "id": 8,
@@ -373,12 +373,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
-                     "fillBelowTo": "min",
+                     "alias": "p999",
+                     "fillBelowTo": "p98",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "p98",
                      "lines": false
                   }
                ],
@@ -387,31 +387,31 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster, request_type) (mcac_client_request_latency{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\", quantile=\".99\"})",
+                     "expr": "histogram_quantile(0.98, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\"}[5m])) by (le, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "max",
+                     "legendFormat": "p98",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster, request_type) (mcac_client_request_latency{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\", quantile=\".99\"})",
+                     "expr": "histogram_quantile(0.99, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\"}[5m])) by (le, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "min",
+                     "legendFormat": "p99",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster, request_type) (mcac_client_request_latency{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\", quantile=\".99\"})",
+                     "expr": "histogram_quantile(0.999, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\"}[5m])) by (le, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "avg",
+                     "legendFormat": "p999",
                      "refId": "C"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Read Latency (99th percentile)",
+               "title": "Read Latency (98 - 999th percentile)",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -451,7 +451,7 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "p99 Write latency maximum for coordinated reads",
+               "description": "Write latency for coordinated writes",
                "fill": 0,
                "gridPos": { },
                "id": 9,
@@ -479,12 +479,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
-                     "fillBelowTo": "min",
+                     "alias": "p999",
+                     "fillBelowTo": "p98",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "p98",
                      "lines": false
                   }
                ],
@@ -493,31 +493,31 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster, request_type) (mcac_client_request_latency{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\", quantile=\".99\"})",
+                     "expr": "histogram_quantile(0.98, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\"}[5m])) by (le, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "max",
+                     "legendFormat": "p98",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster, request_type) (mcac_client_request_latency{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\", quantile=\".99\"})",
+                     "expr": "histogram_quantile(0.99, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\"}[5m])) by (le, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "min",
+                     "legendFormat": "p99",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster, request_type) (mcac_client_request_latency{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\", quantile=\".99\"})",
+                     "expr": "histogram_quantile(0.999, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\"}[5m])) by (le, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "avg",
+                     "legendFormat": "p999",
                      "refId": "C"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Write Latency (99th Percentile)",
+               "title": "Write Latency (98th - p999 Percentile)",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -589,10 +589,10 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster, request_type) (mcac_client_request_latency{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type!~\"write|read|.*-.*\", quantile=\".99\"})",
+                     "expr": "histogram_quantile(0.99, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type!~\"write|read|.*-.*\"}[5m])) by (le, request_type, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "max {{request_type}}",
+                     "legendFormat": "p99 {{request_type}}",
                      "refId": "A"
                   }
                ],
@@ -1160,12 +1160,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
+                     "alias": "max",
                      "fillBelowTo": "min",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "min",
                      "lines": false
                   }
                ],
@@ -1790,12 +1790,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
+                     "alias": "max",
                      "fillBelowTo": "min",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "min",
                      "lines": false
                   }
                ],
@@ -1898,12 +1898,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
+                     "alias": "max",
                      "fillBelowTo": "min",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "min",
                      "lines": false
                   }
                ],
@@ -2093,12 +2093,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
+                     "alias": "max",
                      "fillBelowTo": "min",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "min",
                      "lines": false
                   }
                ],
@@ -2199,12 +2199,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
+                     "alias": "max",
                      "fillBelowTo": "min",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "min",
                      "lines": false
                   }
                ],
@@ -2413,12 +2413,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
+                     "alias": "max",
                      "fillBelowTo": "min",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "min",
                      "lines": false
                   }
                ],
@@ -2521,12 +2521,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
+                     "alias": "max",
                      "fillBelowTo": "min",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "min",
                      "lines": false
                   }
                ],
@@ -2627,12 +2627,12 @@
                "repeat": null,
                "seriesOverrides": [
                   {
-                     "alias": "/.*max.*/",
+                     "alias": "max",
                      "fillBelowTo": "min",
                      "lines": false
                   },
                   {
-                     "alias": "/.*min.*/",
+                     "alias": "min",
                      "lines": false
                   }
                ],

@@ -13,15 +13,26 @@ local polystatPanel = grafana.polystatPanel;
 
 local prefix = std.extVar('prefix');
 
+local fillLatencySeriesOverrides = {
+    'alias': 'p999',
+    'fillBelowTo': 'p98',
+    'lines': false
+};
+local removeMinLatencySeriesOverrides = {
+    'alias': 'p98',
+    'lines': false
+};
+
 local fillMinMaxSeriesOverrides = {
-    'alias': '/.*max.*/',
+    'alias': 'max',
     'fillBelowTo': 'min',
     'lines': false
 };
 local removeMinlineSeriesOverrides = {
-    'alias': '/.*min.*/',
+    'alias': 'min',
     'lines': false
 };
+
 
 // used in the single stat panels where higher is better - cache hit rates for example
 local reversedColors =[
@@ -217,8 +228,8 @@ dashboard.new(
   )
   .addPanel(
     graphPanel.new(
-      'Read Latency (99th percentile)',
-      description='p99 Read latency maximum for coordinated reads',
+      'Read Latency (98 - 999th percentile)',
+      description='Read latency for coordinated reads',
       format='µs',
       datasource='$PROMETHEUS_DS',
       transparent=true,
@@ -234,29 +245,29 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='max by (cluster, request_type) (' + prefix + '_client_request_latency{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read", quantile=".99"})',
-        legendFormat='max',
+        expr='histogram_quantile(0.98, sum(irate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[5m])) by (le, cluster))',
+        legendFormat='p98',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='min by (cluster, request_type) (' + prefix + '_client_request_latency{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read", quantile=".99"})',
-        legendFormat='min',
+        expr='histogram_quantile(0.99, sum(irate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[5m])) by (le, cluster))',
+        legendFormat='p99',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='avg by (cluster, request_type) (' + prefix + '_client_request_latency{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read", quantile=".99"})',
-        legendFormat='avg',
+        expr='histogram_quantile(0.999, sum(irate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[5m])) by (le, cluster))',
+        legendFormat='p999',
       )
     )
-    .addSeriesOverride(fillMinMaxSeriesOverrides)
-    .addSeriesOverride(removeMinlineSeriesOverrides)
+    .addSeriesOverride(fillLatencySeriesOverrides)
+    .addSeriesOverride(removeMinLatencySeriesOverrides)
   )
   .addPanel(
     graphPanel.new(
-      'Write Latency (99th Percentile)',
-      description='p99 Write latency maximum for coordinated reads',
+      'Write Latency (98th - p999 Percentile)',
+      description='Write latency for coordinated writes',
       format='µs',
       datasource='$PROMETHEUS_DS',
       transparent=true,
@@ -272,24 +283,24 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='max by (cluster, request_type) (' + prefix + '_client_request_latency{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write", quantile=".99"})',
-        legendFormat='max',
+        expr='histogram_quantile(0.98, sum(irate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[5m])) by (le, cluster))',
+        legendFormat='p98',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='min by (cluster, request_type) (' + prefix + '_client_request_latency{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write", quantile=".99"})',
-        legendFormat='min',
+        expr='histogram_quantile(0.99, sum(irate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[5m])) by (le, cluster))',
+        legendFormat='p99',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='avg by (cluster, request_type) (' + prefix + '_client_request_latency{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write", quantile=".99"})',
-        legendFormat='avg',
+        expr='histogram_quantile(0.999, sum(irate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[5m])) by (le, cluster))',
+        legendFormat='p999',
       )
     )
-    .addSeriesOverride(fillMinMaxSeriesOverrides)
-    .addSeriesOverride(removeMinlineSeriesOverrides)
+    .addSeriesOverride(fillLatencySeriesOverrides)
+    .addSeriesOverride(removeMinLatencySeriesOverrides)
   )
   .addPanel(
     graphPanel.new(
@@ -311,8 +322,8 @@ dashboard.new(
     .addTarget(
       prometheus.target(
         # In scope!~"Write|Read|.*-.*", we want to exclude charts above and all the per-consistency_level info like "Read-LOCAL_ONE"
-        expr='max by (cluster, request_type) (' + prefix + '_client_request_latency{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type!~"write|read|.*-.*", quantile=".99"})',
-        legendFormat='max {{request_type}}'
+        expr='histogram_quantile(0.99, sum(irate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type!~"write|read|.*-.*"}[5m])) by (le, request_type, cluster))',
+        legendFormat='p99 {{request_type}}'
       )
     )
   )
