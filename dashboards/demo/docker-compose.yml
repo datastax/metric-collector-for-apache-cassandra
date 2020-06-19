@@ -12,7 +12,7 @@ services:
       - "../prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml"
       - "../demo/tg_mcac.json:/etc/prometheus/tg_mcac.json"
   grafana:
-    image: "grafana/grafana:5.3.2"
+    image: "grafana/grafana:6.7.2"
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -20,6 +20,7 @@ services:
       - "../grafana/prometheus-datasource.yaml:/etc/grafana/provisioning/datasources/prometheus-datasource.yaml"
       - "../grafana/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml"
       - "../grafana/generated-dashboards:/var/lib/grafana/dashboards:ro"
+      - "../grafana/grafana.ini:/etc/grafana/grafana.ini:ro"
     networks:
       - demo_net
     environment:
