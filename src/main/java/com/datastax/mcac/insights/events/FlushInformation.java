@@ -1,14 +1,13 @@
 package com.datastax.mcac.insights.events;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.cassandra.db.Memtable;
 import org.apache.cassandra.io.sstable.format.SSTableReader;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FlushInformation extends Insight
 {

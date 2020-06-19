@@ -14,10 +14,10 @@ import org.apache.cassandra.cql3.UntypedResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRawValue;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonRawValue;
 
 import static org.apache.cassandra.cql3.QueryProcessor.executeInternal;
 
@@ -25,10 +25,7 @@ import static org.apache.cassandra.cql3.QueryProcessor.executeInternal;
 
 
 /**
- * Insight that holds all the meta-info we can get our hands on.
- *
- * This class is optimised for fast writes, not intended to be used
- * directly by DSE other than tests.
+ * Insight that holds all node meta-info
  */
 public class NodeSystemInformation extends Insight
 {

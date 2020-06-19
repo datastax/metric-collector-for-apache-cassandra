@@ -3,14 +3,14 @@ package com.datastax.mcac.insights.events;
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
 import com.datastax.mcac.utils.JacksonUtil;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import org.apache.cassandra.cql3.QueryProcessor;
 import org.apache.cassandra.cql3.UntypedResultSet;
 import org.apache.cassandra.utils.FBUtilities;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonRawValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +20,6 @@ import java.util.List;
 import java.util.Optional;
 
 
-/**
- * Copyright DataStax, Inc.
- *
- * Please see the included license file for details.
- */
 public class SchemaInformation extends Insight
 {
     public static final String NAME = "oss.insights.events.schema_information";
