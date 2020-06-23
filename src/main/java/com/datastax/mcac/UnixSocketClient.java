@@ -906,7 +906,7 @@ public class UnixSocketClient
             com.datastax.mcac.insights.metrics.Histogram h = new com.datastax.mcac.insights.metrics.Histogram(
                     name,
                     System.currentTimeMillis(),
-                    Optional.of(globalTags),
+                    globalTags,
                     hist.count(),
                     new SamplingStats(min, max, mean, p50, p75, p90, p98, p99, p999, stddev)
             );
@@ -965,7 +965,7 @@ public class UnixSocketClient
             com.datastax.mcac.insights.metrics.Timer t = new com.datastax.mcac.insights.metrics.Timer(
                     name,
                     System.currentTimeMillis(),
-                    Optional.of(buckets),
+                    buckets,
                     timer.getCount(),
                     new SamplingStats((long) min, (long) max, mean, p50, p75, p95, p98, p99, p999, stddev),
                     new RateStats(min1Rate, min5rate, min15rate, meanRate),
@@ -1005,7 +1005,7 @@ public class UnixSocketClient
             com.datastax.mcac.insights.metrics.Meter m = new com.datastax.mcac.insights.metrics.Meter(
                     name,
                     System.currentTimeMillis(),
-                    Optional.of(globalTags),
+                    globalTags,
                     meter.getCount(),
                     new RateStats(min1Rate, min5rate, min15rate, meanRate),
                     rateUnit.name()
@@ -1053,7 +1053,7 @@ public class UnixSocketClient
             com.datastax.mcac.insights.metrics.Histogram h = new com.datastax.mcac.insights.metrics.Histogram(
                     name,
                     System.currentTimeMillis(),
-                    Optional.of(globalTags),
+                    globalTags,
                     histogram.getCount(),
                     new SamplingStats(min, max, mean, p50, p75, p95, p98, p99, p999, stddev)
             );

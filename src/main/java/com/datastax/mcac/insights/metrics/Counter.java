@@ -12,8 +12,8 @@ public class Counter extends Metric
     @JsonCreator
     public Counter(
             @JsonProperty("name") String name,
-            @JsonProperty("timestamp") Optional<Long> timestamp,
-            @JsonProperty("tags") Optional<Map<String, String>> tags,
+            @JsonProperty("timestamp") Long timestamp,
+            @JsonProperty("tags") Map<String, String> tags,
             @JsonProperty("count") long count
     )
     {

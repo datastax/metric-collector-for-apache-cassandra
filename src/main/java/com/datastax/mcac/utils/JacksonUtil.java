@@ -1,18 +1,17 @@
 package com.datastax.mcac.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import com.fasterxml.jackson.databind.util.ISO8601Utils;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.DeserializationFeature;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.Module;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectReader;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectWriter;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.util.ISO8601DateFormat;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.util.ISO8601Utils;
+
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
@@ -41,8 +40,6 @@ public final class JacksonUtil
 
     private static final Logger logger = LoggerFactory.getLogger(JacksonUtil.class);
 
-    private static final ImmutableList<Module> modules = ImmutableList.of(new Jdk8Module(), new JavaTimeModule());
-
     private JacksonUtil()
     {
         // util class should have private constructor
@@ -50,22 +47,15 @@ public final class JacksonUtil
 
     private static final Supplier<ObjectMapper> MAPPER_SUPPLIER = Suppliers.memoize(() -> {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true);
-        modules.forEach(mapper::registerModule);
         return mapper;
     });
 
 
     private static final Supplier<ObjectMapper> PRETTY_MAPPER_SUPPLIER = Suppliers.memoize(() -> {
         ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.INDENT_OUTPUT, true);
-        modules.forEach(mapper::registerModule);
         return mapper;
     });
-
-    public static List<Module> getObjectMapperModules()
-    {
-        return modules;
-    }
-
+    
     /**
      * <p>Public getters/setters/properties/creators will be auto detected.</p>
      * <p><b>NOTE</b>: public properties are allowed here to avoid getter/setter boilerplate

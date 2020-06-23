@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ExceptionInformation extends Insight
 {
@@ -16,12 +16,7 @@ public class ExceptionInformation extends Insight
 
     public ExceptionInformation(Throwable t)
     {
-        super(new InsightMetadata(
-                        NAME,
-                        Optional.of(System.currentTimeMillis()),
-                        Optional.empty(),
-                        Optional.of(InsightMetadata.InsightType.EVENT),
-                        Optional.empty()),
+        super(new InsightMetadata(NAME),
                 new Data(t));
     }
 

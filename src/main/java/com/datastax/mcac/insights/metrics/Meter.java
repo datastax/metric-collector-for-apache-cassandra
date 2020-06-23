@@ -13,7 +13,7 @@ public final class Meter extends Metric
     public Meter(
             @JsonProperty("name") String name,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("tags") Optional<Map<String, String>> tags,
+            @JsonProperty("tags") Map<String, String> tags,
             @JsonProperty("count") long count,
             @JsonProperty("rateStats") RateStats rateStats,
             @JsonProperty("rateUnit") String rateUnit
@@ -21,7 +21,7 @@ public final class Meter extends Metric
     {
         super(
                 name,
-                Optional.of(timestamp),
+                timestamp,
                 tags,
                 InsightMetadata.InsightType.METER,
                 new Data(count, rateStats, rateUnit)

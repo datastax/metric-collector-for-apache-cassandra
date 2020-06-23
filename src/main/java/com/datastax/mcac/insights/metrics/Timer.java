@@ -13,7 +13,7 @@ public class Timer extends Metric
     public Timer(
             @JsonProperty("name") String name,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("tags") Optional<Map<String, String>> tags,
+            @JsonProperty("tags") Map<String, String> tags,
             @JsonProperty("count") long count,
             @JsonProperty("samplingStats") SamplingStats samplingStats,
             @JsonProperty("rateStats") RateStats rateStats,
@@ -23,7 +23,7 @@ public class Timer extends Metric
     {
         super(
                 name,
-                Optional.of(timestamp),
+                timestamp,
                 tags,
                 InsightMetadata.InsightType.TIMER,
                 new Data(count, samplingStats, rateStats, rateUnit, durationUnit)

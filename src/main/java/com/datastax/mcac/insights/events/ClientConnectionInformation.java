@@ -29,12 +29,7 @@ public class ClientConnectionInformation extends Insight
 
     public ClientConnectionInformation(UUID sessionId, ClientState clientState, Map<String, String> options, boolean isHeartbeat)
     {
-        super(new InsightMetadata(
-                        isHeartbeat ? NAME_HEARTBEAT : NAME,
-                        Optional.of(System.currentTimeMillis()),
-                        Optional.empty(),
-                        Optional.of(InsightMetadata.InsightType.EVENT),
-                        Optional.empty()),
+        super(new InsightMetadata(isHeartbeat ? NAME_HEARTBEAT : NAME),
                 new Data(sessionId,  clientState, options));
     }
 

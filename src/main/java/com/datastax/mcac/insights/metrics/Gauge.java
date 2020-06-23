@@ -13,8 +13,8 @@ public class Gauge extends Metric
     @JsonCreator
     public Gauge(
             @JsonProperty("name") String name,
-            @JsonProperty("timestamp") Optional<Long> timestamp,
-            @JsonProperty("tags") Optional<Map<String, String>> tags,
+            @JsonProperty("timestamp") Long timestamp,
+            @JsonProperty("tags") Map<String, String> tags,
             @JsonProperty("value") Number value
     )
     {
@@ -24,20 +24,10 @@ public class Gauge extends Metric
     public Gauge(
             String name,
             Long timestamp,
-            Map<String, String> tags,
             Number value
     )
     {
-        super(name, Optional.of(timestamp), Optional.of(tags), InsightMetadata.InsightType.GAUGE, new Data(value));
-    }
-
-    public Gauge(
-            String name,
-            Long timestamp,
-            Number value
-    )
-    {
-        super(name, Optional.of(timestamp), Optional.empty(), InsightMetadata.InsightType.GAUGE, new Data(value));
+        super(name, timestamp, null, InsightMetadata.InsightType.GAUGE, new Data(value));
     }
 
     @JsonIgnore
