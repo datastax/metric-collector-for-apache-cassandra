@@ -16,12 +16,7 @@ public class ExceptionInformation extends Insight
 
     public ExceptionInformation(Throwable t)
     {
-        super(new InsightMetadata(
-                        NAME,
-                        Optional.of(System.currentTimeMillis()),
-                        Optional.empty(),
-                        Optional.of(InsightMetadata.InsightType.EVENT),
-                        Optional.empty()),
+        super(new InsightMetadata(NAME),
                 new Data(t));
     }
 

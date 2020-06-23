@@ -15,13 +15,7 @@ public class FlushInformation extends Insight
 
     public FlushInformation(Memtable memtable, Collection<SSTableReader> sstables, long durationInMillis, boolean isTruncate)
     {
-        super(new InsightMetadata(
-                NAME,
-                Optional.of(System.currentTimeMillis()),
-                Optional.empty(),
-                Optional.of(InsightMetadata.InsightType.EVENT),
-                Optional.empty()
-        ), new Data(
+        super(new InsightMetadata(NAME), new Data(
                 memtable,
                 sstables,
                 durationInMillis,

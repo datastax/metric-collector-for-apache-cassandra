@@ -14,12 +14,7 @@ public class LargePartitionInformation extends Insight
 
     public LargePartitionInformation(String keyspace, String table, DecoratedKey key, long size, long partitionLimit)
     {
-        super(new InsightMetadata(
-                        NAME,
-                        Optional.of(System.currentTimeMillis()),
-                        Optional.empty(),
-                        Optional.of(InsightMetadata.InsightType.EVENT),
-                        Optional.empty()),
+        super(new InsightMetadata(NAME),
                 new Data(keyspace, table,
                         key.getToken() instanceof Murmur3Partitioner.LongToken ? (Long) key.getToken().getTokenValue() : Long.MIN_VALUE,
                         size, partitionLimit));

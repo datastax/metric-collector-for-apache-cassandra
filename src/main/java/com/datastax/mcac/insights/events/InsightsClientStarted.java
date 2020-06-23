@@ -16,10 +16,7 @@ public class InsightsClientStarted extends Insight
     public InsightsClientStarted()
     {
         super(
-                new InsightMetadata(
-                        NAME,
-                        System.currentTimeMillis()
-                ),
+                new InsightMetadata(NAME),
                 null
         );
     }

@@ -20,13 +20,7 @@ public class GossipChangeInformation extends Insight
 
     public GossipChangeInformation(Data data)
     {
-        super(new InsightMetadata(
-                NAME,
-                Optional.of(System.currentTimeMillis()),
-                Optional.empty(),
-                Optional.of(InsightMetadata.InsightType.EVENT),
-                Optional.empty()
-        ), data);
+        super(new InsightMetadata(NAME), data);
     }
 
     public GossipChangeInformation(GossipEventType eventType, InetAddress ipAddress)

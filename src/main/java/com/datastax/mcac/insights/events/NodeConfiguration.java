@@ -74,10 +74,10 @@ public class NodeConfiguration extends Insight
     {
         super(new InsightMetadata(
                 NAME,
-                Optional.of(System.currentTimeMillis()),
-                Optional.empty(),
-                Optional.of(InsightMetadata.InsightType.EVENT),
-                Optional.of(MAPPING_VERSION)
+                System.currentTimeMillis(),
+                null,
+                InsightMetadata.InsightType.EVENT,
+                MAPPING_VERSION
         ), data);
     }
 

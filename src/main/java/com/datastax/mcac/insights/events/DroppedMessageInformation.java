@@ -20,13 +20,7 @@ public class DroppedMessageInformation extends Insight
     )
     {
         super(
-                new InsightMetadata(
-                        NAME,
-                        Optional.of(System.currentTimeMillis()),
-                        Optional.empty(),
-                        Optional.of(InsightMetadata.InsightType.EVENT),
-                        Optional.empty()
-                ),
+                new InsightMetadata(NAME),
                 new Data(
                         groupName,
                         interval,

@@ -13,12 +13,12 @@ public class Histogram extends Metric
     public Histogram(
             @JsonProperty("name") String name,
             @JsonProperty("timestamp") Long timestamp,
-            @JsonProperty("tags") Optional<Map<String, String>> tags,
+            @JsonProperty("tags") Map<String, String> tags,
             @JsonProperty("count") long count,
             @JsonProperty("samplingStats") SamplingStats samplingStats
     )
     {
-        super(name, Optional.of(timestamp), tags, InsightMetadata.InsightType.HISTOGRAM, new Data(count, samplingStats));
+        super(name, timestamp, tags, InsightMetadata.InsightType.HISTOGRAM, new Data(count, samplingStats));
     }
 
     private static final class Data

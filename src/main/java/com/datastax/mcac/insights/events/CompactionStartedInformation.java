@@ -30,10 +30,10 @@ public class CompactionStartedInformation extends Insight
     {
         super(new InsightMetadata(
                         NAME,
-                        Optional.of(System.currentTimeMillis()),
-                        Optional.empty(),
-                        Optional.of(InsightMetadata.InsightType.EVENT),
-                        Optional.of("version1")
+                        System.currentTimeMillis(),
+                        null,
+                        InsightMetadata.InsightType.EVENT,
+                        "version1"
                 ),
                 new CompactionStartedInformation.DataVersion1(
                         id,

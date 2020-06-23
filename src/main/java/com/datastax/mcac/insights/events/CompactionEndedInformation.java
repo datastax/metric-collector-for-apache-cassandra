@@ -32,10 +32,10 @@ public final class CompactionEndedInformation extends Insight
     {
         super(new InsightMetadata(
                         NAME,
-                        Optional.of(System.currentTimeMillis()),
-                        Optional.empty(),
-                        Optional.of(InsightMetadata.InsightType.EVENT),
-                        Optional.of("version1")
+                        System.currentTimeMillis(),
+                        null,
+                        InsightMetadata.InsightType.EVENT,
+                        "version1"
                 ),
                 new DataVersion1(
                         id,
