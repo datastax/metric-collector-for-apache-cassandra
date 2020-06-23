@@ -1,7 +1,7 @@
 package com.datastax.mcac.insights;
 
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -9,8 +9,9 @@ import java.util.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonInclude;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InsightMetadata
 {
@@ -29,13 +30,14 @@ public class InsightMetadata
     @JsonProperty("name")
     public final String name;
     @JsonProperty("timestamp")
-    public final Optional<Long> timestamp;
+    public final Long timestamp;
     @JsonProperty("tags")
     public final Map<String, String> tags;
     @JsonProperty("insightType")
-    public final Optional<InsightType> insightType;
+    public final InsightType insightType;
     @JsonProperty("insightMappingId")
-    public Optional<String> insightMappingId;
+    @JsonInclude(JsonInclude.Include.NON_NULL) //ignore null field on this property only
+    public String insightMappingId;
 
     /**
      * InsightsMetadata base constructor which all other constructors map to.
@@ -57,13 +59,13 @@ public class InsightMetadata
             @JsonProperty("name")
                     String name,
             @JsonProperty("timestamp")
-                    Optional<Long> timestamp,
+                    Long timestamp,
             @JsonProperty("tags")
-                    Optional<Map<String, String>> tags,
+                    Map<String, String> tags,
             @JsonProperty("insightType")
-                    Optional<InsightType> insightType,
+                    InsightType insightType,
             @JsonProperty("insightMappingId")
-                    Optional<String> insightMappingId
+                    String insightMappingId
     )
     {
         /*
@@ -78,9 +80,9 @@ public class InsightMetadata
         Preconditions.checkArgument(!Strings.isNullOrEmpty(name), "name is required");
 
         this.name = name;
-        this.timestamp = Optional.of(timestamp.filter(ts -> ts > 0).orElse(Instant.now().toEpochMilli()));
-        this.tags = tags.orElseGet(HashMap::new); //kept mutable since we want to add some default tags
-        this.insightType = Optional.of(insightType.orElse(InsightType.EVENT));
+        this.timestamp = timestamp == null || timestamp <= 0L ? Instant.now().toEpochMilli() : timestamp;
+        this.tags = tags == null ? Collections.emptyMap() : tags;  //kept mutable since we want to add some default tags
+        this.insightType = insightType == null ? InsightType.EVENT : insightType;
         this.insightMappingId = insightMappingId;
     }
 
@@ -99,7 +101,7 @@ public class InsightMetadata
             Map<String, String> tags
     )
     {
-        this(name, Optional.ofNullable(timestamp), Optional.ofNullable(tags), Optional.empty(), Optional.empty());
+        this(name, timestamp, tags, null, null);
     }
 
     /**
@@ -115,7 +117,7 @@ public class InsightMetadata
             Map<String, String> tags
     )
     {
-        this(name, Optional.empty(), Optional.ofNullable(tags), Optional.empty(), Optional.empty());
+        this(name, null, tags, null, null);
     }
 
     /**
@@ -130,7 +132,7 @@ public class InsightMetadata
             Long timestamp
     )
     {
-        this(name, Optional.ofNullable(timestamp), Optional.empty(), Optional.empty(), Optional.empty());
+        this(name, timestamp, null, null, null);
     }
 
     /**
@@ -141,17 +143,17 @@ public class InsightMetadata
      */
     public InsightMetadata(String name)
     {
-        this(name, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        this(name, null, null, null, null);
     }
 
     public InsightMetadata withTags(Map<String, String> newTags)
     {
-        return new InsightMetadata(this.name, this.timestamp, Optional.of(newTags), insightType, insightMappingId);
+        return new InsightMetadata(this.name, this.timestamp, newTags, insightType, insightMappingId);
     }
 
     public InsightMetadata withName(String newName)
     {
-        return new InsightMetadata(newName, this.timestamp, Optional.of(tags), insightType, insightMappingId);
+        return new InsightMetadata(newName, this.timestamp, tags, insightType, insightMappingId);
     }
 
     @Override

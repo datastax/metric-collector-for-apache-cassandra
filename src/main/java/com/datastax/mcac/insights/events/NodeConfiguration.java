@@ -25,24 +25,24 @@ import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
 import com.datastax.mcac.utils.JacksonUtil;
 import com.datastax.mcac.utils.ShellUtils;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.fasterxml.jackson.databind.ser.std.MapProperty;
 import org.apache.cassandra.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonStreamContext;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.PropertyWriter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonFilter;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonRawValue;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonGenerator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonStreamContext;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectWriter;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.SerializerProvider;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ser.PropertyWriter;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ser.std.MapProperty;
 
 
 /**
@@ -74,10 +74,10 @@ public class NodeConfiguration extends Insight
     {
         super(new InsightMetadata(
                 NAME,
-                Optional.of(System.currentTimeMillis()),
-                Optional.empty(),
-                Optional.of(InsightMetadata.InsightType.EVENT),
-                Optional.of(MAPPING_VERSION)
+                System.currentTimeMillis(),
+                null,
+                InsightMetadata.InsightType.EVENT,
+                MAPPING_VERSION
         ), data);
     }
 
@@ -236,7 +236,8 @@ public class NodeConfiguration extends Insight
     @JsonFilter("secure filter")
     static class SecureFilterMixIn {}
 
-    static class SecurePropertyFilter extends SimpleBeanPropertyFilter {
+    static class SecurePropertyFilter extends SimpleBeanPropertyFilter
+    {
         private static final Pattern pattern = Pattern.compile("(secret|user|pass)", Pattern.CASE_INSENSITIVE);
 
         private String createPath(PropertyWriter writer, JsonGenerator jgen)

@@ -4,8 +4,8 @@ import java.util.*;
 
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MCACFingerprint extends Insight
 {
@@ -25,14 +25,7 @@ public class MCACFingerprint extends Insight
 
     public MCACFingerprint(List<OSSFingerprint> fingerprintList)
     {
-        super(new InsightMetadata(
-                NAME,
-                //TODO: if we upgrade c* dependency we could use ApproximateTime
-                Optional.of(System.currentTimeMillis()),
-                Optional.empty(),
-                Optional.of(InsightMetadata.InsightType.EVENT),
-                Optional.empty()
-        ), new Data(fingerprintList));
+        super(new InsightMetadata(NAME), new Data(fingerprintList));
     }
 
     public static class Data

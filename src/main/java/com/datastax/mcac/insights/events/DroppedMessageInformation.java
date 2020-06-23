@@ -2,7 +2,7 @@ package com.datastax.mcac.insights.events;
 
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Optional;
 
@@ -20,13 +20,7 @@ public class DroppedMessageInformation extends Insight
     )
     {
         super(
-                new InsightMetadata(
-                        NAME,
-                        Optional.of(System.currentTimeMillis()),
-                        Optional.empty(),
-                        Optional.of(InsightMetadata.InsightType.EVENT),
-                        Optional.empty()
-                ),
+                new InsightMetadata(NAME),
                 new Data(
                         groupName,
                         interval,
