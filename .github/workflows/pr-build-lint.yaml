@@ -47,4 +47,3 @@ jobs:
       - name: Lint generated YAML files
         run: |
           yamllint dashboards/k8s-build/generated
-      
