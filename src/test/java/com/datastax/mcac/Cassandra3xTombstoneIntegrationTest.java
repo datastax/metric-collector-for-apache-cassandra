@@ -145,11 +145,18 @@ public class Cassandra3xTombstoneIntegrationTest extends BaseIntegrationTest
     )
     {
         int rangeVal = 0;
-        for (int i = 1; i <= 10000; i++)
+        for (int i = 1; i <= 1000; i++)
         {
-            session.execute(
-                    "INSERT into foo.bar(key, k2, k3, value) VALUES (?, ?, ?, ?)", 0, i % 2 == 0 ? rangeVal++ : rangeVal, i, "1"
-            );
+            try
+            {
+                session.execute(
+                        "INSERT into foo.bar(key, k2, k3, value) VALUES (?, ?, ?, ?)", 0, i % 2 == 0 ? rangeVal++ : rangeVal, i, "1"
+                );
+            }
+            catch (Throwable t)
+            {
+                //Timeout ok
+            }
         }
     }
 }
