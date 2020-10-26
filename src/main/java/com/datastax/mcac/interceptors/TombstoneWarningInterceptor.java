@@ -65,6 +65,9 @@ public class TombstoneWarningInterceptor extends AbstractInterceptor
                 if (matcher.matches() && matcher.groupCount() == 2)
                 {
                     String cqlQuery = matcher.group(2);
+                    if (cqlQuery.indexOf(';') > 0)
+                        cqlQuery = cqlQuery.substring(0, cqlQuery.indexOf(";"));
+                    
                     Object statement = QueryProcessor.class.getMethod("parseStatement", String.class).invoke(null, cqlQuery);
 
                     Method ks = statement.getClass().getMethod("keyspace");
