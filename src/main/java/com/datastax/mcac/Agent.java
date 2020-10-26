@@ -10,20 +10,12 @@ import com.datastax.mcac.interceptors.LargePartitionInterceptor;
 import com.datastax.mcac.interceptors.LegacyCompactionStartInterceptor;
 import com.datastax.mcac.interceptors.DroppedMessageLoggingAdvice;
 import com.datastax.mcac.interceptors.OptionsMessageInterceptor;
-import com.datastax.mcac.interceptors.QueryHandlerInterceptor;
 import com.datastax.mcac.interceptors.StartupMessageInterceptor;
 import com.datastax.mcac.interceptors.TombstoneFailureInterceptor;
 import com.datastax.mcac.interceptors.TombstoneWarningInterceptor;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.ClassFileLocator;
-import net.bytebuddy.dynamic.loading.ClassInjector;
 
-import java.io.File;
 import java.lang.instrument.Instrumentation;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
 import static net.bytebuddy.matcher.ElementMatchers.isSynthetic;

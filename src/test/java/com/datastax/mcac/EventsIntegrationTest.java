@@ -47,7 +47,7 @@ public class EventsIntegrationTest extends BaseIntegrationTest
                     .withPoolingOptions(new PoolingOptions().setHeartbeatIntervalSeconds(1))
                     .build();
             Session session = cluster.connect();
-            
+
             session.execute("CREATE KEYSPACE foo with replication={'class': 'SimpleStrategy', 'replication_factor':3}");
             session.execute("CREATE TABLE foo.bar (key text PRIMARY KEY, value text) with compaction = {'class': 'LeveledCompactionStrategy'}");
 
