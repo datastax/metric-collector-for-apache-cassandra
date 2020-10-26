@@ -48,20 +48,6 @@ public class EventsIntegrationTest extends BaseIntegrationTest
                     .build();
             Session session = cluster.connect();
 
-            session.execute("CALL InsightsRpc.reportInsight('{\n" +
-                   "  \"metadata\": {\n" +
-                   "    \"name\": \"driver.startup\",\n" +
-                   "    \"insightMappingId\": \"v1\",\n" +
-                   "    \"insightType\": \"EVENT\",\n" +
-                   "    \"timestamp\": 1542285611120,\n" +
-                   "    \"tags\": {\n" +
-                   "      \"language\": \"nodejs\"\n" +
-                   "    }\n" +
-                   "  },\n" +
-                   "  \"data\": {}" +
-                   "}')");
-
-
             session.execute("CREATE KEYSPACE foo with replication={'class': 'SimpleStrategy', 'replication_factor':3}");
             session.execute("CREATE TABLE foo.bar (key text PRIMARY KEY, value text) with compaction = {'class': 'LeveledCompactionStrategy'}");
 
@@ -85,8 +71,6 @@ public class EventsIntegrationTest extends BaseIntegrationTest
         }
 
         File rootDir = getInsightsDir();
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "driver.startup") > 0);
 
         Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, NodeConfiguration.NAME) > 0);
 
