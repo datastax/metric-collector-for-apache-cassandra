@@ -54,9 +54,6 @@ public class Agent {
                 //Cassandra Daemon
                 .type(CassandraDaemonInterceptor.type())
                 .transform(CassandraDaemonInterceptor.transformer())
-                //Query Handler
-                .type(QueryHandlerInterceptor.type())
-                .transform(QueryHandlerInterceptor.transformer())
                 //Startup Message
                 .type(StartupMessageInterceptor.type())
                 .transform(StartupMessageInterceptor.transformer())
