@@ -123,7 +123,7 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
         CompletableFuture write = CompletableFuture.runAsync(
                 () ->
                 {
-                    for (int i = 0; i < 10000; i++)
+                    for (int i = 0; i < 1000; i++)
                     {
                         try
                         {
@@ -148,7 +148,7 @@ public class DroppedMessageIntegrationTest extends BaseIntegrationTest
                      */
                     if (version.equals("3.11") || version.equals("4.0"))
                     {
-                        for (int i = 0; i < 10000; i++)
+                        for (int i = 0; i < 1000; i++)
                         {
                             try
                             {

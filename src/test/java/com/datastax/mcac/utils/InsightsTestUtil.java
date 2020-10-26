@@ -29,59 +29,59 @@ public class InsightsTestUtil
         while (attempts++ < MAX_ATTEMPTS && !dataDir.isDirectory())
         {
             Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+        }
 
-            Assert.assertTrue(dataDir.getCanonicalPath(), dataDir.isDirectory());
-            for (File file : dataDir.listFiles())
+        Assert.assertTrue(dataDir.getCanonicalPath(), dataDir.isDirectory());
+        for (File file : dataDir.listFiles())
+        {
+            InputStream reader = null;
+            try
             {
-                InputStream reader = null;
-                try
+                if (file.getName().endsWith(".gz"))
                 {
-                    if (file.getName().endsWith(".gz"))
+                    reader = new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(file))));
+                }
+                else
+                {
+                    try
                     {
-                        reader = new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(file))));
+                        reader = new BufferedInputStream(new FileInputStream(file));
                     }
-                    else
+                    catch (FileNotFoundException e)
                     {
-                        try
-                        {
-                            reader = new BufferedInputStream(new FileInputStream(file));
-                        }
-                        catch (FileNotFoundException e)
-                        {
-                            Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
-                            //File might be compressed after the listing
-                            File gzFile = new File(file.getAbsolutePath() + ".gz");
-                            reader = new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(gzFile))));
-                        }
-                    }
-
-                    byte[] bytes = new byte[Ints.BYTES];
-
-                    while (reader.read(bytes) == bytes.length)
-                    {
-                        int len = readUnsignedInt(bytes);
-                        Assert.assertTrue("" + len, len >= 0 && len < 1 << 20);
-                        byte[] msg = new byte[len];
-                        int read = reader.read(msg);
-
-                        Assert.assertTrue("Message not at encoded length " + len + " vs " + read + " file=" + file, read == len);
-
-                        String str = new String(msg);
-
-                        //Found it
-                        if (str.contains(entry))
-                        {
-                            ++numFound;
-                            sample = str;
-                            //System.err.println(str);
-                        }
+                        Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+                        //File might be compressed after the listing
+                        File gzFile = new File(file.getAbsolutePath() + ".gz");
+                        reader = new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(gzFile))));
                     }
                 }
-                finally
+
+                byte[] bytes = new byte[Ints.BYTES];
+
+                while (reader.read(bytes) == bytes.length)
                 {
-                    if (reader != null)
-                        reader.close();
+                    int len = readUnsignedInt(bytes);
+                    Assert.assertTrue("" + len, len >= 0 && len < 1 << 20);
+                    byte[] msg = new byte[len];
+                    int read = reader.read(msg);
+
+                    Assert.assertTrue("Message not at encoded length " + len + " vs " + read + " file="+file, read == len);
+
+                    String str = new String(msg);
+
+                    //Found it
+                    if (str.contains(entry))
+                    {
+                        ++numFound;
+                        sample = str;
+                        //System.err.println(str);
+                    }
                 }
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.close();
             }
         }
 
