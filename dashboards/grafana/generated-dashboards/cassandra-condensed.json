@@ -5,13 +5,13 @@
       "list": [ ]
    },
    "description": "Single pane of glass for most important Cassandra metrics",
-   "editable": false,
+   "editable": true,
    "gnetId": null,
    "graphTooltip": 0,
    "hideControls": false,
    "id": null,
    "links": [ ],
-   "refresh": "1m",
+   "refresh": "30s",
    "rows": [
       {
          "collapse": false,
