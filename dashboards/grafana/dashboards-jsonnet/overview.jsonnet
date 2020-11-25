@@ -44,10 +44,11 @@ local reversedColors =[
 dashboard.new(
   'Cassandra Overview',
   schemaVersion=14,
-  refresh='1m',
-  time_from='now-15m',
+  refresh='30s',
+  time_from='now-30m',
   editable=true,
   tags=['Cassandra', 'Overview'],
+  style='dark'
 )
 .addTemplate(
   grafana.template.datasource(
@@ -132,7 +133,7 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (irate(' + prefix + '_client_request_latency_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='{{request_type}}',
       )
     )
@@ -322,7 +323,7 @@ dashboard.new(
     .addTarget(
       prometheus.target(
         # In scope!~"Write|Read|.*-.*", we want to exclude charts above and all the per-consistency_level info like "Read-LOCAL_ONE"
-        expr='histogram_quantile(0.99, sum(irate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type!~"write|read|.*-.*"}[5m])) by (le, request_type, cluster))',
+        expr='histogram_quantile(0.99, sum(rate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type!~"write|read|.*-.*"}[1m])) by (le, request_type, cluster))',
         legendFormat='p99 {{request_type}}'
       )
     )
@@ -338,6 +339,7 @@ dashboard.new(
       transparent=true,
       span=12,
       global_unit_format='none',
+      global_operator_name='current',
       global_thresholds=[
         {
           "value": 0,
@@ -350,7 +352,20 @@ dashboard.new(
           "color": "#299c46"
         }
       ],
-      global_operator_name='current',
+      range_maps=[
+        {
+          "from": "0",
+          "to": "0.9999",
+          "text": "DOWN"
+        },
+        {
+          "from": "1",
+          "to": "1",
+          "text": "UP"
+        }
+      ],
+      mapping_type=2,
+      value_enabled=true,
     )
     .addTarget(
       prometheus.target(
@@ -667,7 +682,7 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, pool_name) (' + prefix + '_thread_pools_total_blocked_tasks_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"})',
+        expr='sum by (cluster, pool_name) (irate(' + prefix + '_thread_pools_total_blocked_tasks_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
         legendFormat='{{cluster}} - blocked {{pool_name}}',
       )
     )
@@ -691,7 +706,7 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, message_type) (' + prefix + '_dropped_message_dropped_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"})',
+        expr='sum by (cluster, message_type) (irate(' + prefix + '_dropped_message_dropped_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
         legendFormat='{{cluster}} - dropped {{message_type}}',
       )
     )
@@ -769,19 +784,19 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type="idle", cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))))',
+        expr='max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type="idle", cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))))',
         legendFormat='max',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type="idle", cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))))',
+        expr='min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type="idle", cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))))',
         legendFormat='min',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type="idle", cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))))',
+        expr='avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type="idle", cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))))',
         legendFormat='avg',
       )
     )
@@ -873,19 +888,19 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='max by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        expr='max by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='max',
       )
     )
     .addTarget(
       prometheus.target(
-        'min by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'min by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='min',
       )
     )
     .addTarget(
       prometheus.target(
-        'avg by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'avg by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='avg',
       )
     )
@@ -910,19 +925,19 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='max by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        expr='max by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='max',
       )
     )
     .addTarget(
       prometheus.target(
-        'min by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'min by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='min',
       )
     )
     .addTarget(
       prometheus.target(
-        'avg by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'avg by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='avg',
       )
     )
@@ -948,13 +963,13 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        'sum by (cluster) (irate(collectd_interface_if_octets_rx_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'sum by (cluster) (rate(collectd_interface_if_octets_rx_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='outgoing',
       )
     )
     .addTarget(
       prometheus.target(
-        'sum by (cluster) (irate(collectd_interface_if_octets_rx_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'sum by (cluster) (rate(collectd_interface_if_octets_rx_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='incoming',
       )
     )
@@ -983,22 +998,24 @@ dashboard.new(
       legend_sortDesc=true,
       shared_tooltip=false,
       decimals=2,
+      min=0,
+      max=1,
     )
     .addTarget(
       prometheus.target(
-        'max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / 1000))',
+        'max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m])) / 1000))',
         legendFormat='max',
       )
     )
     .addTarget(
       prometheus.target(
-        'min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / 1000))',
+        'min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m])) / 1000))',
         legendFormat='min',
       )
     )
     .addTarget(
       prometheus.target(
-        'avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m])) / 1000))',
+        'avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m])) / 1000))',
         legendFormat='avg',
       )
     )
@@ -1023,19 +1040,19 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        'max by (cluster) (irate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'max by (cluster) (rate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='max',
       )
     )
     .addTarget(
       prometheus.target(
-        'min by (cluster) (irate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'min by (cluster) (rate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='min',
       )
     )
     .addTarget(
       prometheus.target(
-        'avg by (cluster) (irate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m]))',
+        'avg by (cluster) (rate(' + prefix + '_jvm_gc_time{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[5m:1m]))',
         legendFormat='avg',
       )
     )

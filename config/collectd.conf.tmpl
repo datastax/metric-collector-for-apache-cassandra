@@ -89,13 +89,6 @@ LoadPlugin tcpconns
 LoadPlugin match_regex
 LoadPlugin target_set
 LoadPlugin target_replace
-LoadPlugin ntpd
-
-<Plugin "ntpd">
-  Host "{{hostName}}"
-  Port "123"
-  ReverseLookups false
-</Plugin>
 
 PreCacheChain "PreCache"
 <Chain "PreCache">
