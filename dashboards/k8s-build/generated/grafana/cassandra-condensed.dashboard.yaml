@@ -8,12 +8,12 @@ metadata:
 spec:
   json: "{\n   \"__inputs\": [ ],\n   \"__requires\": [ ],\n   \"annotations\": {\n\
     \      \"list\": [ ]\n   },\n   \"description\": \"Single pane of glass for most\
-    \ important Cassandra metrics\",\n   \"editable\": false,\n   \"gnetId\": null,\n\
+    \ important Cassandra metrics\",\n   \"editable\": true,\n   \"gnetId\": null,\n\
     \   \"graphTooltip\": 0,\n   \"hideControls\": false,\n   \"id\": null,\n   \"\
-    links\": [ ],\n   \"refresh\": \"1m\",\n   \"rows\": [\n      {\n         \"collapse\"\
-    : false,\n         \"collapsed\": false,\n         \"height\": 100,\n        \
-    \ \"panels\": [\n            {\n               \"cacheTimeout\": null,\n     \
-    \          \"colorBackground\": false,\n               \"colorValue\": true,\n\
+    links\": [ ],\n   \"refresh\": \"30s\",\n   \"rows\": [\n      {\n         \"\
+    collapse\": false,\n         \"collapsed\": false,\n         \"height\": 100,\n\
+    \         \"panels\": [\n            {\n               \"cacheTimeout\": null,\n\
+    \               \"colorBackground\": false,\n               \"colorValue\": true,\n\
     \               \"colors\": [\n                  \"#d44a3a\",\n              \
     \    \"#299c46\",\n                  \"#299c46\"\n               ],\n        \
     \       \"datasource\": \"$PROMETHEUS_DS\",\n               \"decimals\": 0,\n\
@@ -403,28 +403,29 @@ spec:
     : false,\n               \"dashLength\": 10,\n               \"dashes\": false,\n\
     \               \"datasource\": \"$PROMETHEUS_DS\",\n               \"description\"\
     : \"(no keyspace/table filters apply)\",\n               \"fill\": 1,\n      \
-    \         \"gridPos\": { },\n               \"id\": 13,\n               \"legend\"\
-    : {\n                  \"alignAsTable\": false,\n                  \"avg\": false,\n\
-    \                  \"current\": false,\n                  \"hideEmpty\": true,\n\
-    \                  \"hideZero\": true,\n                  \"max\": false,\n  \
-    \                \"min\": false,\n                  \"rightSide\": false,\n  \
-    \                \"show\": true,\n                  \"total\": false,\n      \
-    \            \"values\": false\n               },\n               \"lines\": true,\n\
-    \               \"linewidth\": 1,\n               \"links\": [ ],\n          \
-    \     \"nullPointMode\": \"null\",\n               \"percentage\": false,\n  \
-    \             \"pointradius\": 5,\n               \"points\": false,\n       \
-    \        \"renderer\": \"flot\",\n               \"repeat\": null,\n         \
-    \      \"seriesOverrides\": [\n                  {\n                     \"alias\"\
-    : \"/.*Connected/\",\n                     \"yaxis\": 2\n                  }\n\
-    \               ],\n               \"spaceLength\": 10,\n               \"span\"\
-    : 4,\n               \"stack\": false,\n               \"steppedLine\": false,\n\
-    \               \"targets\": [\n                  {\n                     \"expr\"\
-    : \"sum(irate(mcac_client_request_latency_total{cluster=~\\\"$cluster\\\", dc=~\\\
-    \"$dc\\\", rack=~\\\"$rack\\\", instance=~\\\"$host\\\"}[$rate])) by ($by, request_type)\"\
-    ,\n                     \"format\": \"time_series\",\n                     \"\
-    intervalFactor\": 2,\n                     \"legendFormat\": \"{{$by}}:{{request_type}}\"\
-    ,\n                     \"refId\": \"A\"\n                  },\n             \
-    \     {\n                     \"expr\": \"sum(mcac_client_connected_native_clients{cluster=~\\\
+    \         \"fillGradient\": 0,\n               \"gridPos\": { },\n           \
+    \    \"id\": 13,\n               \"legend\": {\n                  \"alignAsTable\"\
+    : false,\n                  \"avg\": false,\n                  \"current\": false,\n\
+    \                  \"hideEmpty\": true,\n                  \"hideZero\": true,\n\
+    \                  \"max\": false,\n                  \"min\": false,\n      \
+    \            \"rightSide\": false,\n                  \"show\": true,\n      \
+    \            \"sideWidth\": null,\n                  \"total\": false,\n     \
+    \             \"values\": false\n               },\n               \"lines\":\
+    \ true,\n               \"linewidth\": 1,\n               \"links\": [ ],\n  \
+    \             \"nullPointMode\": \"null\",\n               \"percentage\": false,\n\
+    \               \"pointradius\": 5,\n               \"points\": false,\n     \
+    \          \"renderer\": \"flot\",\n               \"repeat\": null,\n       \
+    \        \"seriesOverrides\": [\n                  {\n                     \"\
+    alias\": \"/.*Connected/\",\n                     \"yaxis\": 2\n             \
+    \     }\n               ],\n               \"spaceLength\": 10,\n            \
+    \   \"span\": 4,\n               \"stack\": false,\n               \"steppedLine\"\
+    : false,\n               \"targets\": [\n                  {\n               \
+    \      \"expr\": \"sum(irate(mcac_client_request_latency_total{cluster=~\\\"$cluster\\\
+    \", dc=~\\\"$dc\\\", rack=~\\\"$rack\\\", instance=~\\\"$host\\\"}[$rate])) by\
+    \ ($by, request_type)\",\n                     \"format\": \"time_series\",\n\
+    \                     \"intervalFactor\": 2,\n                     \"legendFormat\"\
+    : \"{{$by}}:{{request_type}}\",\n                     \"refId\": \"A\"\n     \
+    \             },\n                  {\n                     \"expr\": \"sum(mcac_client_connected_native_clients{cluster=~\\\
     \"$cluster\\\", dc=~\\\"$dc\\\", rack=~\\\"$rack\\\", instance=~\\\"$host\\\"\
     }) by ($by)\",\n                     \"format\": \"time_series\",\n          \
     \           \"intervalFactor\": 2,\n                     \"legendFormat\": \"\
@@ -449,21 +450,22 @@ spec:
     : { },\n               \"bars\": false,\n               \"dashLength\": 10,\n\
     \               \"dashes\": false,\n               \"datasource\": \"$PROMETHEUS_DS\"\
     ,\n               \"description\": \"(no keyspace/table filters apply)\",\n  \
-    \             \"fill\": 1,\n               \"gridPos\": { },\n               \"\
-    id\": 14,\n               \"legend\": {\n                  \"alignAsTable\": false,\n\
-    \                  \"avg\": false,\n                  \"current\": false,\n  \
-    \                \"hideEmpty\": true,\n                  \"hideZero\": true,\n\
-    \                  \"max\": false,\n                  \"min\": false,\n      \
-    \            \"rightSide\": false,\n                  \"show\": true,\n      \
-    \            \"total\": false,\n                  \"values\": false\n        \
-    \       },\n               \"lines\": true,\n               \"linewidth\": 1,\n\
-    \               \"links\": [ ],\n               \"nullPointMode\": \"null\",\n\
-    \               \"percentage\": false,\n               \"pointradius\": 5,\n \
-    \              \"points\": false,\n               \"renderer\": \"flot\",\n  \
-    \             \"repeat\": null,\n               \"seriesOverrides\": [ ],\n  \
-    \             \"spaceLength\": 10,\n               \"span\": 4,\n            \
-    \   \"stack\": false,\n               \"steppedLine\": false,\n              \
-    \ \"targets\": [\n                  {\n                     \"expr\": \"histogram_quantile($latency,\
+    \             \"fill\": 1,\n               \"fillGradient\": 0,\n            \
+    \   \"gridPos\": { },\n               \"id\": 14,\n               \"legend\":\
+    \ {\n                  \"alignAsTable\": false,\n                  \"avg\": false,\n\
+    \                  \"current\": false,\n                  \"hideEmpty\": true,\n\
+    \                  \"hideZero\": true,\n                  \"max\": false,\n  \
+    \                \"min\": false,\n                  \"rightSide\": false,\n  \
+    \                \"show\": true,\n                  \"sideWidth\": null,\n   \
+    \               \"total\": false,\n                  \"values\": false\n     \
+    \          },\n               \"lines\": true,\n               \"linewidth\":\
+    \ 1,\n               \"links\": [ ],\n               \"nullPointMode\": \"null\"\
+    ,\n               \"percentage\": false,\n               \"pointradius\": 5,\n\
+    \               \"points\": false,\n               \"renderer\": \"flot\",\n \
+    \              \"repeat\": null,\n               \"seriesOverrides\": [ ],\n \
+    \              \"spaceLength\": 10,\n               \"span\": 4,\n           \
+    \    \"stack\": false,\n               \"steppedLine\": false,\n             \
+    \  \"targets\": [\n                  {\n                     \"expr\": \"histogram_quantile($latency,\
     \ sum(rate(mcac_client_request_latency_bucket{cluster=~\\\"$cluster\\\", dc=~\\\
     \"$dc\\\", rack=~\\\"$rack\\\", instance=~\\\"$host\\\"}[$rate])) by (le, request_type,\
     \ $by))\",\n                     \"format\": \"time_series\",\n              \
@@ -488,23 +490,24 @@ spec:
     \            },\n            {\n               \"aliasColors\": { },\n       \
     \        \"bars\": false,\n               \"dashLength\": 10,\n              \
     \ \"dashes\": false,\n               \"datasource\": \"$PROMETHEUS_DS\",\n   \
-    \            \"fill\": 1,\n               \"gridPos\": { },\n               \"\
-    id\": 15,\n               \"legend\": {\n                  \"alignAsTable\": false,\n\
-    \                  \"avg\": false,\n                  \"current\": false,\n  \
-    \                \"hideEmpty\": true,\n                  \"hideZero\": true,\n\
-    \                  \"max\": false,\n                  \"min\": false,\n      \
-    \            \"rightSide\": false,\n                  \"show\": true,\n      \
-    \            \"total\": false,\n                  \"values\": false\n        \
-    \       },\n               \"lines\": true,\n               \"linewidth\": 1,\n\
-    \               \"links\": [ ],\n               \"nullPointMode\": \"null\",\n\
-    \               \"percentage\": false,\n               \"pointradius\": 5,\n \
-    \              \"points\": false,\n               \"renderer\": \"flot\",\n  \
-    \             \"repeat\": null,\n               \"seriesOverrides\": [\n     \
-    \             {\n                     \"alias\": \"/.*Flushes/\",\n          \
-    \           \"bars\": true,\n                     \"lines\": false,\n        \
-    \             \"yaxis\": 2,\n                     \"zindex\": -3\n           \
-    \       }\n               ],\n               \"spaceLength\": 10,\n          \
-    \     \"span\": 4,\n               \"stack\": false,\n               \"steppedLine\"\
+    \            \"fill\": 1,\n               \"fillGradient\": 0,\n             \
+    \  \"gridPos\": { },\n               \"id\": 15,\n               \"legend\": {\n\
+    \                  \"alignAsTable\": false,\n                  \"avg\": false,\n\
+    \                  \"current\": false,\n                  \"hideEmpty\": true,\n\
+    \                  \"hideZero\": true,\n                  \"max\": false,\n  \
+    \                \"min\": false,\n                  \"rightSide\": false,\n  \
+    \                \"show\": true,\n                  \"sideWidth\": null,\n   \
+    \               \"total\": false,\n                  \"values\": false\n     \
+    \          },\n               \"lines\": true,\n               \"linewidth\":\
+    \ 1,\n               \"links\": [ ],\n               \"nullPointMode\": \"null\"\
+    ,\n               \"percentage\": false,\n               \"pointradius\": 5,\n\
+    \               \"points\": false,\n               \"renderer\": \"flot\",\n \
+    \              \"repeat\": null,\n               \"seriesOverrides\": [\n    \
+    \              {\n                     \"alias\": \"/.*Flushes/\",\n         \
+    \            \"bars\": true,\n                     \"lines\": false,\n       \
+    \              \"yaxis\": 2,\n                     \"zindex\": -3\n          \
+    \        }\n               ],\n               \"spaceLength\": 10,\n         \
+    \      \"span\": 4,\n               \"stack\": false,\n               \"steppedLine\"\
     : false,\n               \"targets\": [\n                  {\n               \
     \      \"expr\": \"sum(mcac_table_memtable_off_heap_size{cluster=~\\\"$cluster\\\
     \", dc=~\\\"$dc\\\", rack=~\\\"$rack\\\", keyspace=~\\\"$keyspace\\\", table=~\\\
@@ -548,24 +551,25 @@ spec:
     \         \"aliasColors\": { },\n               \"bars\": false,\n           \
     \    \"dashLength\": 10,\n               \"dashes\": false,\n               \"\
     datasource\": \"$PROMETHEUS_DS\",\n               \"fill\": 1,\n             \
-    \  \"gridPos\": { },\n               \"id\": 16,\n               \"legend\": {\n\
-    \                  \"alignAsTable\": false,\n                  \"avg\": false,\n\
-    \                  \"current\": false,\n                  \"hideEmpty\": true,\n\
-    \                  \"hideZero\": true,\n                  \"max\": false,\n  \
-    \                \"min\": false,\n                  \"rightSide\": false,\n  \
-    \                \"show\": true,\n                  \"total\": false,\n      \
-    \            \"values\": false\n               },\n               \"lines\": true,\n\
-    \               \"linewidth\": 1,\n               \"links\": [ ],\n          \
-    \     \"nullPointMode\": \"null\",\n               \"percentage\": false,\n  \
-    \             \"pointradius\": 5,\n               \"points\": false,\n       \
-    \        \"renderer\": \"flot\",\n               \"repeat\": null,\n         \
-    \      \"seriesOverrides\": [\n                  {\n                     \"alias\"\
-    : \"/.*Compactions/\",\n                     \"bars\": true,\n               \
-    \      \"lines\": false,\n                     \"yaxis\": 2,\n               \
-    \      \"zindex\": -3\n                  }\n               ],\n              \
-    \ \"spaceLength\": 10,\n               \"span\": 4,\n               \"stack\"\
-    : false,\n               \"steppedLine\": false,\n               \"targets\":\
-    \ [\n                  {\n                     \"expr\": \"sum(irate(mcac_table_compaction_bytes_written_total{cluster=~\\\
+    \  \"fillGradient\": 0,\n               \"gridPos\": { },\n               \"id\"\
+    : 16,\n               \"legend\": {\n                  \"alignAsTable\": false,\n\
+    \                  \"avg\": false,\n                  \"current\": false,\n  \
+    \                \"hideEmpty\": true,\n                  \"hideZero\": true,\n\
+    \                  \"max\": false,\n                  \"min\": false,\n      \
+    \            \"rightSide\": false,\n                  \"show\": true,\n      \
+    \            \"sideWidth\": null,\n                  \"total\": false,\n     \
+    \             \"values\": false\n               },\n               \"lines\":\
+    \ true,\n               \"linewidth\": 1,\n               \"links\": [ ],\n  \
+    \             \"nullPointMode\": \"null\",\n               \"percentage\": false,\n\
+    \               \"pointradius\": 5,\n               \"points\": false,\n     \
+    \          \"renderer\": \"flot\",\n               \"repeat\": null,\n       \
+    \        \"seriesOverrides\": [\n                  {\n                     \"\
+    alias\": \"/.*Compactions/\",\n                     \"bars\": true,\n        \
+    \             \"lines\": false,\n                     \"yaxis\": 2,\n        \
+    \             \"zindex\": -3\n                  }\n               ],\n       \
+    \        \"spaceLength\": 10,\n               \"span\": 4,\n               \"\
+    stack\": false,\n               \"steppedLine\": false,\n               \"targets\"\
+    : [\n                  {\n                     \"expr\": \"sum(irate(mcac_table_compaction_bytes_written_total{cluster=~\\\
     \"$cluster\\\", dc=~\\\"$dc\\\", rack=~\\\"$rack\\\", keyspace=~\\\"$keyspace\\\
     \", table=~\\\"$table\\\", instance=~\\\"$host\\\"}[$rate])) by ($by)\",\n   \
     \                  \"format\": \"time_series\",\n                     \"intervalFactor\"\
@@ -602,21 +606,22 @@ spec:
     \ { },\n               \"bars\": false,\n               \"dashLength\": 10,\n\
     \               \"dashes\": false,\n               \"datasource\": \"$PROMETHEUS_DS\"\
     ,\n               \"description\": \"\",\n               \"fill\": 1,\n      \
-    \         \"gridPos\": { },\n               \"id\": 17,\n               \"legend\"\
-    : {\n                  \"alignAsTable\": false,\n                  \"avg\": false,\n\
-    \                  \"current\": false,\n                  \"hideEmpty\": true,\n\
-    \                  \"hideZero\": true,\n                  \"max\": false,\n  \
-    \                \"min\": false,\n                  \"rightSide\": false,\n  \
-    \                \"show\": true,\n                  \"total\": false,\n      \
-    \            \"values\": false\n               },\n               \"lines\": true,\n\
-    \               \"linewidth\": 1,\n               \"links\": [ ],\n          \
-    \     \"nullPointMode\": \"null\",\n               \"percentage\": false,\n  \
-    \             \"pointradius\": 5,\n               \"points\": false,\n       \
-    \        \"renderer\": \"flot\",\n               \"repeat\": null,\n         \
-    \      \"seriesOverrides\": [ ],\n               \"spaceLength\": 10,\n      \
-    \         \"span\": 4,\n               \"stack\": false,\n               \"steppedLine\"\
-    : false,\n               \"targets\": [\n                  {\n               \
-    \      \"expr\": \"histogram_quantile($latency, sum(irate(mcac_table_range_latency_bucket{cluster=~\\\
+    \         \"fillGradient\": 0,\n               \"gridPos\": { },\n           \
+    \    \"id\": 17,\n               \"legend\": {\n                  \"alignAsTable\"\
+    : false,\n                  \"avg\": false,\n                  \"current\": false,\n\
+    \                  \"hideEmpty\": true,\n                  \"hideZero\": true,\n\
+    \                  \"max\": false,\n                  \"min\": false,\n      \
+    \            \"rightSide\": false,\n                  \"show\": true,\n      \
+    \            \"sideWidth\": null,\n                  \"total\": false,\n     \
+    \             \"values\": false\n               },\n               \"lines\":\
+    \ true,\n               \"linewidth\": 1,\n               \"links\": [ ],\n  \
+    \             \"nullPointMode\": \"null\",\n               \"percentage\": false,\n\
+    \               \"pointradius\": 5,\n               \"points\": false,\n     \
+    \          \"renderer\": \"flot\",\n               \"repeat\": null,\n       \
+    \        \"seriesOverrides\": [ ],\n               \"spaceLength\": 10,\n    \
+    \           \"span\": 4,\n               \"stack\": false,\n               \"\
+    steppedLine\": false,\n               \"targets\": [\n                  {\n  \
+    \                   \"expr\": \"histogram_quantile($latency, sum(irate(mcac_table_range_latency_bucket{cluster=~\\\
     \"$cluster\\\", dc=~\\\"$dc\\\", rack=~\\\"$rack\\\", keyspace=~\\\"$keyspace\\\
     \", table=~\\\"$table\\\", instance=~\\\"$host\\\"}[$rate])) by (le, $by))\",\n\
     \                     \"format\": \"time_series\",\n                     \"intervalFactor\"\
@@ -665,12 +670,13 @@ spec:
     \    \"aliasColors\": { },\n               \"bars\": false,\n               \"\
     dashLength\": 10,\n               \"dashes\": false,\n               \"datasource\"\
     : \"$PROMETHEUS_DS\",\n               \"description\": \"\",\n               \"\
-    fill\": 1,\n               \"gridPos\": { },\n               \"id\": 18,\n   \
-    \            \"legend\": {\n                  \"alignAsTable\": false,\n     \
-    \             \"avg\": false,\n                  \"current\": false,\n       \
-    \           \"hideEmpty\": true,\n                  \"hideZero\": true,\n    \
-    \              \"max\": false,\n                  \"min\": false,\n          \
-    \        \"rightSide\": false,\n                  \"show\": true,\n          \
+    fill\": 1,\n               \"fillGradient\": 0,\n               \"gridPos\": {\
+    \ },\n               \"id\": 18,\n               \"legend\": {\n             \
+    \     \"alignAsTable\": false,\n                  \"avg\": false,\n          \
+    \        \"current\": false,\n                  \"hideEmpty\": true,\n       \
+    \           \"hideZero\": true,\n                  \"max\": false,\n         \
+    \         \"min\": false,\n                  \"rightSide\": false,\n         \
+    \         \"show\": true,\n                  \"sideWidth\": null,\n          \
     \        \"total\": false,\n                  \"values\": false\n            \
     \   },\n               \"lines\": true,\n               \"linewidth\": 1,\n  \
     \             \"links\": [ ],\n               \"nullPointMode\": \"null\",\n \
