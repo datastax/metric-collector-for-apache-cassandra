@@ -89,7 +89,7 @@ services:
       - demo_net
     environment:
       - "TLP_STRESS_CASSANDRA_HOST=cassandra"
-    command: "run KeyValue --rate 100 -d 1d -r .8"
+    command: "run KeyValue --rate 30 -d 1d -r .8"
     depends_on:
       cassandra2:
         condition: service_healthy
@@ -102,7 +102,7 @@ services:
       - demo_net
     environment:
       - "TLP_STRESS_CASSANDRA_HOST=cassandra"
-    command: "run BasicTimeSeries --rate 100 -d 1d -r .9"
+    command: "run BasicTimeSeries --rate 20 -d 1d -r .9"
     depends_on:
       cassandra2:
         condition: service_healthy
