@@ -10,7 +10,7 @@
    "hideControls": false,
    "id": null,
    "links": [ ],
-   "refresh": "1m",
+   "refresh": "30s",
    "rows": [
       {
          "collapse": false,
@@ -68,6 +68,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Total Requests Per Cluster, by Request Type",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 5,
                "legend": {
@@ -78,6 +79,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -98,7 +100,7 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, request_type) (irate(mcac_client_request_latency_total{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_latency_total{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{request_type}}",
@@ -150,6 +152,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Total Timeouts, Failures, Unavailable Rates for each cluster",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 6,
                "legend": {
@@ -160,6 +163,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -347,6 +351,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Read latency for coordinated reads",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 8,
                "legend": {
@@ -357,6 +362,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -453,6 +459,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Write latency for coordinated writes",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 9,
                "legend": {
@@ -463,6 +470,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -559,6 +567,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Other p99 latencies for coordinated requests",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 10,
                "legend": {
@@ -569,6 +578,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -589,7 +599,7 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "histogram_quantile(0.99, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type!~\"write|read|.*-.*\"}[5m])) by (le, request_type, cluster))",
+                     "expr": "histogram_quantile(0.99, sum(rate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type!~\"write|read|.*-.*\"}[1m])) by (le, request_type, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "p99 {{request_type}}",
@@ -651,6 +661,17 @@
                "description": "Nodes Status uses Internal/Gossip activity. Be mindful that if Native or Thrift protocol are disabled, the nodes won't be reachable, and still marked up",
                "gridPos": { },
                "id": 11,
+               "mappingType": 2,
+               "mappingTypes": [
+                  {
+                     "name": "value to text",
+                     "value": 1
+                  },
+                  {
+                     "name": "range to text",
+                     "value": 2
+                  }
+               ],
                "polystat": {
                   "globalOperatorName": "current",
                   "globalThresholds": [
@@ -665,8 +686,21 @@
                         "value": 1
                      }
                   ],
-                  "globalUnitFormat": "none"
+                  "globalUnitFormat": "none",
+                  "valueEnabled": true
                },
+               "rangeMaps": [
+                  {
+                     "from": "0",
+                     "text": "DOWN",
+                     "to": "0.9999"
+                  },
+                  {
+                     "from": "1",
+                     "text": "UP",
+                     "to": "1"
+                  }
+               ],
                "span": 12,
                "targets": [
                   {
@@ -771,6 +805,7 @@
                "decimals": 0,
                "description": "Nodes up and down in the cluster per protocol/activity",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 13,
                "legend": {
@@ -781,6 +816,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": false,
                   "total": false,
@@ -886,6 +922,7 @@
                "description": "Disk space used ordered (fullest disks first)",
                "gridPos": { },
                "id": 14,
+               "links": [ ],
                "sort": {
                   "col": 1,
                   "desc": true
@@ -955,6 +992,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Total sizes of the data on distinct nodes",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 15,
                "legend": {
@@ -965,6 +1003,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1044,6 +1083,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "SSTable Count Max and Average per table",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 16,
                "legend": {
@@ -1054,6 +1094,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1134,6 +1175,7 @@
                "decimals": 0,
                "description": "Maximum pending compactions on any node in the cluster",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 17,
                "legend": {
@@ -1144,6 +1186,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1243,6 +1286,7 @@
                "decimals": 0,
                "description": "Maximum pending compactions per table",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 18,
                "legend": {
@@ -1253,6 +1297,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1340,6 +1385,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Cluster wide pending threads, by thread pool name",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 19,
                "legend": {
@@ -1350,6 +1396,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1422,6 +1469,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Cluster wide blocked threads, by thread pool name",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 20,
                "legend": {
@@ -1432,6 +1480,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1452,7 +1501,7 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, pool_name) (mcac_thread_pools_total_blocked_tasks_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "sum by (cluster, pool_name) (irate(mcac_thread_pools_total_blocked_tasks_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{cluster}} - blocked {{pool_name}}",
@@ -1504,6 +1553,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Dropped messages rate summed by message type and cluster",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 21,
                "legend": {
@@ -1514,6 +1564,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1534,7 +1585,7 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, message_type) (mcac_dropped_message_dropped_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "sum by (cluster, message_type) (irate(mcac_dropped_message_dropped_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{cluster}} - dropped {{message_type}}",
@@ -1586,6 +1637,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "active threads summed per cluster",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 22,
                "legend": {
@@ -1596,6 +1648,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1668,6 +1721,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Sum of hints being handed off per cluster.",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 23,
                "legend": {
@@ -1678,6 +1732,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1764,6 +1819,7 @@
                "decimals": 1,
                "description": "Maximum CPU utilisation (max 100%)",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 24,
                "legend": {
@@ -1774,6 +1830,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1804,21 +1861,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))))",
+                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))))",
+                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))))",
+                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -1872,6 +1929,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Max Unix load on a node for a cluster",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 25,
                "legend": {
@@ -1882,6 +1940,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -1978,6 +2037,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Maximum Memory allocated per usage (worst node) - excludes caches, buffers, etc",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 26,
                "legend": {
@@ -1988,6 +2048,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -2067,6 +2128,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Disk read throughput",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 27,
                "legend": {
@@ -2077,6 +2139,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -2107,21 +2170,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "max by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "min by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "avg by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2173,6 +2236,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Disk write throughput",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 28,
                "legend": {
@@ -2183,6 +2247,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -2213,21 +2278,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "max by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "min by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "avg by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2279,6 +2344,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Network In and Out per cluster",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 29,
                "legend": {
@@ -2289,6 +2355,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -2314,14 +2381,14 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster) (irate(collectd_interface_if_octets_rx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "sum by (cluster) (rate(collectd_interface_if_octets_rx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "outgoing",
                      "refId": "A"
                   },
                   {
-                     "expr": "sum by (cluster) (irate(collectd_interface_if_octets_rx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "sum by (cluster) (rate(collectd_interface_if_octets_rx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "incoming",
@@ -2387,6 +2454,7 @@
                "decimals": 2,
                "description": "Percentage of the time the node is *not* doing a GC, thus Cassandra is not stopped for GC",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 30,
                "legend": {
@@ -2397,6 +2465,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -2427,21 +2496,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / 1000))",
+                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m])) / 1000))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / 1000))",
+                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m])) / 1000))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / 1000))",
+                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m])) / 1000))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2472,8 +2541,8 @@
                      "format": "percentunit",
                      "label": null,
                      "logBase": 1,
-                     "max": null,
-                     "min": null,
+                     "max": 1,
+                     "min": 0,
                      "show": true
                   },
                   {
@@ -2481,8 +2550,8 @@
                      "format": "percentunit",
                      "label": null,
                      "logBase": 1,
-                     "max": null,
-                     "min": null,
+                     "max": 1,
+                     "min": 0,
                      "show": true
                   }
                ]
@@ -2495,6 +2564,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Garbage collection duration",
                "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 31,
                "legend": {
@@ -2505,6 +2575,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -2535,21 +2606,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "max by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "min by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "avg by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2601,6 +2672,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "Maximum JVM Heap Memory size (worst node) and minimum available heap size",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 32,
                "legend": {
@@ -2611,6 +2683,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "sort": "current",
                   "sortDesc": true,
                   "total": false,
@@ -2821,7 +2894,7 @@
       ]
    },
    "time": {
-      "from": "now-15m",
+      "from": "now-30m",
       "to": "now"
    },
    "timepicker": {

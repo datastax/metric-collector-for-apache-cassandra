@@ -19,8 +19,9 @@ dashboard.new(
   'Cassandra Cluster Condensed',
   description='Single pane of glass for most important Cassandra metrics',
   schemaVersion=14,
+  refresh='30s',
   time_from='now-30m',
-  refresh='1m',
+  editable=true,
   tags=['os'],
   style='dark'
 )
@@ -337,7 +338,7 @@ dashboard.new(
     )
     .addSeriesOverride({
       "alias": "/.*Connected/",
-      "yaxis": 2 
+      "yaxis": 2
     })
     .addTarget(
       prometheus.target(
@@ -369,7 +370,7 @@ dashboard.new(
           legendFormat="$by:{{$by}} {{$latency}} {{request_type}}"
       )
     )
-  ) 
+  )
   .addPanel(
     graphpanel.new(
       title="Memtable Space $keyspace.$table / $by",
@@ -493,7 +494,7 @@ dashboard.new(
           legendFormat="$by:{{$by}} Coordinator Range Scan"
       )
     )
-  ) 
+  )
   .addPanel(
     graphpanel.new(
       title="Streaming / $by / $rate",
@@ -517,5 +518,5 @@ dashboard.new(
           legendFormat="{{$by}}: Outgoing Stream"
       )
     )
-  ) 
+  )
 )
