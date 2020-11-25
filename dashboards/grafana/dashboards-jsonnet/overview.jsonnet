@@ -352,6 +352,20 @@ dashboard.new(
           "color": "#299c46"
         }
       ],
+      range_maps=[
+        {
+          "from": "0",
+          "to": "0.9999",
+          "text": "DOWN"
+        },
+        {
+          "from": "1",
+          "to": "1",
+          "text": "UP"
+        }
+      ],
+      mapping_type=2,
+      value_enabled=true,
     )
     .addTarget(
       prometheus.target(

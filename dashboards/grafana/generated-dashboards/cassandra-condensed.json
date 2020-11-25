@@ -838,6 +838,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "(no keyspace/table filters apply)",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 13,
                "legend": {
@@ -850,6 +851,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "total": false,
                   "values": false
                },
@@ -932,6 +934,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "(no keyspace/table filters apply)",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 14,
                "legend": {
@@ -944,6 +947,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "total": false,
                   "values": false
                },
@@ -1013,6 +1017,7 @@
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 15,
                "legend": {
@@ -1025,6 +1030,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "total": false,
                   "values": false
                },
@@ -1123,6 +1129,7 @@
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 16,
                "legend": {
@@ -1135,6 +1142,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "total": false,
                   "values": false
                },
@@ -1227,6 +1235,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 17,
                "legend": {
@@ -1239,6 +1248,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "total": false,
                   "values": false
                },
@@ -1337,6 +1347,7 @@
                "datasource": "$PROMETHEUS_DS",
                "description": "",
                "fill": 1,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 18,
                "legend": {
@@ -1349,6 +1360,7 @@
                   "min": false,
                   "rightSide": false,
                   "show": true,
+                  "sideWidth": null,
                   "total": false,
                   "values": false
                },
