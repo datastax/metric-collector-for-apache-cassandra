@@ -10,7 +10,7 @@
    "hideControls": false,
    "id": null,
    "links": [ ],
-   "refresh": "1m",
+   "refresh": "30s",
    "rows": [
       {
          "collapse": false,
@@ -98,7 +98,7 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, request_type) (irate(mcac_client_request_latency_total{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_latency_total{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{request_type}}",
@@ -589,7 +589,7 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "histogram_quantile(0.99, sum(irate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type!~\"write|read|.*-.*\"}[5m])) by (le, request_type, cluster))",
+                     "expr": "histogram_quantile(0.99, sum(rate(mcac_client_request_latency_bucket{cluster=~\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type!~\"write|read|.*-.*\"}[1m])) by (le, request_type, cluster))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "p99 {{request_type}}",
@@ -1452,7 +1452,7 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, pool_name) (mcac_thread_pools_total_blocked_tasks_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "sum by (cluster, pool_name) (irate(mcac_thread_pools_total_blocked_tasks_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{cluster}} - blocked {{pool_name}}",
@@ -1534,7 +1534,7 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, message_type) (mcac_dropped_message_dropped_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "sum by (cluster, message_type) (irate(mcac_dropped_message_dropped_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{cluster}} - dropped {{message_type}}",
@@ -1804,21 +1804,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))))",
+                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))))",
+                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (irate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))))",
+                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{type=\"idle\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / sum by (cluster, dc, rack, instance) (rate(collectd_cpu_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2107,21 +2107,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "max by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "min by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (irate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "avg by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2213,21 +2213,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "max by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "min by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (irate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "avg by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2314,14 +2314,14 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster) (irate(collectd_interface_if_octets_rx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "sum by (cluster) (rate(collectd_interface_if_octets_rx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "outgoing",
                      "refId": "A"
                   },
                   {
-                     "expr": "sum by (cluster) (irate(collectd_interface_if_octets_rx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "sum by (cluster) (rate(collectd_interface_if_octets_rx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "incoming",
@@ -2427,21 +2427,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / 1000))",
+                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m])) / 1000))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / 1000))",
+                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m])) / 1000))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m])) / 1000))",
+                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m])) / 1000))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2472,8 +2472,8 @@
                      "format": "percentunit",
                      "label": null,
                      "logBase": 1,
-                     "max": null,
-                     "min": null,
+                     "max": 100,
+                     "min": 0,
                      "show": true
                   },
                   {
@@ -2481,8 +2481,8 @@
                      "format": "percentunit",
                      "label": null,
                      "logBase": 1,
-                     "max": null,
-                     "min": null,
+                     "max": 100,
+                     "min": 0,
                      "show": true
                   }
                ]
@@ -2535,21 +2535,21 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "max by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "max",
                      "refId": "A"
                   },
                   {
-                     "expr": "min by (cluster) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "min by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "min",
                      "refId": "B"
                   },
                   {
-                     "expr": "avg by (cluster) (irate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "expr": "avg by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[5m:1m]))",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "avg",
@@ -2821,7 +2821,7 @@
       ]
    },
    "time": {
-      "from": "now-15m",
+      "from": "now-30m",
       "to": "now"
    },
    "timepicker": {
