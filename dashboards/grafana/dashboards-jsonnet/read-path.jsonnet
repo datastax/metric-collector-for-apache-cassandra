@@ -12,6 +12,12 @@ local textPanel = grafana.text;
 
 local prefix = std.extVar('prefix');
 
+local fillLatencySeriesOverrides = {
+    'alias': 'p999',
+    'fillBelowTo': 'p98',
+    'lines': false
+};
+
 local fillMinMaxSeriesOverrides = {
     'alias': 'max',
     'fillBelowTo': 'min',
