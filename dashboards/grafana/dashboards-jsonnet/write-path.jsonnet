@@ -628,6 +628,52 @@ dashboard.new(
   )
   .addPanel(
     graphPanel.new(
+      'Disk Write Thoughput',
+      description='Disk write throughput per node',
+      format='bps',
+      datasource='$PROMETHEUS_DS',
+      transparent=true,
+      fill=0,
+      legend_show=true,
+      legend_values=true,
+      legend_current=true,
+      legend_alignAsTable=true,
+      legend_sort='current',
+      legend_sortDesc=true,
+      shared_tooltip=false,
+    )
+    .addTarget(
+      prometheus.target(
+        expr='rate(collectd_processes_disk_octets_write_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s])',
+        legendFormat='{{dc}}-{{instance}} ({{cluster}})',
+      )
+    )
+  )
+  .addPanel(
+    graphPanel.new(
+      'Disk Write Thoughput',
+      description='Disk write throughput per node',
+      format='bps',
+      datasource='$PROMETHEUS_DS',
+      transparent=true,
+      fill=0,
+      legend_show=true,
+      legend_values=true,
+      legend_current=true,
+      legend_alignAsTable=true,
+      legend_sort='current',
+      legend_sortDesc=true,
+      shared_tooltip=false,
+    )
+    .addTarget(
+      prometheus.target(
+        expr='rate(collectd_processes_disk_octets_write_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s])',
+        legendFormat='{{dc}}-{{instance}} ({{cluster}})',
+      )
+    )
+  )
+  .addPanel(
+    graphPanel.new(
       'Network I/O',
       description='Network In and Out per cluster',
       format='bytes',

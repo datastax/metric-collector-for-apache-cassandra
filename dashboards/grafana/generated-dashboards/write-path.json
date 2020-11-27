@@ -1550,11 +1550,179 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
+               "description": "Disk write throughput per node",
+               "fill": 0,
+               "fillGradient": 0,
+               "gridPos": { },
+               "id": 20,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{dc}}-{{instance}} ({{cluster}})",
+                     "refId": "A"
+                  }
+               ],
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Disk Write Thoughput",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "format": "bps",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": null,
+                     "show": true
+                  },
+                  {
+                     "format": "bps",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": null,
+                     "show": true
+                  }
+               ]
+            },
+            {
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "$PROMETHEUS_DS",
+               "description": "Disk write throughput per node",
+               "fill": 0,
+               "fillGradient": 0,
+               "gridPos": { },
+               "id": 21,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{dc}}-{{instance}} ({{cluster}})",
+                     "refId": "A"
+                  }
+               ],
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Disk Write Thoughput",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "format": "bps",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": null,
+                     "show": true
+                  },
+                  {
+                     "format": "bps",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": null,
+                     "show": true
+                  }
+               ]
+            },
+            {
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "$PROMETHEUS_DS",
                "description": "Network In and Out per cluster",
                "fill": 1,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 20,
+               "id": 22,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1650,7 +1818,7 @@
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 21,
+               "id": 23,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1748,7 +1916,7 @@
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 22,
+               "id": 24,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1835,7 +2003,7 @@
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 23,
+               "id": 25,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1935,7 +2103,7 @@
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 24,
+               "id": 26,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2021,7 +2189,7 @@
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 25,
+               "id": 27,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2105,7 +2273,7 @@
                "fill": 1,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 26,
+               "id": 28,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
