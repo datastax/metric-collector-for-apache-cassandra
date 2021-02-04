@@ -8,11 +8,10 @@
     <name>DataStax Metrics Collector for Apache Cassandra</name>
 
     <properties>
-        <revision>0.1.0-SNAPSHOT</revision>
+        <revision>0.1.14-SNAPSHOT</revision>
         <dropwizard.version>1.0.2</dropwizard.version>
-        <!--<cassandra.version>4.0-alpha2</cassandra.version>-->
-        <cassandra.version>3.11.5</cassandra.version>
-        <!--<cassandra.version>2.2.15</cassandra.version> -->
+        <!-- <cassandra.version>4.0-beta4</cassandra.version> -->
+        <cassandra.version>3.11.10</cassandra.version>
         <driver.version>3.6.0</driver.version> <!-- Needed for guava 18 compat-->
         <bytebuddy.version>1.10.10</bytebuddy.version>
         <mustache.version>0.9.6</mustache.version>
@@ -46,6 +45,10 @@
                     <groupId>commons-codec</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.yaml</groupId>
+                    <artifactId>snakeyaml</artifactId>
+                </exclusion>
             </exclusions>
             <scope>provided</scope>
         </dependency>
@@ -53,6 +56,11 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-shaded-jackson</artifactId>
             <version>2.10.1-10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.26</version>
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
@@ -168,7 +176,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>1.6</version>
+                <version>3.2.1</version>
                 <configuration>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
                     <artifactSet>
@@ -189,6 +197,17 @@
                             </excludes>
                         </filter>
                     </filters>
+                    <relocations combine.children="append">
+                        <relocation>
+                            <pattern>org.yaml</pattern>
+                            <shadedPattern>
+                            com.datastax.shaded.org.yaml
+                            </shadedPattern>
+                            <includes>
+                            <include>org.yaml.**</include>
+                            </includes>
+                        </relocation>
+                    </relocations>
                 </configuration>
                 <executions>
                     <execution>
