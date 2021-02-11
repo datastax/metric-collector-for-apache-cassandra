@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;

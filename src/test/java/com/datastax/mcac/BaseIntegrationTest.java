@@ -6,11 +6,12 @@ import com.datastax.mcac.utils.InsightsTestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runners.Parameterized;
+
+import org.junit.Assert;
 
 import java.io.File;
 import java.io.FileOutputStream;

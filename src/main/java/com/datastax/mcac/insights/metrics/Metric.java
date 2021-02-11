@@ -1,7 +1,6 @@
 package com.datastax.mcac.insights.metrics;
 
 import java.util.Map;
-import java.util.Optional;
 
 import com.datastax.mcac.insights.Insight;
 import com.datastax.mcac.insights.InsightMetadata;

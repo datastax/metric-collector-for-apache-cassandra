@@ -14,16 +14,6 @@ import org.junit.runners.Parameterized;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.Session;
-import com.datastax.mcac.insights.events.ClientConnectionInformation;
-import com.datastax.mcac.insights.events.CompactionEndedInformation;
-import com.datastax.mcac.insights.events.CompactionStartedInformation;
-import com.datastax.mcac.insights.events.ExceptionInformation;
-import com.datastax.mcac.insights.events.FlushInformation;
-import com.datastax.mcac.insights.events.GCInformation;
-import com.datastax.mcac.insights.events.LargePartitionInformation;
-import com.datastax.mcac.insights.events.NodeConfiguration;
-import com.datastax.mcac.insights.events.NodeSystemInformation;
-import com.datastax.mcac.insights.events.SchemaInformation;
 import com.datastax.mcac.utils.InsightsTestUtil;
 
 @RunWith(Parameterized.class)
@@ -72,30 +62,9 @@ public class EventsIntegrationTest extends BaseIntegrationTest
 
         File rootDir = getInsightsDir();
 
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, NodeConfiguration.NAME) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, SchemaInformation.NAME) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, NodeSystemInformation.NAME) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, ClientConnectionInformation.NAME) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, ClientConnectionInformation.NAME_HEARTBEAT) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, LargePartitionInformation.NAME) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, FlushInformation.NAME) > 0);
-
-        if (version != "4.0")
-            Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, ExceptionInformation.NAME) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, GCInformation.NAME) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, CompactionStartedInformation.NAME) > 0);
-
-        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, CompactionEndedInformation.NAME) > 0);
-
         //Test filtering
         Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "jvm.fd.usage") == 0);
+        // Check that we're getting some table metrics
+        Assert.assertTrue(InsightsTestUtil.checkInsightLogFor(rootDir, "org.apache.cassandra.metrics.keyspace.write_latency.foo") > 0);
     }
 }
