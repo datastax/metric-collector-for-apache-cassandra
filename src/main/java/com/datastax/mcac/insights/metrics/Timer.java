@@ -1,11 +1,10 @@
 package com.datastax.mcac.insights.metrics;
 
 import java.util.Map;
-import java.util.Optional;
 
 import com.datastax.mcac.insights.InsightMetadata;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Timer extends Metric
 {

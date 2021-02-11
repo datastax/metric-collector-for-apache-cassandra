@@ -14,7 +14,6 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.util.ISO8
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,6 @@ import java.io.InputStream;
 import java.text.FieldPosition;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public final class JacksonUtil

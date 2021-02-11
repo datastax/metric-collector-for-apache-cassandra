@@ -1,9 +1,6 @@
 package com.datastax.mcac.utils;
 
 import java.io.File;
-import java.io.IOError;
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;

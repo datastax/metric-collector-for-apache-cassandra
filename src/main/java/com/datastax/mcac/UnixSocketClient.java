@@ -9,11 +9,6 @@ import com.codahale.metrics.MetricRegistryListener;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.datastax.mcac.insights.Insight;
-import com.datastax.mcac.utils.LocalHostIdSupplier;
-import com.datastax.mcac.insights.TokenStore;
-import com.datastax.mcac.insights.events.NodeConfiguration;
-import com.datastax.mcac.insights.events.NodeSystemInformation;
-import com.datastax.mcac.insights.events.SchemaInformation;
 import com.datastax.mcac.insights.metrics.RateStats;
 import com.datastax.mcac.insights.metrics.SamplingStats;
 import com.datastax.mcac.utils.JacksonUtil;
@@ -22,7 +17,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.io.CharStreams;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -52,20 +46,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.Proxy;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RejectedExecutionException;
@@ -75,12 +64,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-public class UnixSocketClient
-{
+public class UnixSocketClient {
     public static final int DEFAULT_WRITE_BUFFER_WATERMARK_LOW_IN_KB = 4096;
     public static final int DEFAULT_WRITE_BUFFER_WATERMARK_HIGH_IN_KB = 8192;
 
-    private final TokenStore tokenStore;
     /*
      * For metrics we add enhancing what exists out of the box for C* metrics
      */
@@ -93,19 +80,17 @@ public class UnixSocketClient
     private static final long[] inputBuckets = new EstimatedHistogram(90).getBucketOffsets();
     private static final long[] decayingBuckets = new EstimatedHistogram(165).getBucketOffsets();
 
-
-    //Log linear buckets (these must match the collectd entry in types.db)
+    // Log linear buckets (these must match the collectd entry in types.db)
     private static final Pair<Long, String>[] latencyBuckets;
     private static final long[] latencyOffsets = { 35, 60, 103, 179, 310, 535, 924, 1597, 2759, 4768, 8239, 14237,
             24601, 42510, 73457, 126934, 219342, 379022, 654949, 1131752, 1955666, 3379391, 5839588, 10090808,
             17436917 };
 
-    static
-    {
+    static {
         latencyBuckets = new Pair[latencyOffsets.length];
-        for (int i = 0; i < latencyBuckets.length; i++)
-        {
-            // Latencies are reported in nanoseconds, so we convert the offsets from micros to nanos
+        for (int i = 0; i < latencyBuckets.length; i++) {
+            // Latencies are reported in nanoseconds, so we convert the offsets from micros
+            // to nanos
             latencyBuckets[i] = Pair.create(latencyOffsets[i] * 1000, "bucket_" + Long.toString(latencyOffsets[i]));
         }
     }
@@ -113,8 +98,7 @@ public class UnixSocketClient
     private final AtomicBoolean started;
     private final String socketFile;
 
-    public void logError(String log, Throwable throwable)
-    {
+    public void logError(String log, Throwable throwable) {
         logger.error(log, throwable);
     }
 
@@ -149,14 +133,11 @@ public class UnixSocketClient
 
     private Method decayingHistogramOffsetMethod = null;
 
-    public UnixSocketClient()
-    {
+    public UnixSocketClient() {
         this(null, TimeUnit.SECONDS, TimeUnit.MICROSECONDS);
     }
 
-    public UnixSocketClient(String socketFile, TimeUnit rateUnit, TimeUnit durationUnit)
-    {
-        this.tokenStore = new MCACTokenStore(runtimeConfig.token_dir);
+    public UnixSocketClient(String socketFile, TimeUnit rateUnit, TimeUnit durationUnit) {
         this.metricsRegistries = Lists.newArrayList(CassandraMetricsRegistry.Metrics, agentAddedMetricsRegistry);
         this.started = new AtomicBoolean(false);
         this.socketFile = socketFile == null ? CollectdController.defaultSocketFile.get() : socketFile;
@@ -165,12 +146,8 @@ public class UnixSocketClient
         this.rateFactor = rateUnit.toSeconds(1);
         this.durationFactor = 1.0 / durationUnit.toNanos(1);
         this.ip = getBroadcastAddress().getHostAddress();
-        this.globalTags = ImmutableMap.of(
-                "host", ip,
-                "cluster", DatabaseDescriptor.getClusterName(),
-                "datacenter", getDataCenter(),
-                "rack", getRack()
-        );
+        this.globalTags = ImmutableMap.of("host", ip, "cluster", DatabaseDescriptor.getClusterName(), "datacenter",
+                getDataCenter(), "rack", getRack());
         this.metricProcessors = new ConcurrentHashMap<>();
         this.globalFilteredMetricProcessors = new ConcurrentHashMap<>();
         this.insightFilteredMetricProcessors = new ConcurrentHashMap<>();
@@ -185,35 +162,34 @@ public class UnixSocketClient
         this.lastTokenRefreshNanos = 0L;
     }
 
-    public static InetAddress getBroadcastAddress()
-    {
-        try
-        {
+    public static InetAddress getBroadcastAddress() {
+        try {
 
-            return DatabaseDescriptor.getBroadcastAddress() == null ?
-                   DatabaseDescriptor.getListenAddress() == null ?
-                   InetAddress.getLocalHost() : DatabaseDescriptor.getListenAddress()
-                                                                    : DatabaseDescriptor.getBroadcastAddress();
-        }
-        catch (UnknownHostException e)
-        {
+            return DatabaseDescriptor.getBroadcastAddress() == null
+                    ? DatabaseDescriptor.getListenAddress() == null ? InetAddress.getLocalHost()
+                            : DatabaseDescriptor.getListenAddress()
+                    : DatabaseDescriptor.getBroadcastAddress();
+        } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String getRack()
-    {
-        try
-        {
-            return (String) IEndpointSnitch.class.getMethod("getLocalRack").invoke(DatabaseDescriptor.getEndpointSnitch());
-        }
-        catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException | IllegalAccessException e)
-        {
-            //No biggie
+    public static String getRack() {
+        try {
+            return (String) IEndpointSnitch.class.getMethod("getLocalRack")
+                    .invoke(DatabaseDescriptor.getEndpointSnitch());
+        } catch (NoSuchMethodException | IllegalArgumentException | InvocationTargetException
+                | IllegalAccessException e) {
+            // No biggie
         }
 
-
-        return DatabaseDescriptor.getEndpointSnitch().getRack(getBroadcastAddress());
+        try {
+            return (String) IEndpointSnitch.class.getMethod("getRack", InetAddress.class).invoke(DatabaseDescriptor.getEndpointSnitch(), getBroadcastAddress());
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+                | SecurityException e) {
+            logger.error("Couldn't determine rack", e);
+            return "unknown_rack";
+        }
     }
 
     public static String getDataCenter()
@@ -227,7 +203,13 @@ public class UnixSocketClient
             //No biggie
         }
 
-        return DatabaseDescriptor.getEndpointSnitch().getDatacenter(getBroadcastAddress());
+        try {
+            return (String) IEndpointSnitch.class.getMethod("getDatacenter", InetAddress.class).invoke(DatabaseDescriptor.getEndpointSnitch(), getBroadcastAddress());
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+                | SecurityException e) {
+            logger.error("Couldn't determine datacenter", e);
+            return "unknown_dc";
+        }
     }
 
     private EventLoopGroup epollGroup()
@@ -295,7 +277,6 @@ public class UnixSocketClient
 
                 try
                 {
-                    maybeGetToken();
                     CollectdController.ProcessState r = CollectdController.instance.get().start(socketFile, runtimeConfig);
 
                     if (r != CollectdController.ProcessState.STARTED)
@@ -314,7 +295,6 @@ public class UnixSocketClient
                 initMetricsReporting();
                 initCollectdHealthCheck();
                 restartMetricReporting(runtimeConfig.metric_sampling_interval_in_seconds);
-                restartEventReporting(runtimeConfig.event_interval_in_seconds);
             }
             else
             {
@@ -371,113 +351,12 @@ public class UnixSocketClient
                 }
 
                 tryConnect();
-                maybeGetToken();
-
-                if (tokenStore instanceof MCACTokenStore)
-                    ((MCACTokenStore)tokenStore).checkFingerprint(this);
-
             }
             catch (Throwable e)
             {
                 logger.error("Error with collectd healthcheck", e);
             }
         }, 30, 30, TimeUnit.SECONDS);
-    }
-
-
-    private void maybeGetToken()
-    {
-        /*
-         * We shouldn't communicate or try to communicate with the Insights service
-         * if uploading has not been enabled
-         */
-        if ((!runtimeConfig.insights_upload_enabled && !runtimeConfig.insights_streaming_enabled) || runtimeConfig.upload_url == null) return;
-
-        Optional<String> currentToken = tokenStore.token();
-
-        //TODO: Could be ApproximateTime.nanoTIme() if we upgrade c* dependency versions
-        Long now = System.nanoTime();
-
-        //Attempt to fetch or refresh the token every upload interval or 1h (whichever is greater)
-        if (lastTokenRefreshNanos == 0 || (now - lastTokenRefreshNanos > TimeUnit.SECONDS.toNanos(Math.max(TimeUnit.HOURS.toSeconds(1),
-                runtimeConfig.upload_interval_in_seconds))))
-        {
-            try
-            {
-                //Figure out the collector token refresh endpoint
-                URL url = new URL(runtimeConfig.upload_url);
-                URL tokenUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(), "/api/v1/tokens");
-
-                HttpURLConnection connection = (HttpURLConnection) tokenUrl.openConnection(Proxy.NO_PROXY);
-                connection.setRequestMethod("POST");
-                connection.setDoOutput(true);
-                connection.setFixedLengthStreamingMode(0);
-
-                try
-                {
-                    connection.setRequestProperty(
-                            "ClientId",
-                            LocalHostIdSupplier.getHostId()
-                    );
-                }
-                catch (Exception ex)
-                {
-                    logger.warn(
-                            "Error looking up host_id of node",
-                            ex
-                    );
-                }
-
-                if (currentToken.isPresent())
-                    connection.setRequestProperty("Authorization", "Bearer " + currentToken.get());
-                getAndStoreToken(connection);
-            }
-            catch (Throwable e)
-            {
-                logger.warn("Error trying to refresh insights token", e);
-            }
-            finally
-            {
-                lastTokenRefreshNanos = now;
-            }
-        }
-    }
-
-    private void getAndStoreToken(HttpURLConnection connection) throws IOException
-    {
-        try
-        {
-            connection.connect();
-            int code = connection.getResponseCode();
-            if (code != 200 && code != 201)
-            {
-                logger.warn(
-                        "Error trying to get insights token at {} {}",
-                        connection.getURL(),
-                        code
-                );
-            }
-            else
-            {
-                try (InputStreamReader stream = new InputStreamReader(connection.getInputStream()))
-                {
-                    String token = CharStreams.toString(stream);
-                    tokenStore.store(token);
-                }
-
-                // Required to update to the new token
-                runtimeConfig.insights_token = tokenStore.token().get();
-                if (CollectdController.instance.get().reloadPlugin(runtimeConfig)
-                        == CollectdController.ProcessState.STARTED)
-                {
-                    reportInternalWithFlush("RELOADINSIGHTS", "");
-                }
-            }
-        }
-        finally
-        {
-            connection.disconnect();
-        }
     }
 
     private void tryConnect()
@@ -691,86 +570,6 @@ public class UnixSocketClient
             }
         }
     }
-
-    private synchronized void restartEventReporting(Integer interval)
-    {
-        if (eventReportFuture != null)
-            eventReportFuture.cancel(false);
-
-        logger.info("Starting event reporting with {} sec interval", interval);
-
-        //Some metrics are reported to insights as custom Insight types.
-        //We avoid sending these at the same interval as other metrics since insights only needs things
-        //at a 5 minute interval worst case. see InsightsRuntimeConfig::metricUpdateGapInSeconds
-        final long reportInsightEvery = Math.max((long) Math.floor(runtimeConfig.eventUpdateGapInSeconds() / interval), 1);
-        logger.debug("Reporting event insights every {} intervals", reportInsightEvery);
-
-        eventReportFuture = eventLoopGroup.scheduleWithFixedDelay(() -> {
-            if (channel == null || !channel.isOpen())
-                logger.info("Event reporting skipped due to connection to collectd not being established");
-
-            long count = 0;
-            long thisInterval = eventReportingIntervalCount.getAndIncrement();
-
-            try
-            {
-                NodeConfiguration nodeConfiguration = new NodeConfiguration();
-                boolean status = report(nodeConfiguration);
-                if (status){
-                    logger.trace("reported node config");
-                }else {
-                    logger.warn("didn't report node config");
-                }
-            }
-            catch (Exception e)
-            {
-                logger.warn(
-                        "Error reporting node configuration",
-                        e
-                );
-            }
-
-
-            try
-            {
-                NodeSystemInformation nodeSystemInformation= new NodeSystemInformation();
-                boolean status = report(nodeSystemInformation);
-                if (status){
-                    logger.trace("reported node system info");
-                }else {
-                    logger.warn("didn't report system info");
-                }
-
-            }
-            catch (Exception e)
-            {
-                logger.warn(
-                        "Error reporting node system information",
-                        e
-                );
-            }
-
-            try
-            {
-                SchemaInformation schemaInformation = new SchemaInformation();
-                boolean status = report(schemaInformation);
-                if (status){
-                    logger.trace("reported schema info");
-                }else {
-                    logger.warn("didn't report schema info");
-                }
-
-            }
-            catch (Exception e)
-            {
-                logger.warn(
-                        "Error reporting schema information",
-                        e
-                );
-            }
-        }, 5, interval, TimeUnit.SECONDS);
-    }
-
 
     private synchronized void restartMetricReporting(Integer metricSamplingIntervalInSeconds)
     {

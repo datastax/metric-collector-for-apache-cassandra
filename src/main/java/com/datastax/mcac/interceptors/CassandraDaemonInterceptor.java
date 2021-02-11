@@ -17,7 +17,6 @@ import com.codahale.metrics.jvm.BufferPoolMetricSet;
 import com.codahale.metrics.jvm.FileDescriptorRatioGauge;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.datastax.mcac.UnixSocketClient;
 import com.datastax.mcac.insights.events.InsightsClientStarted;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.description.type.TypeDescription;
@@ -28,7 +27,6 @@ import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
 import org.apache.cassandra.metrics.CassandraMetricsRegistry;
-import org.apache.cassandra.service.StorageService;
 
 public class CassandraDaemonInterceptor extends AbstractInterceptor
 {
@@ -70,16 +68,8 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
                 Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
             }
 
-            AgentEndpointLifecycleListener gossipListener = new AgentEndpointLifecycleListener();
-            StorageService.instance.register(gossipListener);
-
-            final GCListener gcListener = new GCListener();
-            gcListener.registerMBeanAndGCNotifications();
-
             //Hook into things that have hooks
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                gcListener.unregisterMBeanAndGCNotifications();
-                StorageService.instance.unregister(gossipListener);
                 client.get().close();
             }));
         }

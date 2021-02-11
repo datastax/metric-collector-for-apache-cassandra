@@ -8,8 +8,8 @@ import java.util.regex.PatternSyntaxException;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonIgnore;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FilteringRule
 {

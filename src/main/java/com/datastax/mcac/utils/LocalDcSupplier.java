@@ -3,8 +3,6 @@ package com.datastax.mcac.utils;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import org.apache.cassandra.config.DatabaseDescriptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LocalDcSupplier
 {

@@ -1,6 +1,6 @@
 package com.datastax.mcac.insights.metrics;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RateStats
 {
