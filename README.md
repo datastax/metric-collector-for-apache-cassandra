@@ -81,8 +81,7 @@ workload and dashboards connected to kick the tires.
 
 ## Cassandra version supported:
 
-The supported versions of Apache Cassandra: 2.2+ (2.2.X, 3.0.X, 3.11.X)
-Apache Cassandra 4.0 breaks compatibility. The support for this version is being worked on as we will definitely support it as well.
+The supported versions of Apache Cassandra: 2.2+ (2.2.X, 3.0.X, 3.11.X, 4.0)
 
 ## Kubernetes Support
 Check out the [dashboards/k8s-build](dashboards/k8s-build) directory for a guide on using this project along with Kubernetes.
