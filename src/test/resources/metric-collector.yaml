@@ -12,6 +12,9 @@ filtering_rules:
   - policy: deny
     pattern: jvm.fd.usage
     scope: global
+  - policy: deny
+    pattern: org.apache.cassandra.metrics.Table
+    scope: global
 
 #To output tombstone counter metrics for integration tests
 #metric_sampling_interval - The frequency that metrics are reported to Cassandra Metrics Collector.
