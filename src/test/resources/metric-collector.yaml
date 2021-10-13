@@ -8,12 +8,17 @@ write_to_disk_enabled: true
 # Default: 5000
 #data_dir_max_size_in_mb: 5000
 
+# The last applicable rule for a metric wins.
+# This allows to deny all metrics for a specific metric group and then allow them individually.
 filtering_rules:
   - policy: deny
     pattern: jvm.fd.usage
     scope: global
   - policy: deny
     pattern: org.apache.cassandra.metrics.Table
+    scope: global
+  - policy: allow
+    pattern: org.apache.cassandra.metrics.Table.LiveSSTableCount
     scope: global
 
 #To output tombstone counter metrics for integration tests

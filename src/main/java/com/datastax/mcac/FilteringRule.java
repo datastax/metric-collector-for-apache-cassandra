@@ -2,6 +2,7 @@ package com.datastax.mcac;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -18,10 +19,8 @@ public class FilteringRule
     public static final String GLOBAL = "global";
     public static final String DATALOG_ONLY = "datalog";
 
-    public static final FilteringRule FILTERED_GLOBALLY = new FilteringRule(DENY, ".*", GLOBAL);
-    public static final FilteringRule FILTERED_INSIGHTS = new FilteringRule(DENY, ".*", DATALOG_ONLY);
     public static final FilteringRule ALLOWED_GLOBALLY = new FilteringRule(ALLOW, ".*", GLOBAL);
-    public static final FilteringRule ALLOWED_INSIGHTS = new FilteringRule(ALLOW, ".*", DATALOG_ONLY);
+
 
     @JsonProperty("policy")
     public final String policy;
@@ -82,60 +81,26 @@ public class FilteringRule
         });
     }
 
-    public boolean isAllowed(String name)
+    public boolean matches(String name)
     {
-        boolean match = patternRegex.get().matcher(name).find();
-        return isAllowRule ? match : !match;
+        return patternRegex.get().matcher(name).find();
     }
 
     /**
-     * Returns the most applicable filtering rule for this name
-     * taking into account global vs insights level scope.
+     * Returns the most applicable filtering rule for this name.
      *
-     * global taking precedent over insights and deny rules taking precedent over allow rules
+     * The last rule in the list of applicable rules wins.
      * @param name
      * @return The rule that applied for this name.
      */
     public static FilteringRule applyFilters(String name, Collection<FilteringRule> rules)
     {
-        FilteringRule allowRule = null;
-        FilteringRule denyRule = null;
-        boolean hasDenyRule = false;
-        boolean hasAllowRule = false;
+        Optional<FilteringRule> lastRule = rules.stream().filter(rule -> rule.matches(name)).reduce((first, second) -> second);
 
-        for (FilteringRule rule : rules)
-        {
-            if (rule.isAllowRule)
-            {
-                hasAllowRule = true;
-                if ((allowRule == null || !allowRule.isGlobal) && rule.isAllowed(name))
-                {
-                    allowRule = rule;
-                }
-            }
-            else
-            {
-                hasDenyRule = true;
-                if ((denyRule == null || !denyRule.isGlobal) && !rule.isAllowed(name))
-                {
-                    denyRule = rule;
-                }
-            }
-        }
-
-        if (rules.isEmpty())
+        if (!lastRule.isPresent())
             return FilteringRule.ALLOWED_GLOBALLY;
 
-        if (denyRule != null)
-            return denyRule;
-
-        if (allowRule != null)
-            return allowRule;
-
-        if (hasDenyRule && !hasAllowRule)
-            return FilteringRule.ALLOWED_GLOBALLY;
-
-        return FilteringRule.FILTERED_GLOBALLY;
+        return lastRule.get();
     }
 
 
