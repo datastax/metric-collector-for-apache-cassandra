@@ -11,9 +11,12 @@ import com.google.common.base.Suppliers;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FilteringRule
 {
+    private static final Logger logger = LoggerFactory.getLogger(FilteringRule.class);
     public static final String ALLOW = "allow";
     public static final String DENY = "deny";
     public static final String GLOBAL = "global";
@@ -100,6 +103,8 @@ public class FilteringRule
         if (!lastRule.isPresent())
             return FilteringRule.ALLOWED_GLOBALLY;
 
+        logger.info("Metric {}", name);
+        logger.info(">>>>>> Applying rule {}", lastRule.get());
         return lastRule.get();
     }
 
