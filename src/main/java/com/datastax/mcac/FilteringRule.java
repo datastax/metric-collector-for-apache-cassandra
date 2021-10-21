@@ -103,8 +103,10 @@ public class FilteringRule
         if (!lastRule.isPresent())
             return FilteringRule.ALLOWED_GLOBALLY;
 
-        logger.info("Metric {}", name);
-        logger.info(">>>>>> Applying rule {}", lastRule.get());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Metric {}", name);
+            logger.debug(">>>>>> Applying rule {}", lastRule.get());
+        }
         return lastRule.get();
     }
 
