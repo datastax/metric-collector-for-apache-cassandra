@@ -13,7 +13,7 @@ spec:
   - cassandra.datastax.com/cluster
   - cassandra.datastax.com/datacenter
   endpoints:
-  - interval: 15s
+  - interval: 60s
     path: /metrics
     port: metrics
     scrapeTimeout: 15s
