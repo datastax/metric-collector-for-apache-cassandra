@@ -12,26 +12,54 @@ metric_sampling_interval_in_seconds: 30
 ### pattern: regex pattern to search, can be a sub-match or full match
 ### scope: 'global' will affect all data. 'datalog' will only affect the datalog
 ### policy: 'allow' or 'deny'
-###
-### The following logic is applied to each metric name name
-### ====================================
-### || allow    | deny     | behavior ||
-### ||----------|----------|----------||
-### || empty    | empty    | allowed  ||
-### || match    | empty    | allowed  ||
-### || no-match | empty    | denied   ||
-### || empty    | match    | denied   ||
-### || empty    | no-match | allowed  ||
-### || match    | match    | denied   ||
-### || no-match | match    | denied   ||
-### || match    | no-match | allowed  ||
-### || no-match | no-match | denied   ||
-### ====================================
+### The last applicable rule wins, which works similarly to iptables firewall rules:
+###   - A metric that would be denied by a rule and then allowed by another would be allowed.
+###   - A metric that would be allowed by a rule and then denied by another would be denied.
+### This allows to apply efficient filters on table level metrics for example and allow just a 
+### subset of those to match the dashboards requirements.
 ### Default - allow all
 
+# Below sample rules allow to extract only a subset of table level metrics and lighten the load
+# for clusters with 100s of tables.
 #filtering_rules:
 #  - policy: deny
-#    pattern: system_auth
+#    pattern: org.apache.cassandra.metrics.table
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.live_ss_table_count
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.Table.LiveSSTableCount
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.live_disk_space_used
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.LiveDiskSpaceUsed
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.Table.Pending
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.Table.Memtable
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.Table.Compaction
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.read
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.write
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.range
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.coordinator
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.dropped_mutations
 #    scope: global
 
 
