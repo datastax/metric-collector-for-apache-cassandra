@@ -17,6 +17,12 @@ metric_sampling_interval_in_seconds: 30
 ###   - A metric that would be allowed by a rule and then denied by another would be denied.
 ### This allows to apply efficient filters on table level metrics for example and allow just a 
 ### subset of those to match the dashboards requirements.
+### Filter rules are applied both on the name of the Cassandra metric and a cleaned/formatted
+### version of the metric name:
+###   - org.apache.cassandra.metrics.Table.LiveSSTableCount
+###   - org.apache.cassandra.metrics.table.live_ss_table_count
+### In the event the metric name and the cleaned metric name result in a differing policy,
+### the deny policy would be applied.
 ### Default - allow all
 
 # Below sample rules allow to extract only a subset of table level metrics and lighten the load
@@ -60,6 +66,9 @@ metric_sampling_interval_in_seconds: 30
 #    scope: global
 #  - policy: allow
 #    pattern: org.apache.cassandra.metrics.table.dropped_mutations
+#    scope: global
+#  - policy: allow
+#    pattern: org.apache.cassandra.metrics.table.DroppedMutations
 #    scope: global
 
 
