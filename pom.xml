@@ -11,7 +11,7 @@
         <revision>0.2.0</revision>
         <dropwizard.version>1.0.2</dropwizard.version>
         <!-- <cassandra.version>4.0-beta4</cassandra.version> -->
-        <cassandra.version>3.11.10</cassandra.version>
+        <cassandra.version>3.11.12</cassandra.version>
         <driver.version>3.6.0</driver.version> <!-- Needed for guava 18 compat-->
         <bytebuddy.version>1.10.10</bytebuddy.version>
         <mustache.version>0.9.6</mustache.version>
