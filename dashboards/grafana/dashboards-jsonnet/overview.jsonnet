@@ -107,7 +107,7 @@ dashboard.new(
     textPanel.new(
       transparent=true,
       mode="html",
-      content='<a href="https://cassandra.apache.org" target="new"><img src="https://cassandra.apache.org/img/cassandra_logo.png"/></a>',
+      content='<a href="https://cassandra.apache.org" target="new"><img src="https://cassandra.apache.org/assets/img/logo-white.svg"/></a>',
     )
   )
   .addPanel(textPanel.new(transparent=true))
