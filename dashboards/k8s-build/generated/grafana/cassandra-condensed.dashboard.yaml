@@ -203,7 +203,7 @@ spec:
     \            \"value\": \"null\"\n                  }\n               ],\n   \
     \            \"valueName\": \"avg\"\n            },\n            {\n         \
     \      \"content\": \"<a href=\\\"https://cassandra.apache.org\\\" target=\\\"\
-    new\\\"><img src=\\\"https://cassandra.apache.org/img/cassandra_logo.png\\\"/></a>\"\
+    new\\\"><img src=\\\"https://cassandra.apache.org/assets/img/logo-white.svg\\\"/></a>\"\
     ,\n               \"datasource\": null,\n               \"gridPos\": { },\n  \
     \             \"id\": 7,\n               \"mode\": \"html\",\n               \"\
     span\": 2,\n               \"title\": \"\",\n               \"transparent\": true,\n\
