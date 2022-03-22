@@ -16,7 +16,7 @@ spec:
     \      \"id\": 2,\n               \"mode\": \"markdown\",\n               \"title\"\
     : \"\",\n               \"transparent\": true,\n               \"type\": \"text\"\
     \n            },\n            {\n               \"content\": \"<a href=\\\"https://cassandra.apache.org\\\
-    \" target=\\\"new\\\"><img src=\\\"https://cassandra.apache.org/img/cassandra_logo.png\\\
+    \" target=\\\"new\\\"><img src=\\\"https://cassandra.apache.org/assets/img/logo-white.svg\\\
     \"/></a>\",\n               \"datasource\": null,\n               \"gridPos\"\
     : { },\n               \"id\": 3,\n               \"mode\": \"html\",\n      \
     \         \"title\": \"\",\n               \"transparent\": true,\n          \
