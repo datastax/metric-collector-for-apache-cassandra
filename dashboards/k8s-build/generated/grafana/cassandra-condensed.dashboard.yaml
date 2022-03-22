@@ -203,16 +203,16 @@ spec:
     \            \"value\": \"null\"\n                  }\n               ],\n   \
     \            \"valueName\": \"avg\"\n            },\n            {\n         \
     \      \"content\": \"<a href=\\\"https://cassandra.apache.org\\\" target=\\\"\
-    new\\\"><img src=\\\"https://cassandra.apache.org/assets/img/logo-white.svg\\\"/></a>\"\
-    ,\n               \"datasource\": null,\n               \"gridPos\": { },\n  \
-    \             \"id\": 7,\n               \"mode\": \"html\",\n               \"\
-    span\": 2,\n               \"title\": \"\",\n               \"transparent\": true,\n\
-    \               \"type\": \"text\"\n            },\n            {\n          \
-    \     \"cacheTimeout\": null,\n               \"colorBackground\": false,\n  \
-    \             \"colorValue\": true,\n               \"colors\": [\n          \
-    \        \"#299c46\",\n                  \"rgba(237, 129, 40, 0.89)\",\n     \
-    \             \"#d44a3a\"\n               ],\n               \"datasource\": \"\
-    $PROMETHEUS_DS\",\n               \"decimals\": 0,\n               \"description\"\
+    new\\\"><img src=\\\"https://cassandra.apache.org/assets/img/logo-white.svg\\\"\
+    /></a>\",\n               \"datasource\": null,\n               \"gridPos\": {\
+    \ },\n               \"id\": 7,\n               \"mode\": \"html\",\n        \
+    \       \"span\": 2,\n               \"title\": \"\",\n               \"transparent\"\
+    : true,\n               \"type\": \"text\"\n            },\n            {\n  \
+    \             \"cacheTimeout\": null,\n               \"colorBackground\": false,\n\
+    \               \"colorValue\": true,\n               \"colors\": [\n        \
+    \          \"#299c46\",\n                  \"rgba(237, 129, 40, 0.89)\",\n   \
+    \               \"#d44a3a\"\n               ],\n               \"datasource\"\
+    : \"$PROMETHEUS_DS\",\n               \"decimals\": 0,\n               \"description\"\
     : \"Number of connected clients during this time window\",\n               \"\
     format\": \"none\",\n               \"gauge\": {\n                  \"maxValue\"\
     : 100,\n                  \"minValue\": 0,\n                  \"show\": false,\n\
