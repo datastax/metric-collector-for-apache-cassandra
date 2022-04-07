@@ -41,10 +41,7 @@ cd $PACKAGE_DIR
 tar zcvf $PROJECT_DIR_NAME.tar.gz $PROJECT_DIR_NAME
 zip $PROJECT_DIR_NAME.zip $(tar ztf $PROJECT_DIR_NAME.tar.gz)
 popd
-pushd .
-cd dashboards/grafana
-./make-dashboards.sh
-popd
+mixin/make-dashboards.sh
 
 DASHBOARD_DIR_NAME=datastax-mcac-dashboards-$VERSION
 mkdir -p $PACKAGE_DIR/$DASHBOARD_DIR_NAME/grafana

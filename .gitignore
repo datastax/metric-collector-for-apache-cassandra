@@ -6,3 +6,4 @@ venv
 .classpath
 target
 .vscode
+vendor
