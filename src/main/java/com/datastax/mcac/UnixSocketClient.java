@@ -65,8 +65,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 public class UnixSocketClient {
-    public static final int DEFAULT_WRITE_BUFFER_WATERMARK_LOW_IN_KB = 4096;
-    public static final int DEFAULT_WRITE_BUFFER_WATERMARK_HIGH_IN_KB = 8192;
+
+    /*
+     * Defaults, and system properties to allow customisation, to Netty's write buffer watermarks.
+     *
+     * This does not affect collectd (which is usually what you want). The collectd properties can be configured here:
+     *  https://github.com/datastax/metric-collector-for-apache-cassandra/blob/a72e183/config/collectd.conf.tmpl#L14-L15
+     */
+    public static final int DEFAULT_WRITE_BUFFER_WATERMARK_LOW_IN_KB = Integer.getInteger("mcac.write_buffer_watermark_low_in_kb", 4096);
+    public static final int DEFAULT_WRITE_BUFFER_WATERMARK_HIGH_IN_KB = Integer.getInteger("mcac.write_buffer_watermark_high_in_kb", 8192);
 
     /*
      * For metrics we add enhancing what exists out of the box for C* metrics
