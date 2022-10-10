@@ -20,10 +20,10 @@ To use:
      
   3. Open your web browser to [http://localhost:3000](http://localhost:3000)
   
-  If you want to change the jsonnet dashboards, make your changes then run:
+  If you want to change the jsonnet dashboards, make your changes under `mixin/dashboards/` then run:
   
   ````
-  ../grafana/make-dashboards.sh
+  mixin/make-dashboards.sh
   ````
   
   Refresh the browser to see changes. 

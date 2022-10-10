@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/grafana/grafonnet-lib.git",
+          "subdir": "grafonnet"
+        }
+      },
+      "version": "6db00c292d3a1c71661fc875f90e0ec7caa538c2",
+      "sum": "gF8foHByYcB25jcUOBqP6jxk0OPifQMjPvKY0HaCk6w="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/thelastpickle/grafonnet-polystat-panel.git",
+          "subdir": ""
+        }
+      },
+      "version": "275a48de57afdac0d72219d82863d8ab8bd0e682",
+      "sum": "pXSXxNxi4WvBKYZ83GVYotQyL+toHaizqvjJ+8YYMoU="
+    }
+  ],
+  "legacyImports": false
+}
