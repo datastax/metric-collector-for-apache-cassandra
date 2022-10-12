@@ -45,6 +45,9 @@ workload and dashboards connected to kick the tires.
  1. Download the [latest release](https://github.com/datastax/metric-collector-for-apache-cassandra/releases/latest) of the agent onto your Cassandra nodes.
  The archive is self contained so no need do anything other than `tar -zxf latest.tar.gz`
  into any location you prefer like `/usr/local` or `/opt`.
+ 
+**NOTE:** For Cassandra 4.1.x and newer, you will need to use the release bundle with `-4.1-beta1` appended.
+For Cassandra 4.0.x and lower, you will need to use the release bundle without the extra prefix.
 
  2. Add the following line into the `cassandra-env.sh` file:
 
