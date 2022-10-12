@@ -17,6 +17,8 @@ jobs:
           RELEASE_VERSION="${RELEASE_VERSION:1}"
           ./make_package.sh "$RELEASE_VERSION"
 
+          ./make_package.sh "$RELEASE_VERSION" 4.1-beta1
+
           cd package-${RELEASE_VERSION}
           assets=()
           for asset in *.{gz,zip}; do

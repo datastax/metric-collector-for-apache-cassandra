@@ -12,18 +12,20 @@ if [ "$VERSION" == "" ]; then
   exit 1
 fi
 
+PACKAGE_DIR=package-$VERSION
+PROJECT_DIR_NAME=datastax-mcac-agent-$VERSION
+
 OPTIONAL_MVN_ARGS=""
 if [ -n "$CASSANDRA_VERSION" ]; then
   OPTIONAL_MVN_ARGS="${OPTIONAL_MVN_ARGS} -Dcassandra.version=${CASSANDRA_VERSION}"
+  # make a different package for the specific Cassandra version
+  PROJECT_DIR_NAME=datastax-mcac-agent-$VERSION-${CASSANDRA_VERSION}
 fi
 if [ -n "$BUILD_PROFILE" ]; then
   OPTIONAL_MVN_ARGS="${OPTIONAL_MVN_ARGS} --activate-profiles=${BUILD_PROFILE}"
 fi
 
-PACKAGE_DIR=package-$VERSION
-PROJECT_DIR_NAME=datastax-mcac-agent-$VERSION
-
-mkdir $PACKAGE_DIR
+mkdir -p $PACKAGE_DIR
 
 mvn -DskipTests clean package -Drevision=$VERSION $OPTIONAL_MVN_ARGS
 mkdir -p $PACKAGE_DIR/$PROJECT_DIR_NAME/config
