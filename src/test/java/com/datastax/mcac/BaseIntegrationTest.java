@@ -30,9 +30,17 @@ public abstract class BaseIntegrationTest
     protected final String version;
     protected static DockerHelper docker;
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Iterable<String[]> functions()
     {
+        String cassandraVersion = System.getProperty("cassandra.version");
+        if (cassandraVersion != null && cassandraVersion.startsWith("4.1"))
+        {
+            String[] versions = new String[]{"4.1"};
+            ArrayList<String[]> list = new ArrayList<>(1);
+            list.add(versions);
+            return list;
+        }
         return Lists.newArrayList(
                 new String[]{"4.0"},
                 new String[]{"3.11"},

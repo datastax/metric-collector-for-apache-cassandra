@@ -4,6 +4,13 @@ on: [push, pull_request]
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        cassandra-version: ['4.0', '4.1']
+        include:
+          - cassandra-version: '4.1'
+            set-version: true
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +25,15 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Build with Maven
-        run: mvn -B package -DskipTests --file pom.xml
-      - name: run tests
+      - if: ${{ !matrix.set-version }}
+        name: Build with Maven (Cassandra 4.0 and lower)
+        run: mvn -B clean package -DskipTests --file pom.xml
+      - if: ${{ !matrix.set-version }}
+        name: run tests (Cassandra 4.0 and lower)
         run: mvn -B test --file pom.xml
+      - if: ${{ matrix.set-version }}
+        name: Build with Maven (Cassandra 4.1 and newer)
+        run: mvn -B clean package -DskipTests --file pom.xml -Dcassandra.version=4.1-beta1
+      - if: ${{ matrix.set-version }}
+        name: run tests (Cassandra 4.1 and newer)
+        run: mvn -B test --file pom.xml -Dcassandra.version=4.1-beta1
