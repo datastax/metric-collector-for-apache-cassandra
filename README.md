@@ -48,6 +48,7 @@ workload and dashboards connected to kick the tires.
  
 **NOTE:** For Cassandra 4.1.x and newer, you will need to use the release bundle with `-4.1-beta1` appended.
 For Cassandra 4.0.x and lower, you will need to use the release bundle without the extra prefix.
+See [below](#cassandra-version-supported) for more.
 
  2. Add the following line into the `cassandra-env.sh` file:
 
@@ -84,7 +85,12 @@ For Cassandra 4.0.x and lower, you will need to use the release bundle without t
 
 ## Cassandra version supported:
 
-The supported versions of Apache Cassandra: 2.2+ (2.2.X, 3.0.X, 3.11.X, 4.0)
+The supported versions of Apache Cassandra: 2.2+ (2.2.X, 3.0.X, 3.11.X, 4.0, 4.1)
+
+**NOTE:** There is a different install bundle for the agent for Cassandra 4.1 and newer.
+For Cassandra 4.0.x and older, use the bundles without the `-4.1-beta1` suffix.
+For Cassandra 4.1.x and newer, use the bundles with the `-4.1-beta1` suffix.
+The Dashboard bundles can be used with any version of Cassandra.
 
 ## Kubernetes Support
 Check out the [dashboards/k8s-build](dashboards/k8s-build) directory for a guide on using this project along with Kubernetes.
