@@ -104,8 +104,7 @@ public class FilteringRule
             return FilteringRule.ALLOWED_GLOBALLY;
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Metric {}", name);
-            logger.debug(">>>>>> Applying rule {}", lastRule.get());
+            logger.debug("Applying rule {} to metric {}", lastRule.get(), name);
         }
         return lastRule.get();
     }
