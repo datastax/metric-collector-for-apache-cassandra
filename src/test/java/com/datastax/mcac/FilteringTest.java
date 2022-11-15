@@ -23,15 +23,15 @@ public class FilteringTest
         // Check that allow takes precedence over deny if set last
         FilteringRule firstRule = new FilteringRule("deny", "org.apache.cassandra.metrics", FilteringRule.GLOBAL);
         FilteringRule secondRule = new FilteringRule("allow", "org.apache.cassandra.metrics.metric1", FilteringRule.GLOBAL);
-        Assert.assertTrue(FilteringRule.applyFilters("org.apache.cassandra.metrics.metric1", Arrays.asList(firstRule, secondRule)).isAllowRule);
+        Assert.assertEquals(new FilteringRule.FilteringRuleMatch(1,secondRule), FilteringRule.applyFilters("org.apache.cassandra.metrics.metric1", Arrays.asList(firstRule, secondRule)));
     }
 
     @Test
-    public void testAllowFirstLoses() {
+    public void testAllowFirstLooses() {
         // Check that deny takes precedence over allow if set last
         FilteringRule firstRule = new FilteringRule("allow", "org.apache.cassandra.metrics.metric1", FilteringRule.GLOBAL);
         FilteringRule secondRule = new FilteringRule("deny", "org.apache.cassandra.metrics", FilteringRule.GLOBAL);
-        Assert.assertFalse(FilteringRule.applyFilters("org.apache.cassandra.metrics.metric1", Arrays.asList(firstRule, secondRule)).isAllowRule);
+        Assert.assertEquals(new FilteringRule.FilteringRuleMatch(1,secondRule), FilteringRule.applyFilters("org.apache.cassandra.metrics.metric1", Arrays.asList(firstRule, secondRule)));
     }
 
     @Test
@@ -40,8 +40,8 @@ public class FilteringTest
         FilteringRule firstRule = new FilteringRule("allow", "org.apache.cassandra.metrics.metric1", FilteringRule.GLOBAL);
         FilteringRule secondRule = new FilteringRule("deny", "org.apache.cassandra.metrics", FilteringRule.GLOBAL);
         FilteringRule thirdRule = new FilteringRule("allow", "org.apache.cassandra.metrics.metric2", FilteringRule.GLOBAL);
-        Assert.assertFalse(FilteringRule.applyFilters("org.apache.cassandra.metrics.metric1", Arrays.asList(unaffectedByDenyRule, firstRule, secondRule, thirdRule)).isAllowRule);
-        Assert.assertTrue(FilteringRule.applyFilters("org.apache.cassandra.metrics.metric2", Arrays.asList(unaffectedByDenyRule, firstRule, secondRule, thirdRule)).isAllowRule);
-        Assert.assertTrue(FilteringRule.applyFilters("org.apache.cassandra.whatever.metric3", Arrays.asList(unaffectedByDenyRule, firstRule, secondRule, thirdRule)).isAllowRule);
+        Assert.assertEquals(new FilteringRule.FilteringRuleMatch(2,secondRule), FilteringRule.applyFilters("org.apache.cassandra.metrics.metric1",Arrays.asList(unaffectedByDenyRule, firstRule, secondRule, thirdRule)));
+        Assert.assertEquals(new FilteringRule.FilteringRuleMatch(3,thirdRule), FilteringRule.applyFilters("org.apache.cassandra.metrics.metric2", Arrays.asList(unaffectedByDenyRule, firstRule, secondRule, thirdRule)));
+        Assert.assertEquals(new FilteringRule.FilteringRuleMatch(2,secondRule), FilteringRule.applyFilters("org.apache.cassandra.metrics.metric3", Arrays.asList(unaffectedByDenyRule, firstRule, secondRule, thirdRule)));
     }
 }
