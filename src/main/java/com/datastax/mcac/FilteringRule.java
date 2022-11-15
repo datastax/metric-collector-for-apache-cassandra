@@ -1,10 +1,9 @@
 package com.datastax.mcac;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.IntStream;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -89,6 +88,38 @@ public class FilteringRule
         return patternRegex.get().matcher(name).find();
     }
 
+    public static class FilteringRuleMatch{
+        public final int index;
+        public final FilteringRule rule;
+        public FilteringRuleMatch(int index,FilteringRule rule){
+            this.index = index;
+            this.rule = rule;
+        }
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            FilteringRuleMatch ruleMatch = (FilteringRuleMatch) o;
+            return Objects.equals(index, ruleMatch.index) &&
+                Objects.equals(rule, ruleMatch.rule);
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return Objects.hash(index,rule);
+        }
+        @Override
+        public String toString()
+        {
+            return "FilteringRuleMatch{" +
+                "index='" + index + '\'' +
+                ", rule='" + rule.toString() +
+                '}';
+        }
+    }
+
     /**
      * Returns the most applicable filtering rule for this name.
      *
@@ -96,17 +127,19 @@ public class FilteringRule
      * @param name
      * @return The rule that applied for this name.
      */
-    public static FilteringRule applyFilters(String name, Collection<FilteringRule> rules)
+    public static FilteringRuleMatch applyFilters(String name, List<FilteringRule> rules)
     {
-        Optional<FilteringRule> lastRule = rules.stream().filter(rule -> rule.matches(name)).reduce((first, second) -> second);
+        OptionalInt lastRule = IntStream.range(0, rules.size()).filter(index -> rules.get(index).matches(name)).reduce((first, second) -> second);
 
         if (!lastRule.isPresent())
-            return FilteringRule.ALLOWED_GLOBALLY;
+            return new FilteringRuleMatch(0,FilteringRule.ALLOWED_GLOBALLY);
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Applying rule {} to metric {}", lastRule.get(), name);
+        int index = lastRule.getAsInt();
+        FilteringRule rule = rules.get(index);
+        if (logger.isTraceEnabled()) {
+            logger.trace("Applying rule {} for Metric {}", rule,name);
         }
-        return lastRule.get();
+        return new FilteringRuleMatch(index,rule);
     }
 
 

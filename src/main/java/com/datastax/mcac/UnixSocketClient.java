@@ -451,20 +451,29 @@ public class UnixSocketClient {
 
     void addMetric(String name, Function<String, Integer> writer)
     {
-        FilteringRule applied = FilteringRule.applyFilters(name, runtimeConfig.filtering_rules);
-        FilteringRule applied2 = FilteringRule.applyFilters(clean(name), runtimeConfig.filtering_rules);
+        final FilteringRule.FilteringRuleMatch appliedCassandra = FilteringRule.applyFilters(name, runtimeConfig.filtering_rules);
+        final FilteringRule.FilteringRuleMatch appliedCleaned = FilteringRule.applyFilters(clean(name), runtimeConfig.filtering_rules);
 
-        //Prefer globally denied rules
-        if (applied.isAllowRule != applied2.isAllowRule)
+        final FilteringRule applied;
+        //Prefer order (last wins)
+        if(appliedCassandra.index != appliedCleaned.index)
         {
-            applied = applied.isAllowRule ? applied2 : applied;
+            applied = appliedCassandra.index > appliedCleaned.index ? appliedCassandra.rule : appliedCleaned.rule;
         }
-        else if (applied.isGlobal != applied2.isGlobal)
+        //and then prefer globally denied rules
+        else if (appliedCassandra.rule.isAllowRule != appliedCleaned.rule.isAllowRule)
         {
-            applied = applied.isGlobal ? applied : applied2;
+            applied = appliedCassandra.rule.isAllowRule ? appliedCleaned.rule : appliedCassandra.rule;
+        }
+        else if (appliedCassandra.rule.isGlobal != appliedCleaned.rule.isGlobal)
+        {
+            applied = appliedCassandra.rule.isGlobal ? appliedCassandra.rule : appliedCleaned.rule;
+        }
+        else {
+            applied = appliedCassandra.rule;
         }
 
-        logger.trace("Using filtering rule {} for name '{}'", applied, name);
+        logger.debug("Using filtering rule {} for name '{}'", applied, name);
         ConcurrentHashMap<String, Function<String, Integer>> picked = null;
 
         if (applied.isAllowRule)
@@ -573,7 +582,7 @@ public class UnixSocketClient {
             }
             catch (IllegalArgumentException e)
             {
-                logger.debug("Unknown metric class", e);
+                logger.warn("initializing Metrics Reporting failed with "+e.getMessage(), e);
             }
         }
     }
