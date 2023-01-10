@@ -13,7 +13,7 @@
         <!-- <cassandra.version>4.0-beta4</cassandra.version> -->
         <cassandra.version>3.11.10</cassandra.version>
         <driver.version>3.6.0</driver.version> <!-- Needed for guava 18 compat-->
-        <bytebuddy.version>1.10.10</bytebuddy.version>
+        <bytebuddy.version>1.12.19</bytebuddy.version>
         <mustache.version>0.9.6</mustache.version>
         <collectd.version>0.1.4</collectd.version>
         <docker.java.version>3.1.2</docker.java.version>
