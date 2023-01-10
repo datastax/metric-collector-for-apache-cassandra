@@ -2,6 +2,7 @@ package com.datastax.mcac.interceptors;
 
 import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
+import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -42,7 +43,7 @@ public class CassandraDaemonInterceptor extends AbstractInterceptor
         return new AgentBuilder.Transformer()
         {
             @Override
-            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule)
+            public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule, ProtectionDomain protectionDomain)
             {
                 return builder.method(ElementMatchers.named("start")).intercept(MethodDelegation.to(CassandraDaemonInterceptor.class));
             }
