@@ -15,7 +15,7 @@
         <driver.version>3.6.0</driver.version> <!-- Needed for guava 18 compat-->
         <bytebuddy.version>1.12.19</bytebuddy.version>
         <mustache.version>0.9.6</mustache.version>
-        <collectd.version>0.1.4</collectd.version>
+        <collectd.version>0.1.5</collectd.version>
         <docker.java.version>3.1.2</docker.java.version>
         <build.version.file>build_version.sh</build.version.file>
     </properties>
