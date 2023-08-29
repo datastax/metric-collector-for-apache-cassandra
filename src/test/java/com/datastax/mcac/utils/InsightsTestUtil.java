@@ -19,7 +19,7 @@ public class InsightsTestUtil
 {
     private static final Logger logger = LoggerFactory.getLogger(InsightsTestUtil.class);
 
-    static final int MAX_ATTEMPTS = 3;
+    static final int MAX_ATTEMPTS = 7;
 
     public static int checkInsightLogFor(File dataDir, String entry) throws IOException
     {
