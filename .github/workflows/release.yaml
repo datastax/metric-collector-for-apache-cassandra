@@ -22,10 +22,10 @@ jobs:
           cd package-${RELEASE_VERSION}
           assets=()
           for asset in *.{gz,zip}; do
-            assets+=("-a" "$asset")
+            assets+=("$asset")
           done
       
-          hub release create "${assets[@]}" -m "v$RELEASE_VERSION" "v$RELEASE_VERSION"
+          gh release create "v$RELEASE_VERSION" "${assets[@]}" -n "v$RELEASE_VERSION"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
