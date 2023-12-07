@@ -199,13 +199,21 @@ scrape_configs:
        replacement: mcac_hints_${1}
      #HintService Metrics
      - source_labels: ["mcac"]
-       regex: org\.apache\.cassandra\.metrics\.hints_service\.hints_delays\-(\w+)
+       regex: org\.apache\.cassandra\.metrics\.hints_service\.hint_delays\.([^\-]+)
        target_label: peer_ip
        replacement: ${1}
      - source_labels: ["mcac"]
-       regex: org\.apache\.cassandra\.metrics\.hints_service\.hints_delays\-(\w+)
+       regex: org\.apache\.cassandra\.metrics\.hints_service\.hint_delays\.([^\-]+)
        target_label: __name__
        replacement: mcac_hints_hints_delays
+     - source_labels: [ "mcac" ]
+       regex: org\.apache\.cassandra\.metrics\.hints_service\.hints_created\.([^\-]+)
+       target_label: peer_ip
+       replacement: ${1}
+     - source_labels: [ "mcac" ]
+       regex: org\.apache\.cassandra\.metrics\.hints_service\.hints_created\.([^\-]+)
+       target_label: __name__
+       replacement: mcac_hints_created
      - source_labels: ["mcac"]
        regex: org\.apache\.cassandra\.metrics\.hints_service\.([^\-]+)
        target_label: __name__
