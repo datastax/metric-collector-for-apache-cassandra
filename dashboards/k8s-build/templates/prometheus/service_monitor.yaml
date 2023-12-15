@@ -13,9 +13,8 @@ spec:
   - cassandra.datastax.com/cluster
   - cassandra.datastax.com/datacenter
   endpoints:
-  - targetPort: 9103
-    scheme: http
+  - interval: 60s
     path: /metrics
+    port: metrics
     scrapeTimeout: 15s
-    interval: 15s
     metricRelabelings: []
