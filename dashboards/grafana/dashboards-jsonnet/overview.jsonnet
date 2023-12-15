@@ -71,9 +71,10 @@ dashboard.new(
   template.new(
     'dc',
     '$PROMETHEUS_DS',
-    'label_values(collectd_collectd_queue_length{cluster=~"$cluster"}, dc)',
+    'label_values(collectd_collectd_queue_length{cluster="$cluster"}, dc)',
     label='DataCenter',
     refresh='time',
+    multi=true,
     includeAll=true,
     allValues=".*",
   )
@@ -82,9 +83,10 @@ dashboard.new(
   template.new(
     'rack',
     '$PROMETHEUS_DS',
-    'label_values(collectd_collectd_queue_length{cluster=~"$cluster", dc=~"$dc"}, rack)',
+    'label_values(collectd_collectd_queue_length{cluster="$cluster", dc=~"$dc"}, rack)',
     label='Rack',
     refresh='time',
+    multi=true,
     includeAll=true,
     allValues=".*",
   )
@@ -93,9 +95,10 @@ dashboard.new(
   template.new(
     'node',
     '$PROMETHEUS_DS',
-    'label_values(collectd_collectd_queue_length{cluster=~"$cluster", dc=~"$dc", rack=~"$rack"}, instance)',
+    'label_values(collectd_collectd_queue_length{cluster="$cluster", dc=~"$dc", rack=~"$rack"}, instance)',
     label='Node',
     refresh='time',
+    multi=true,
     includeAll=true,
     allValues=".*",
   )
@@ -133,7 +136,7 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
         legendFormat='{{request_type}}',
       )
     )
@@ -157,37 +160,37 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_failures_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_failures_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
         legendFormat='{{request_type}} failures',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_timeouts_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_timeouts_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
         legendFormat='{{request_type}} timeouts',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_unavailables_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_unavailables_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
         legendFormat='{{request_type}} unavailable errors',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_unfinished_commit_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_unfinished_commit_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
         legendFormat='{{request_type}} unfinished commit errors',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_condition_not_met_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_condition_not_met_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
         legendFormat='{{request_type}} condition not met errors',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_contention_histogram_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_contention_histogram_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"}[1m:30s]))',
         legendFormat='{{request_type}} contention histogram errors',
       )
     )
@@ -223,7 +226,9 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[1m:30s])) / ignoring (request_type) (sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[1m:30s])) + ignoring (request_type) sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[1m:30s])))',
+        expr='sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[1m:30s]))
+              / ignoring (request_type) (sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[1m:30s]))
+              + ignoring (request_type) sum by (cluster, request_type) (rate(' + prefix + '_client_request_latency_total{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[1m:30s])))',
       )
     )
   )
@@ -246,19 +251,19 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='histogram_quantile(0.98, sum(rate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[5m])) by (le, cluster))',
+        expr='histogram_quantile(0.98, sum by (le, cluster) (rate(' + prefix + '_client_request_latency_bucket{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[1m:30s])))',
         legendFormat='p98',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='histogram_quantile(0.99, sum(rate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[5m])) by (le, cluster))',
+        expr='histogram_quantile(0.99, sum by (le, cluster) (rate(' + prefix + '_client_request_latency_bucket{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[1m:30s])))',
         legendFormat='p99',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='histogram_quantile(0.999, sum(rate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[5m])) by (le, cluster))',
+        expr='histogram_quantile(0.999, sum by (le, cluster) (rate(' + prefix + '_client_request_latency_bucket{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="read"}[1m:30s])))',
         legendFormat='p999',
       )
     )
@@ -284,19 +289,19 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='histogram_quantile(0.98, sum(rate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[5m])) by (le, cluster))',
+        expr='histogram_quantile(0.98, sum by (le, cluster) (rate(' + prefix + '_client_request_latency_bucket{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[1m:30s])))',
         legendFormat='p98',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='histogram_quantile(0.99, sum(rate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[5m])) by (le, cluster))',
+        expr='histogram_quantile(0.99, sum by (le, cluster) (rate(' + prefix + '_client_request_latency_bucket{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[1m:30s])))',
         legendFormat='p99',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='histogram_quantile(0.999, sum(rate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[5m])) by (le, cluster))',
+        expr='histogram_quantile(0.999, sum by (le, cluster) (rate(' + prefix + '_client_request_latency_bucket{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type="write"}[1m:30s])))',
         legendFormat='p999',
       )
     )
@@ -323,7 +328,7 @@ dashboard.new(
     .addTarget(
       prometheus.target(
         # In scope!~"Write|Read|.*-.*", we want to exclude charts above and all the per-consistency_level info like "Read-LOCAL_ONE"
-        expr='histogram_quantile(0.99, sum(rate(' + prefix + '_client_request_latency_bucket{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type!~"write|read|.*-.*"}[1m:30s])) by (le, request_type, cluster))',
+        expr='histogram_quantile(0.99, sum by (le, request_type, cluster) (rate(' + prefix + '_client_request_latency_bucket{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", request_type!~"write|read|.*-.*"}[1m:30s])))',
         legendFormat='p99 {{request_type}}'
       )
     )
@@ -369,7 +374,7 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        'max by (cluster, dc, rack, instance) (changes(' + prefix + '_thread_pools_completed_tasks{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", pool_name="gossip_stage"}[2m:30s])) > bool 0',
+        'max by (cluster, dc, rack, instance) (changes(' + prefix + '_thread_pools_completed_tasks{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", pool_name="gossip_stage"}[2m:30s])) > bool 0',
         legendFormat='{{instance}}',
         instant=true,
       )
@@ -423,13 +428,13 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster) (max by (cluster, datacenter, rack, instance) (changes(' + prefix + '_thread_pools_completed_tasks{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", pool_name="native"}[2m:30s])) > bool 0)',
+        expr='sum by (cluster) (max by (cluster, dc, rack, instance) (changes(' + prefix + '_thread_pools_completed_tasks{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", pool_name="native"}[2m:30s])) > bool 0)',
         legendFormat='Nodes Coordinating Requests (Native protocol)',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='sum by (cluster) (max by (cluster, datacenter, rack, instance) (changes(' + prefix + '_thread_pools_completed_tasks{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", pool_name="gossip_stage"}[2m:30s])) > bool 0)',
+        expr='sum by (cluster) (max by (cluster, dc, rack, instance) (changes(' + prefix + '_thread_pools_completed_tasks{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node", pool_name="gossip_stage"}[2m:30s])) > bool 0)',
         legendFormat='Nodes With Internal Activity (Gossip protocol)',
       )
     )
@@ -589,19 +594,19 @@ dashboard.new(
     )
     .addTarget(
       prometheus.target(
-        expr='max by (cluster) (' + prefix + '_table_pending_compactions{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"})',
+        expr='max by (cluster) (' + prefix + '_table_pending_compactions{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"})',
         legendFormat='max',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='min by (cluster) (' + prefix + '_table_pending_compactions{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"})',
+        expr='min by (cluster) (' + prefix + '_table_pending_compactions{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"})',
         legendFormat='min',
       )
     )
     .addTarget(
       prometheus.target(
-        expr='avg by (cluster) (' + prefix + '_table_pending_compactions{cluster=~"$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"})',
+        expr='avg by (cluster) (' + prefix + '_table_pending_compactions{cluster="$cluster", dc=~"$dc", rack=~"$rack", instance=~"$node"})',
         legendFormat='avg',
       )
     )
@@ -998,7 +1003,6 @@ dashboard.new(
       legend_sortDesc=true,
       shared_tooltip=false,
       decimals=2,
-      min=0,
       max=1,
     )
     .addTarget(

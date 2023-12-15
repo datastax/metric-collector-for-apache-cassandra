@@ -40,6 +40,7 @@ services:
     volumes:
       - "mcac_data:/mcac"
       - "../../config:/mcac/config:ro"
+      - "./demo-cassandra.yaml:/etc/cassandra/cassandra.yaml"
     environment:
       MAX_HEAP_SIZE: "500M"
       HEAP_NEWSIZE: "100M"
@@ -64,6 +65,7 @@ services:
     volumes:
       - "mcac_data:/mcac"
       - "../../config:/mcac/config:ro"
+      - "./demo-cassandra.yaml:/etc/cassandra/cassandra.yaml"
     networks:
       - demo_net
     healthcheck:
@@ -89,7 +91,7 @@ services:
       - demo_net
     environment:
       - "TLP_STRESS_CASSANDRA_HOST=cassandra"
-    command: "run KeyValue --rate 30 -d 1d -r .8"
+    command: "run KeyValue --rate 250 -p 100 -d 1d -r .8"
     depends_on:
       cassandra2:
         condition: service_healthy
@@ -102,7 +104,7 @@ services:
       - demo_net
     environment:
       - "TLP_STRESS_CASSANDRA_HOST=cassandra"
-    command: "run BasicTimeSeries --rate 20 -d 1d -r .9"
+    command: "run BasicTimeSeries --rate 200 -p 10 -d 1d -r .1 --deletes .5"
     depends_on:
       cassandra2:
         condition: service_healthy

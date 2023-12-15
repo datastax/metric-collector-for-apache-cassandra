@@ -28,7 +28,7 @@
                "type": "text"
             },
             {
-               "content": "<a href=\"https://cassandra.apache.org\" target=\"new\"><img src=\"https://cassandra.apache.org/assets/img/logo-white.svg\"/></a>",
+               "content": "<a href=\"https://cassandra.apache.org\" target=\"new\"><img src=\"https://cassandra.apache.org/img/cassandra_logo.png\"/></a>",
                "datasource": null,
                "gridPos": { },
                "id": 3,
@@ -66,7 +66,7 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Total Requests Per Cluster, by Request Type",
+               "description": "Total writes, cas_propose and cas_commit per table",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
@@ -100,17 +100,31 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "expr": "sum by (cluster, keyspace, table) (rate(mcac_table_write_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "{{request_type}}",
+                     "legendFormat": "Writes: {{keyspace}}.{{table}}",
                      "refId": "A"
+                  },
+                  {
+                     "expr": "sum by (cluster, keyspace, table) (rate(mcac_table_cas_propose_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "Cas Propose: {{keyspace}}.{{table}}",
+                     "refId": "B"
+                  },
+                  {
+                     "expr": "sum by (cluster, keyspace, table) (rate(mcac_table_cas_commit_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "Cas Commit: {{keyspace}}.{{table}}",
+                     "refId": "C"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Request Throughputs",
+               "title": "Local Writes Throughput per Table",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -150,7 +164,7 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Total Timeouts, Failures, Unavailable Rates for each cluster",
+               "description": "Total writes, cas_propose and cas_commit per node",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
@@ -184,52 +198,31 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_failures_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "expr": "sum by (cluster, dc, rack, instance) (rate(mcac_table_write_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "{{request_type}} failures",
+                     "legendFormat": "Writes: {{instance}}",
                      "refId": "A"
                   },
                   {
-                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_timeouts_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "expr": "sum by (cluster, dc, rack, instance) (rate(mcac_table_cas_propose_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "{{request_type}} timeouts",
+                     "legendFormat": "Cas Propose: {{instance}}",
                      "refId": "B"
                   },
                   {
-                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_unavailables_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "expr": "sum by (cluster, dc, rack, instance) (rate(mcac_table_cas_commit_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "{{request_type}} unavailable errors",
+                     "legendFormat": "Cas Commit: {{instance}}",
                      "refId": "C"
-                  },
-                  {
-                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_unfinished_commit_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "{{request_type}} unfinished commit errors",
-                     "refId": "D"
-                  },
-                  {
-                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_condition_not_met_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "{{request_type}} condition not met errors",
-                     "refId": "E"
-                  },
-                  {
-                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_contention_histogram_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "{{request_type}} contention histogram errors",
-                     "refId": "F"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Error throughputs",
+               "title": "Local Writes Throughput per Node",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -264,92 +257,123 @@
                ]
             },
             {
-               "cacheTimeout": null,
-               "colorBackground": false,
-               "colorValue": false,
-               "colors": [
-                  "#DEB6F2",
-                  "#CA95E5",
-                  "#8F3BB8"
-               ],
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "decimals": 2,
-               "description": "Part of reads in the total of standard requests (Reads+Writes). CAS, Views, ... operations are ignored.",
-               "format": "percentunit",
-               "gauge": {
-                  "maxValue": 1,
-                  "minValue": 0,
-                  "show": true,
-                  "thresholdLabels": true,
-                  "thresholdMarkers": false
-               },
+               "description": "Total writes, cas_propose and cas_commit per node and table",
+               "fill": 0,
+               "fillGradient": 0,
                "gridPos": { },
                "id": 7,
-               "interval": null,
-               "links": [ ],
-               "mappingType": 1,
-               "mappingTypes": [
-                  {
-                     "name": "value to text",
-                     "value": 1
-                  },
-                  {
-                     "name": "range to text",
-                     "value": 2
-                  }
-               ],
-               "maxDataPoints": 100,
-               "nullPointMode": "connected",
-               "nullText": null,
-               "postfix": " Reads",
-               "postfixFontSize": "30%",
-               "prefix": "",
-               "prefixFontSize": "50%",
-               "rangeMaps": [
-                  {
-                     "from": "null",
-                     "text": "N/A",
-                     "to": "null"
-                  }
-               ],
-               "sparkline": {
-                  "fillColor": "rgba(31, 118, 189, 0.18)",
-                  "full": false,
-                  "lineColor": "#FFB357",
-                  "show": false
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
                },
-               "tableColumn": "",
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster, request_type) (rate(mcac_client_request_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\"}[1m:30s]))\n              / ignoring (request_type) (sum by (cluster, request_type) (rate(mcac_client_request_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\"}[1m:30s]))\n              + ignoring (request_type) sum by (cluster, request_type) (rate(mcac_client_request_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\"}[1m:30s])))",
+                     "expr": "sum by (cluster, dc, rack, instance, keyspace, table) (rate(mcac_table_write_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "",
+                     "legendFormat": "Writes: {{keyspace}}.{{table}} on {{instance}}",
                      "refId": "A"
-                  }
-               ],
-               "thresholds": "0.25,0.5,0.75",
-               "timeFrom": "",
-               "title": "Read / Write Distribution",
-               "transparent": true,
-               "type": "singlestat",
-               "valueFontSize": "30%",
-               "valueMaps": [
+                  },
                   {
-                     "op": "=",
-                     "text": "N/A",
-                     "value": "null"
+                     "expr": "sum by (cluster, dc, rack, instance, keyspace, table) (rate(mcac_table_cas_propose_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "Cas Propose: {{keyspace}}.{{table}} on {{instance}}",
+                     "refId": "B"
+                  },
+                  {
+                     "expr": "sum by (cluster, dc, rack, instance, keyspace, table) (rate(mcac_table_cas_commit_latency_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "Cas Commit: {{keyspace}}.{{table}} on {{instance}}",
+                     "refId": "C"
                   }
                ],
-               "valueName": "current"
-            },
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Local Writes Throughput per Node and Table",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "format": "rps",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  },
+                  {
+                     "format": "rps",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  }
+               ]
+            }
+         ],
+         "repeat": null,
+         "repeatIteration": null,
+         "repeatRowId": null,
+         "showTitle": true,
+         "title": "Local Writes Throughputs (Node Perspective)",
+         "titleSize": "h6",
+         "type": "row"
+      },
+      {
+         "collapse": false,
+         "collapsed": false,
+         "panels": [
             {
                "aliasColors": { },
                "bars": false,
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Read latency for coordinated reads",
+               "description": "Write latency for local writes per table (98 - 999th percentile)",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
@@ -377,47 +401,37 @@
                "points": false,
                "renderer": "flot",
                "repeat": null,
-               "seriesOverrides": [
-                  {
-                     "alias": "p999",
-                     "fillBelowTo": "p98",
-                     "lines": false
-                  },
-                  {
-                     "alias": "p98",
-                     "lines": false
-                  }
-               ],
+               "seriesOverrides": [ ],
                "spaceLength": 10,
                "stack": false,
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "histogram_quantile(0.98, sum by (le, cluster) (rate(mcac_client_request_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\"}[1m:30s])))",
+                     "expr": "histogram_quantile(0.98, sum by (cluster, keyspace, table, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "p98",
+                     "legendFormat": "p98 - {{keyspace}}.{{table}}",
                      "refId": "A"
                   },
                   {
-                     "expr": "histogram_quantile(0.99, sum by (le, cluster) (rate(mcac_client_request_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\"}[1m:30s])))",
+                     "expr": "histogram_quantile(0.99, sum by (cluster, keyspace, table, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "p99",
+                     "legendFormat": "p99 - {{keyspace}}.{{table}}",
                      "refId": "B"
                   },
                   {
-                     "expr": "histogram_quantile(0.999, sum by (le, cluster) (rate(mcac_client_request_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"read\"}[1m:30s])))",
+                     "expr": "histogram_quantile(0.999, sum by (cluster, keyspace, table, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "p999",
+                     "legendFormat": "p999 - {{keyspace}}.{{table}}",
                      "refId": "C"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Read Latency (98 - 999th percentile)",
+               "title": "Local Write Latency per Table",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -457,7 +471,7 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Write latency for coordinated writes",
+               "description": "Write latency for local writes per node (98 - 999th percentile)",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
@@ -485,47 +499,37 @@
                "points": false,
                "renderer": "flot",
                "repeat": null,
-               "seriesOverrides": [
-                  {
-                     "alias": "p999",
-                     "fillBelowTo": "p98",
-                     "lines": false
-                  },
-                  {
-                     "alias": "p98",
-                     "lines": false
-                  }
-               ],
+               "seriesOverrides": [ ],
                "spaceLength": 10,
                "stack": false,
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "histogram_quantile(0.98, sum by (le, cluster) (rate(mcac_client_request_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\"}[1m:30s])))",
+                     "expr": "histogram_quantile(0.98, sum by (cluster, dc, rack, instance, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "p98",
+                     "legendFormat": "p98 - {{instance}}",
                      "refId": "A"
                   },
                   {
-                     "expr": "histogram_quantile(0.99, sum by (le, cluster) (rate(mcac_client_request_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\"}[1m:30s])))",
+                     "expr": "histogram_quantile(0.99, sum by (cluster, dc, rack, instance, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "p99",
+                     "legendFormat": "p99 - {{instance}}",
                      "refId": "B"
                   },
                   {
-                     "expr": "histogram_quantile(0.999, sum by (le, cluster) (rate(mcac_client_request_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type=\"write\"}[1m:30s])))",
+                     "expr": "histogram_quantile(0.999, sum by (cluster, dc, rack, instance, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "p999",
+                     "legendFormat": "p999 - {{instance}}",
                      "refId": "C"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Write Latency (98th - p999 Percentile)",
+               "title": "Local Write Latency per Node",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -565,7 +569,7 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Other p99 latencies for coordinated requests",
+               "description": "Write latency for local writes per table and per node  (98 - 999th percentile)",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
@@ -599,17 +603,31 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "histogram_quantile(0.99, sum by (le, request_type, cluster) (rate(mcac_client_request_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", request_type!~\"write|read|.*-.*\"}[1m:30s])))",
+                     "expr": "histogram_quantile(0.98, sum by (cluster, dc, rack, instance, keyspace, table, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "p99 {{request_type}}",
+                     "legendFormat": "p98 - {{keyspace}}.{{table}} - {{instance}}",
                      "refId": "A"
+                  },
+                  {
+                     "expr": "histogram_quantile(0.99, sum by (cluster, dc, rack, instance, keyspace, table, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "p99 - {{keyspace}}.{{table}} - {{instance}}",
+                     "refId": "B"
+                  },
+                  {
+                     "expr": "histogram_quantile(0.999, sum by (cluster, dc, rack, instance, keyspace, table, le) (rate(mcac_table_write_latency_bucket{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])))",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "p999 - {{keyspace}}.{{table}} - {{instance}}",
+                     "refId": "C"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Other Latencies",
+               "title": "Local Write Latency per Table and Node",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -648,7 +666,7 @@
          "repeatIteration": null,
          "repeatRowId": null,
          "showTitle": true,
-         "title": "Request Throughputs (Coordinator Perspective)",
+         "title": "Local Write Latencies",
          "titleSize": "h6",
          "type": "row"
       },
@@ -657,157 +675,16 @@
          "collapsed": false,
          "panels": [
             {
-               "datasource": "$PROMETHEUS_DS",
-               "description": "Nodes Status uses Internal/Gossip activity. Be mindful that if Native or Thrift protocol are disabled, the nodes won't be reachable, and still marked up",
-               "gridPos": { },
-               "id": 11,
-               "mappingType": 2,
-               "mappingTypes": [
-                  {
-                     "name": "value to text",
-                     "value": 1
-                  },
-                  {
-                     "name": "range to text",
-                     "value": 2
-                  }
-               ],
-               "polystat": {
-                  "globalOperatorName": "current",
-                  "globalThresholds": [
-                     {
-                        "color": "#d44a3a",
-                        "state": 2,
-                        "value": 0
-                     },
-                     {
-                        "color": "#299c46",
-                        "state": 0,
-                        "value": 1
-                     }
-                  ],
-                  "globalUnitFormat": "none",
-                  "valueEnabled": true
-               },
-               "rangeMaps": [
-                  {
-                     "from": "0",
-                     "text": "DOWN",
-                     "to": "0.9999"
-                  },
-                  {
-                     "from": "1",
-                     "text": "UP",
-                     "to": "1"
-                  }
-               ],
-               "span": 12,
-               "targets": [
-                  {
-                     "expr": "max by (cluster, dc, rack, instance) (changes(mcac_thread_pools_completed_tasks{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", pool_name=\"gossip_stage\"}[2m:30s])) > bool 0",
-                     "format": "time_series",
-                     "instant": true,
-                     "intervalFactor": 2,
-                     "legendFormat": "{{instance}}",
-                     "refId": "A"
-                  }
-               ],
-               "title": "Nodes Status",
-               "transparent": true,
-               "type": "grafana-polystat-panel"
-            },
-            {
-               "cacheTimeout": null,
-               "colorBackground": false,
-               "colorValue": false,
-               "colors": [
-                  "#299c46",
-                  "rgba(237, 129, 40, 0.89)",
-                  "#d44a3a"
-               ],
-               "datasource": "$PROMETHEUS_DS",
-               "decimals": 0,
-               "description": "Nodes up and down in the cluster",
-               "format": "short",
-               "gauge": {
-                  "maxValue": 100,
-                  "minValue": 0,
-                  "show": false,
-                  "thresholdLabels": false,
-                  "thresholdMarkers": true
-               },
-               "gridPos": { },
-               "id": 12,
-               "interval": null,
-               "links": [ ],
-               "mappingType": 1,
-               "mappingTypes": [
-                  {
-                     "name": "value to text",
-                     "value": 1
-                  },
-                  {
-                     "name": "range to text",
-                     "value": 2
-                  }
-               ],
-               "maxDataPoints": 100,
-               "nullPointMode": "connected",
-               "nullText": null,
-               "postfix": " Nodes",
-               "postfixFontSize": "80%",
-               "prefix": "Total:",
-               "prefixFontSize": "50%",
-               "rangeMaps": [
-                  {
-                     "from": "null",
-                     "text": "N/A",
-                     "to": "null"
-                  }
-               ],
-               "span": 4,
-               "sparkline": {
-                  "fillColor": "rgba(31, 118, 189, 0.18)",
-                  "full": false,
-                  "lineColor": "rgb(31, 120, 193)",
-                  "show": false
-               },
-               "tableColumn": "",
-               "targets": [
-                  {
-                     "expr": "count by (cluster) (max by (cluster, dc, rack, instance) (collectd_collectd_queue_length{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "Total Number Of Nodes",
-                     "refId": "A"
-                  }
-               ],
-               "thresholds": "",
-               "title": "Nodes Count",
-               "transparent": true,
-               "type": "singlestat",
-               "valueFontSize": "80%",
-               "valueMaps": [
-                  {
-                     "op": "=",
-                     "text": "N/A",
-                     "value": "null"
-                  }
-               ],
-               "valueName": "avg"
-            },
-            {
                "aliasColors": { },
                "bars": false,
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "decimals": 0,
-               "description": "Nodes up and down in the cluster per protocol/activity",
+               "description": "Pending threads per node, by thread pool name filtering threads possibly impacting writes",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 13,
+               "id": 11,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -818,7 +695,7 @@
                   "show": true,
                   "sideWidth": null,
                   "sort": "current",
-                  "sortDesc": false,
+                  "sortDesc": true,
                   "total": false,
                   "values": true
                },
@@ -833,36 +710,294 @@
                "repeat": null,
                "seriesOverrides": [ ],
                "spaceLength": 10,
-               "span": 8,
                "stack": false,
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "count by (cluster) (max by (cluster, dc, rack, instance) (collectd_collectd_queue_length{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}))",
+                     "expr": "sum by (cluster, dc, rack, instance, pool_name) (mcac_thread_pools_pending_tasks{pool_name=~\"memtable_flush_writer|memtable_post_flush|migration_stage|counter_mutation_stage|mutation_stage|view_mutation_stage|misc_stage|secondary_index_management|hints_dispatcher\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "Total Number Of Nodes",
+                     "legendFormat": "{{instance}} - pending {{pool_name}}",
                      "refId": "A"
-                  },
-                  {
-                     "expr": "sum by (cluster) (max by (cluster, dc, rack, instance) (changes(mcac_thread_pools_completed_tasks{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", pool_name=\"native\"}[2m:30s])) > bool 0)",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "Nodes Coordinating Requests (Native protocol)",
-                     "refId": "B"
-                  },
-                  {
-                     "expr": "sum by (cluster) (max by (cluster, dc, rack, instance) (changes(mcac_thread_pools_completed_tasks{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", pool_name=\"gossip_stage\"}[2m:30s])) > bool 0)",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "Nodes With Internal Activity (Gossip protocol)",
-                     "refId": "C"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Nodes Status History",
+               "title": "Pending Tasks per Node",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  },
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  }
+               ]
+            },
+            {
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "$PROMETHEUS_DS",
+               "description": "Pending threads per node, by thread pool name filtering threads possibly impacting writes",
+               "fill": 0,
+               "fillGradient": 0,
+               "gridPos": { },
+               "id": 12,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "sum by (cluster, dc, rack, instance, pool_name) (mcac_thread_pools_total_blocked_tasks_total{pool_name=~\"memtable_flush_writer|memtable_post_flush|migration_stage|counter_mutation_stage|mutation_stage|view_mutation_stage|misc_stage|secondary_index_management|hints_dispatcher\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{instance}} - blocked {{pool_name}}",
+                     "refId": "A"
+                  }
+               ],
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Blocked Tasks per Node",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  },
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  }
+               ]
+            },
+            {
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "$PROMETHEUS_DS",
+               "description": "Pending threads per node, by thread pool name filtering threads possibly impacting writes",
+               "fill": 0,
+               "fillGradient": 0,
+               "gridPos": { },
+               "id": 13,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "sum by (cluster, dc, rack, instance, message_type) (rate(mcac_dropped_message_dropped_total{message_type=~\"_trace|batch_store|batch_remove|counter_mutation|hint|mutation\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m]))",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{instance}} - dropped {{message_type}}",
+                     "refId": "A"
+                  }
+               ],
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Dropped Messages per Node",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  },
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  }
+               ]
+            }
+         ],
+         "repeat": null,
+         "repeatIteration": null,
+         "repeatRowId": null,
+         "showTitle": true,
+         "title": "Thread Pools",
+         "titleSize": "h6",
+         "type": "row"
+      },
+      {
+         "collapse": false,
+         "collapsed": false,
+         "panels": [
+            {
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "$PROMETHEUS_DS",
+               "decimals": 0,
+               "description": "Max & Average of the partition sizes, for each table",
+               "fill": 0,
+               "fillGradient": 0,
+               "gridPos": { },
+               "id": 14,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "max by (cluster, keyspace, table) (mcac_table_estimated_partition_size_histogram{quantile=\"1\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "Max partition size: {{keyspace}}.{{table}}",
+                     "refId": "A"
+                  },
+                  {
+                     "expr": "avg by (cluster, keyspace, table) (mcac_table_estimated_partition_size_histogram{quantile=\".50\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "Avg partition size: {{keyspace}}.{{table}}",
+                     "refId": "B"
+                  }
+               ],
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Max & Average Partition Size per Table",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -880,7 +1015,7 @@
                "yaxes": [
                   {
                      "decimals": 0,
-                     "format": "short",
+                     "format": "bytes",
                      "label": null,
                      "logBase": 1,
                      "max": null,
@@ -889,7 +1024,7 @@
                   },
                   {
                      "decimals": 0,
-                     "format": "short",
+                     "format": "bytes",
                      "label": null,
                      "logBase": 1,
                      "max": null,
@@ -897,92 +1032,6 @@
                      "show": true
                   }
                ]
-            }
-         ],
-         "repeat": null,
-         "repeatIteration": null,
-         "repeatRowId": null,
-         "showTitle": true,
-         "title": "Nodes Status",
-         "titleSize": "h6",
-         "type": "row"
-      },
-      {
-         "collapse": false,
-         "collapsed": false,
-         "panels": [
-            {
-               "columns": [
-                  {
-                     "text": "Current",
-                     "value": "current"
-                  }
-               ],
-               "datasource": "$PROMETHEUS_DS",
-               "description": "Disk space used ordered (fullest disks first)",
-               "gridPos": { },
-               "id": 14,
-               "links": [ ],
-               "sort": {
-                  "col": 1,
-                  "desc": true
-               },
-               "styles": [
-                  {
-                     "alias": "Node --> Mounting Point",
-                     "colorMode": null,
-                     "colors": [
-                        "rgba(245, 54, 54, 0.9)",
-                        "rgba(237, 129, 40, 0.89)",
-                        "rgba(50, 172, 45, 0.97)"
-                     ],
-                     "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                     "decimals": 2,
-                     "mappingType": 1,
-                     "pattern": "Metric",
-                     "preserveFormat": true,
-                     "sanitize": true,
-                     "thresholds": [ ],
-                     "type": "string",
-                     "unit": "short"
-                  },
-                  {
-                     "alias": "% Disk Space Used",
-                     "colorMode": "row",
-                     "colors": [
-                        "rgba(50, 172, 45, 0.97)",
-                        "rgba(237, 129, 40, 0.89)",
-                        "rgba(245, 54, 54, 0.9)"
-                     ],
-                     "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                     "decimals": 2,
-                     "link": false,
-                     "mappingType": 1,
-                     "pattern": "Current",
-                     "thresholds": [
-                        "0.5",
-                        "0.75"
-                     ],
-                     "type": "number",
-                     "unit": "percentunit"
-                  }
-               ],
-               "targets": [
-                  {
-                     "expr": "min by (instance, df) (1-(collectd_df_df_complex{df!~\".*lxcfs.*\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", type=\"free\"}\n        / ignoring (type) (collectd_df_df_complex{df!~\".*lxcfs.*\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", type=\"used\"}\n          + ignoring (type) collectd_df_df_complex{df!~\".*lxcfs.*\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", type=\"reserved\"}\n          + ignoring (type) collectd_df_df_complex{df!~\".*lxcfs.*\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\", type=\"free\"}))\n        )",
-                     "format": "time_series",
-                     "instant": true,
-                     "intervalFactor": 2,
-                     "legendFormat": "{{cluster}}-{{instance}} --> {{df}}",
-                     "refId": "A"
-                  }
-               ],
-               "timeFrom": null,
-               "timeShift": null,
-               "title": "Disk Space Usage",
-               "transform": "timeseries_aggregations",
-               "transparent": true,
-               "type": "table"
             },
             {
                "aliasColors": { },
@@ -990,7 +1039,8 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Total sizes of the data on distinct nodes",
+               "decimals": 0,
+               "description": "Max & Average of the partition sizes, for each node",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
@@ -1024,24 +1074,24 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum by (cluster) (mcac_table_live_disk_space_used_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "max by (cluster, dc, rack, instance) (mcac_table_estimated_partition_size_histogram{quantile=\"1\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "Live space - {{cluster}}",
+                     "legendFormat": "Max partition size: {{instance}}",
                      "refId": "A"
                   },
                   {
-                     "expr": "sum by (cluster) (mcac_table_total_disk_space_used_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "avg by (cluster, dc, rack, instance) (mcac_table_estimated_partition_size_histogram{quantile=\".50\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "Total space - {{cluster}}",
+                     "legendFormat": "Avg partition size: {{instance}}",
                      "refId": "B"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Cassandra cluster Data Size",
+               "title": "Max & Average Partition Size per Node",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -1058,19 +1108,21 @@
                },
                "yaxes": [
                   {
+                     "decimals": 0,
                      "format": "bytes",
                      "label": null,
                      "logBase": 1,
                      "max": null,
-                     "min": null,
+                     "min": 0,
                      "show": true
                   },
                   {
+                     "decimals": 0,
                      "format": "bytes",
                      "label": null,
                      "logBase": 1,
                      "max": null,
-                     "min": null,
+                     "min": 0,
                      "show": true
                   }
                ]
@@ -1081,7 +1133,8 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "SSTable Count Max and Average per table",
+               "decimals": 0,
+               "description": "Max & Average of the partition sizes, for each combination of table and node",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
@@ -1115,133 +1168,24 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster, keyspace, table) (mcac_table_live_ss_table_count{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "max by (cluster, dc, rack, instance, keyspace, table) (mcac_table_estimated_partition_size_histogram{quantile=\"1\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "Table - {{keyspace}}.{{table}}",
+                     "legendFormat": "Max partition size: {{keyspace}}.{{table}} - {{instance}}",
                      "refId": "A"
                   },
                   {
-                     "expr": "max by (cluster) (mcac_table_live_ss_table_count{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "avg by (cluster, dc, rack, instance, keyspace, table) (mcac_table_estimated_partition_size_histogram{quantile=\".50\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "Max in cluster - {{cluster}}",
+                     "legendFormat": "Avg partition size: {{keyspace}}.{{table}} - {{instance}}",
                      "refId": "B"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "SSTable Count",
-               "tooltip": {
-                  "shared": false,
-                  "sort": 0,
-                  "value_type": "individual"
-               },
-               "transparent": true,
-               "type": "graph",
-               "xaxis": {
-                  "buckets": null,
-                  "mode": "time",
-                  "name": null,
-                  "show": true,
-                  "values": [ ]
-               },
-               "yaxes": [
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  },
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  }
-               ]
-            },
-            {
-               "aliasColors": { },
-               "bars": false,
-               "dashLength": 10,
-               "dashes": false,
-               "datasource": "$PROMETHEUS_DS",
-               "decimals": 0,
-               "description": "Maximum pending compactions on any node in the cluster",
-               "fill": 0,
-               "fillGradient": 0,
-               "gridPos": { },
-               "id": 17,
-               "legend": {
-                  "alignAsTable": true,
-                  "avg": false,
-                  "current": true,
-                  "max": false,
-                  "min": false,
-                  "rightSide": false,
-                  "show": true,
-                  "sideWidth": null,
-                  "sort": "current",
-                  "sortDesc": true,
-                  "total": false,
-                  "values": true
-               },
-               "lines": true,
-               "linewidth": 1,
-               "links": [ ],
-               "nullPointMode": "null",
-               "percentage": false,
-               "pointradius": 5,
-               "points": false,
-               "renderer": "flot",
-               "repeat": null,
-               "seriesOverrides": [
-                  {
-                     "alias": "max",
-                     "fillBelowTo": "min",
-                     "lines": false
-                  },
-                  {
-                     "alias": "min",
-                     "lines": false
-                  }
-               ],
-               "spaceLength": 10,
-               "stack": false,
-               "steppedLine": false,
-               "targets": [
-                  {
-                     "expr": "max by (cluster) (mcac_table_pending_compactions{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "max",
-                     "refId": "A"
-                  },
-                  {
-                     "expr": "min by (cluster) (mcac_table_pending_compactions{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "min",
-                     "refId": "B"
-                  },
-                  {
-                     "expr": "avg by (cluster) (mcac_table_pending_compactions{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "avg",
-                     "refId": "C"
-                  }
-               ],
-               "thresholds": [ ],
-               "timeFrom": null,
-               "timeShift": null,
-               "title": "Pending Compactions",
+               "title": "Max & Average Partition Size per Table and Node",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -1259,7 +1203,7 @@
                "yaxes": [
                   {
                      "decimals": 0,
-                     "format": "short",
+                     "format": "bytes",
                      "label": null,
                      "logBase": 1,
                      "max": null,
@@ -1268,94 +1212,7 @@
                   },
                   {
                      "decimals": 0,
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  }
-               ]
-            },
-            {
-               "aliasColors": { },
-               "bars": false,
-               "dashLength": 10,
-               "dashes": false,
-               "datasource": "$PROMETHEUS_DS",
-               "decimals": 0,
-               "description": "Maximum pending compactions per table",
-               "fill": 0,
-               "fillGradient": 0,
-               "gridPos": { },
-               "id": 18,
-               "legend": {
-                  "alignAsTable": true,
-                  "avg": false,
-                  "current": true,
-                  "max": false,
-                  "min": false,
-                  "rightSide": false,
-                  "show": true,
-                  "sideWidth": null,
-                  "sort": "current",
-                  "sortDesc": true,
-                  "total": false,
-                  "values": true
-               },
-               "lines": true,
-               "linewidth": 1,
-               "links": [ ],
-               "nullPointMode": "null",
-               "percentage": false,
-               "pointradius": 5,
-               "points": false,
-               "renderer": "flot",
-               "repeat": null,
-               "seriesOverrides": [ ],
-               "spaceLength": 10,
-               "stack": true,
-               "steppedLine": false,
-               "targets": [
-                  {
-                     "expr": "max by (cluster, keyspace, table) (mcac_table_pending_compactions{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "max for {{keyspace}}.{{table}}",
-                     "refId": "A"
-                  }
-               ],
-               "thresholds": [ ],
-               "timeFrom": null,
-               "timeShift": null,
-               "title": "Pending Compactions per Table",
-               "tooltip": {
-                  "shared": false,
-                  "sort": 0,
-                  "value_type": "individual"
-               },
-               "transparent": true,
-               "type": "graph",
-               "xaxis": {
-                  "buckets": null,
-                  "mode": "time",
-                  "name": null,
-                  "show": true,
-                  "values": [ ]
-               },
-               "yaxes": [
-                  {
-                     "decimals": 0,
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  },
-                  {
-                     "decimals": 0,
-                     "format": "short",
+                     "format": "bytes",
                      "label": null,
                      "logBase": 1,
                      "max": null,
@@ -1369,440 +1226,7 @@
          "repeatIteration": null,
          "repeatRowId": null,
          "showTitle": true,
-         "title": "Data Status",
-         "titleSize": "h6",
-         "type": "row"
-      },
-      {
-         "collapse": false,
-         "collapsed": false,
-         "panels": [
-            {
-               "aliasColors": { },
-               "bars": false,
-               "dashLength": 10,
-               "dashes": false,
-               "datasource": "$PROMETHEUS_DS",
-               "description": "Cluster wide pending threads, by thread pool name",
-               "fill": 0,
-               "fillGradient": 0,
-               "gridPos": { },
-               "id": 19,
-               "legend": {
-                  "alignAsTable": true,
-                  "avg": false,
-                  "current": true,
-                  "max": false,
-                  "min": false,
-                  "rightSide": false,
-                  "show": true,
-                  "sideWidth": null,
-                  "sort": "current",
-                  "sortDesc": true,
-                  "total": false,
-                  "values": true
-               },
-               "lines": true,
-               "linewidth": 1,
-               "links": [ ],
-               "nullPointMode": "null",
-               "percentage": false,
-               "pointradius": 5,
-               "points": false,
-               "renderer": "flot",
-               "repeat": null,
-               "seriesOverrides": [ ],
-               "spaceLength": 10,
-               "stack": false,
-               "steppedLine": false,
-               "targets": [
-                  {
-                     "expr": "sum by (cluster, pool_name) (mcac_thread_pools_pending_tasks{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "{{cluster}} - pending {{pool_name}}",
-                     "refId": "A"
-                  }
-               ],
-               "thresholds": [ ],
-               "timeFrom": null,
-               "timeShift": null,
-               "title": "Pending Tasks",
-               "tooltip": {
-                  "shared": false,
-                  "sort": 0,
-                  "value_type": "individual"
-               },
-               "transparent": true,
-               "type": "graph",
-               "xaxis": {
-                  "buckets": null,
-                  "mode": "time",
-                  "name": null,
-                  "show": true,
-                  "values": [ ]
-               },
-               "yaxes": [
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  },
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  }
-               ]
-            },
-            {
-               "aliasColors": { },
-               "bars": false,
-               "dashLength": 10,
-               "dashes": false,
-               "datasource": "$PROMETHEUS_DS",
-               "description": "Cluster wide blocked threads, by thread pool name",
-               "fill": 0,
-               "fillGradient": 0,
-               "gridPos": { },
-               "id": 20,
-               "legend": {
-                  "alignAsTable": true,
-                  "avg": false,
-                  "current": true,
-                  "max": false,
-                  "min": false,
-                  "rightSide": false,
-                  "show": true,
-                  "sideWidth": null,
-                  "sort": "current",
-                  "sortDesc": true,
-                  "total": false,
-                  "values": true
-               },
-               "lines": true,
-               "linewidth": 1,
-               "links": [ ],
-               "nullPointMode": "null",
-               "percentage": false,
-               "pointradius": 5,
-               "points": false,
-               "renderer": "flot",
-               "repeat": null,
-               "seriesOverrides": [ ],
-               "spaceLength": 10,
-               "stack": false,
-               "steppedLine": false,
-               "targets": [
-                  {
-                     "expr": "sum by (cluster, pool_name) (rate(mcac_thread_pools_total_blocked_tasks_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "{{cluster}} - blocked {{pool_name}}",
-                     "refId": "A"
-                  }
-               ],
-               "thresholds": [ ],
-               "timeFrom": null,
-               "timeShift": null,
-               "title": "Blocked Tasks",
-               "tooltip": {
-                  "shared": false,
-                  "sort": 0,
-                  "value_type": "individual"
-               },
-               "transparent": true,
-               "type": "graph",
-               "xaxis": {
-                  "buckets": null,
-                  "mode": "time",
-                  "name": null,
-                  "show": true,
-                  "values": [ ]
-               },
-               "yaxes": [
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  },
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  }
-               ]
-            },
-            {
-               "aliasColors": { },
-               "bars": false,
-               "dashLength": 10,
-               "dashes": false,
-               "datasource": "$PROMETHEUS_DS",
-               "description": "Dropped messages rate summed by message type and cluster",
-               "fill": 0,
-               "fillGradient": 0,
-               "gridPos": { },
-               "id": 21,
-               "legend": {
-                  "alignAsTable": true,
-                  "avg": false,
-                  "current": true,
-                  "max": false,
-                  "min": false,
-                  "rightSide": false,
-                  "show": true,
-                  "sideWidth": null,
-                  "sort": "current",
-                  "sortDesc": true,
-                  "total": false,
-                  "values": true
-               },
-               "lines": true,
-               "linewidth": 1,
-               "links": [ ],
-               "nullPointMode": "null",
-               "percentage": false,
-               "pointradius": 5,
-               "points": false,
-               "renderer": "flot",
-               "repeat": null,
-               "seriesOverrides": [ ],
-               "spaceLength": 10,
-               "stack": false,
-               "steppedLine": false,
-               "targets": [
-                  {
-                     "expr": "sum by (cluster, message_type) (rate(mcac_dropped_message_dropped_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "{{cluster}} - dropped {{message_type}}",
-                     "refId": "A"
-                  }
-               ],
-               "thresholds": [ ],
-               "timeFrom": null,
-               "timeShift": null,
-               "title": "Dropped Messages",
-               "tooltip": {
-                  "shared": false,
-                  "sort": 0,
-                  "value_type": "individual"
-               },
-               "transparent": true,
-               "type": "graph",
-               "xaxis": {
-                  "buckets": null,
-                  "mode": "time",
-                  "name": null,
-                  "show": true,
-                  "values": [ ]
-               },
-               "yaxes": [
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  },
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  }
-               ]
-            },
-            {
-               "aliasColors": { },
-               "bars": false,
-               "dashLength": 10,
-               "dashes": false,
-               "datasource": "$PROMETHEUS_DS",
-               "description": "active threads summed per cluster",
-               "fill": 0,
-               "fillGradient": 0,
-               "gridPos": { },
-               "id": 22,
-               "legend": {
-                  "alignAsTable": true,
-                  "avg": false,
-                  "current": true,
-                  "max": false,
-                  "min": false,
-                  "rightSide": false,
-                  "show": true,
-                  "sideWidth": null,
-                  "sort": "current",
-                  "sortDesc": true,
-                  "total": false,
-                  "values": true
-               },
-               "lines": true,
-               "linewidth": 1,
-               "links": [ ],
-               "nullPointMode": "null",
-               "percentage": false,
-               "pointradius": 5,
-               "points": false,
-               "renderer": "flot",
-               "repeat": null,
-               "seriesOverrides": [ ],
-               "spaceLength": 10,
-               "stack": false,
-               "steppedLine": false,
-               "targets": [
-                  {
-                     "expr": "sum by (cluster, pool_name) (mcac_thread_pools_active_tasks{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "{{cluster}} - active {{pool_name}}",
-                     "refId": "A"
-                  }
-               ],
-               "thresholds": [ ],
-               "timeFrom": null,
-               "timeShift": null,
-               "title": "Active Tasks",
-               "tooltip": {
-                  "shared": false,
-                  "sort": 0,
-                  "value_type": "individual"
-               },
-               "transparent": true,
-               "type": "graph",
-               "xaxis": {
-                  "buckets": null,
-                  "mode": "time",
-                  "name": null,
-                  "show": true,
-                  "values": [ ]
-               },
-               "yaxes": [
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  },
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  }
-               ]
-            },
-            {
-               "aliasColors": { },
-               "bars": false,
-               "dashLength": 10,
-               "dashes": false,
-               "datasource": "$PROMETHEUS_DS",
-               "description": "Sum of hints being handed off per cluster.",
-               "fill": 0,
-               "fillGradient": 0,
-               "gridPos": { },
-               "id": 23,
-               "legend": {
-                  "alignAsTable": true,
-                  "avg": false,
-                  "current": true,
-                  "max": false,
-                  "min": false,
-                  "rightSide": false,
-                  "show": true,
-                  "sideWidth": null,
-                  "sort": "current",
-                  "sortDesc": true,
-                  "total": false,
-                  "values": true
-               },
-               "lines": true,
-               "linewidth": 1,
-               "links": [ ],
-               "nullPointMode": "null",
-               "percentage": false,
-               "pointradius": 5,
-               "points": false,
-               "renderer": "flot",
-               "repeat": null,
-               "seriesOverrides": [ ],
-               "spaceLength": 10,
-               "stack": false,
-               "steppedLine": false,
-               "targets": [
-                  {
-                     "expr": "sum by (cluster) (mcac_storage_total_hints_in_progress_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "count",
-                     "refId": "A"
-                  }
-               ],
-               "thresholds": [ ],
-               "timeFrom": null,
-               "timeShift": null,
-               "title": "Hinted Handoff",
-               "tooltip": {
-                  "shared": false,
-                  "sort": 0,
-                  "value_type": "individual"
-               },
-               "transparent": true,
-               "type": "graph",
-               "xaxis": {
-                  "buckets": null,
-                  "mode": "time",
-                  "name": null,
-                  "show": true,
-                  "values": [ ]
-               },
-               "yaxes": [
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  },
-                  {
-                     "format": "short",
-                     "label": null,
-                     "logBase": 1,
-                     "max": null,
-                     "min": 0,
-                     "show": true
-                  }
-               ]
-            }
-         ],
-         "repeat": null,
-         "repeatIteration": null,
-         "repeatRowId": null,
-         "showTitle": true,
-         "title": "Cassandra Internals",
+         "title": "Max & Average Partition Size",
          "titleSize": "h6",
          "type": "row"
       },
@@ -1821,7 +1245,7 @@
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 24,
+               "id": 17,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -1931,7 +1355,7 @@
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 25,
+               "id": 18,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2039,7 +1463,7 @@
                "fill": 1,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 26,
+               "id": 19,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2126,11 +1550,11 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Disk read throughput",
+               "description": "Disk write throughput per node",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 27,
+               "id": 20,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2154,47 +1578,23 @@
                "points": false,
                "renderer": "flot",
                "repeat": null,
-               "seriesOverrides": [
-                  {
-                     "alias": "max",
-                     "fillBelowTo": "min",
-                     "lines": false
-                  },
-                  {
-                     "alias": "min",
-                     "lines": false
-                  }
-               ],
+               "seriesOverrides": [ ],
                "spaceLength": 10,
                "stack": false,
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "expr": "rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "max",
+                     "legendFormat": "{{dc}}-{{instance}} ({{cluster}})",
                      "refId": "A"
-                  },
-                  {
-                     "expr": "min by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "min",
-                     "refId": "B"
-                  },
-                  {
-                     "expr": "avg by (cluster) (rate(collectd_processes_disk_octets_read_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "avg",
-                     "refId": "C"
                   }
                ],
                "thresholds": [ ],
                "timeFrom": null,
                "timeShift": null,
-               "title": "Disk Read Thoughput",
+               "title": "Disk Write Thoughput",
                "tooltip": {
                   "shared": false,
                   "sort": 0,
@@ -2234,11 +1634,11 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Disk write throughput",
+               "description": "Disk write throughput per node",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 28,
+               "id": 21,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2262,41 +1662,17 @@
                "points": false,
                "renderer": "flot",
                "repeat": null,
-               "seriesOverrides": [
-                  {
-                     "alias": "max",
-                     "fillBelowTo": "min",
-                     "lines": false
-                  },
-                  {
-                     "alias": "min",
-                     "lines": false
-                  }
-               ],
+               "seriesOverrides": [ ],
                "spaceLength": 10,
                "stack": false,
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "expr": "rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "max",
+                     "legendFormat": "{{dc}}-{{instance}} ({{cluster}})",
                      "refId": "A"
-                  },
-                  {
-                     "expr": "min by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "min",
-                     "refId": "B"
-                  },
-                  {
-                     "expr": "avg by (cluster) (rate(collectd_processes_disk_octets_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "avg",
-                     "refId": "C"
                   }
                ],
                "thresholds": [ ],
@@ -2346,7 +1722,7 @@
                "fill": 1,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 29,
+               "id": 22,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2431,32 +1807,18 @@
                      "show": true
                   }
                ]
-            }
-         ],
-         "repeat": null,
-         "repeatIteration": null,
-         "repeatRowId": null,
-         "showTitle": true,
-         "title": "Hardware / Operating System",
-         "titleSize": "h6",
-         "type": "row"
-      },
-      {
-         "collapse": false,
-         "collapsed": false,
-         "panels": [
+            },
             {
                "aliasColors": { },
                "bars": false,
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "decimals": 2,
-               "description": "Percentage of the time the node is *not* doing a GC, thus Cassandra is not stopped for GC",
+               "description": "Amount of context switching per second per host",
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 30,
+               "id": 23,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2480,41 +1842,302 @@
                "points": false,
                "renderer": "flot",
                "repeat": null,
-               "seriesOverrides": [
-                  {
-                     "alias": "max",
-                     "fillBelowTo": "min",
-                     "lines": false
-                  },
-                  {
-                     "alias": "min",
-                     "lines": false
-                  }
-               ],
+               "seriesOverrides": [ ],
                "spaceLength": 10,
                "stack": false,
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])) / 1000))",
+                     "expr": "sum by (cluster, dc, rack, instance) (rate(collectd_contextswitch_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "max",
+                     "legendFormat": "{{instance}} - Context Switches",
                      "refId": "A"
+                  }
+               ],
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Context Switching",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
                   },
                   {
-                     "expr": "min by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])) / 1000))",
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  }
+               ]
+            }
+         ],
+         "repeat": null,
+         "repeatIteration": null,
+         "repeatRowId": null,
+         "showTitle": true,
+         "title": "Hardware / Operating System",
+         "titleSize": "h6",
+         "type": "row"
+      },
+      {
+         "collapse": false,
+         "collapsed": false,
+         "panels": [
+            {
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "$PROMETHEUS_DS",
+               "decimals": 0,
+               "description": "Sum of all disks hits for writes per second, for each node",
+               "fill": 0,
+               "fillGradient": 0,
+               "gridPos": { },
+               "id": 24,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "Sum by (cluster, dc, rack, instance) (rate(collectd_processes_io_ops_write_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "min",
-                     "refId": "B"
+                     "legendFormat": "disks writes - iops: {{instance}}",
+                     "refId": "A"
+                  }
+               ],
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Disk Writes IOPS - Total per Node",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "decimals": 0,
+                     "format": "iops",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
                   },
                   {
-                     "expr": "avg by (cluster) (1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])) / 1000))",
+                     "decimals": 0,
+                     "format": "iops",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  }
+               ]
+            },
+            {
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "$PROMETHEUS_DS",
+               "decimals": 0,
+               "description": "Sum of all disks throughputs for writes per second, for each node",
+               "fill": 0,
+               "fillGradient": 0,
+               "gridPos": { },
+               "id": 25,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "Sum by (cluster, dc, rack, instance) (rate(collectd_processes_io_octets_tx_total{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "avg",
-                     "refId": "C"
+                     "legendFormat": "disks writes - throughput: {{instance}}",
+                     "refId": "A"
+                  }
+               ],
+               "thresholds": [ ],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "Disk Writes Throughput - Total per Node",
+               "tooltip": {
+                  "shared": false,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "transparent": true,
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": [ ]
+               },
+               "yaxes": [
+                  {
+                     "decimals": 0,
+                     "format": "bps",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  },
+                  {
+                     "decimals": 0,
+                     "format": "bps",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  }
+               ]
+            }
+         ],
+         "repeat": null,
+         "repeatIteration": null,
+         "repeatRowId": null,
+         "showTitle": true,
+         "title": "Disks Performances",
+         "titleSize": "h6",
+         "type": "row"
+      },
+      {
+         "collapse": false,
+         "collapsed": false,
+         "panels": [
+            {
+               "aliasColors": { },
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "$PROMETHEUS_DS",
+               "decimals": 2,
+               "description": "Percentage of the time the node is *not* doing a GC, thus Cassandra is not stopped for GC",
+               "fill": 0,
+               "fillGradient": 0,
+               "gridPos": { },
+               "id": 26,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": false,
+                  "show": true,
+                  "sideWidth": null,
+                  "sort": "current",
+                  "sortDesc": true,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [ ],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [ ],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "1 - (sum by (cluster, dc, rack, instance) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])) / 1000)",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{dc}}-{{instance}}",
+                     "refId": "A"
                   }
                ],
                "thresholds": [ ],
@@ -2566,7 +2189,7 @@
                "fill": 0,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 31,
+               "id": 27,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2590,41 +2213,17 @@
                "points": false,
                "renderer": "flot",
                "repeat": null,
-               "seriesOverrides": [
-                  {
-                     "alias": "max",
-                     "fillBelowTo": "min",
-                     "lines": false
-                  },
-                  {
-                     "alias": "min",
-                     "lines": false
-                  }
-               ],
+               "seriesOverrides": [ ],
                "spaceLength": 10,
                "stack": false,
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
+                     "expr": "rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s])",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "max",
+                     "legendFormat": "{{dc}}-{{instance}}",
                      "refId": "A"
-                  },
-                  {
-                     "expr": "min by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "min",
-                     "refId": "B"
-                  },
-                  {
-                     "expr": "avg by (cluster) (rate(mcac_jvm_gc_time{cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}[1m:30s]))",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "avg",
-                     "refId": "C"
                   }
                ],
                "thresholds": [ ],
@@ -2670,11 +2269,11 @@
                "dashLength": 10,
                "dashes": false,
                "datasource": "$PROMETHEUS_DS",
-               "description": "Maximum JVM Heap Memory size (worst node) and minimum available heap size",
+               "description": "JVM Heap Memory size (worst node) and minimum available heap size per node",
                "fill": 1,
                "fillGradient": 0,
                "gridPos": { },
-               "id": 32,
+               "id": 28,
                "legend": {
                   "alignAsTable": true,
                   "avg": false,
@@ -2698,48 +2297,24 @@
                "points": false,
                "renderer": "flot",
                "repeat": null,
-               "seriesOverrides": [
-                  {
-                     "alias": "max",
-                     "fillBelowTo": "min",
-                     "lines": false
-                  },
-                  {
-                     "alias": "min",
-                     "lines": false
-                  }
-               ],
+               "seriesOverrides": [ ],
                "spaceLength": 10,
                "stack": false,
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "max by (cluster)\n        (mcac_jvm_memory_used{memory_type=\"heap\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
+                     "expr": "mcac_jvm_memory_used{memory_type=\"heap\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"}",
                      "format": "time_series",
                      "intervalFactor": 2,
-                     "legendFormat": "max",
+                     "legendFormat": "{{dc}}-{{instance}}",
                      "refId": "A"
-                  },
-                  {
-                     "expr": "min by (cluster)\n        (mcac_jvm_memory_used{memory_type=\"heap\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "min",
-                     "refId": "B"
-                  },
-                  {
-                     "expr": "avg by (cluster)\n        (mcac_jvm_memory_used{memory_type=\"heap\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
-                     "format": "time_series",
-                     "intervalFactor": 2,
-                     "legendFormat": "avg",
-                     "refId": "C"
                   },
                   {
                      "expr": "min by ( cluster)\n        (mcac_jvm_memory_max{memory_type=\"heap\", cluster=\"$cluster\", dc=~\"$dc\", rack=~\"$rack\", instance=~\"$node\"})",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "Heap memory available",
-                     "refId": "D"
+                     "refId": "B"
                   }
                ],
                "thresholds": [ ],
@@ -2793,7 +2368,12 @@
    "style": "dark",
    "tags": [
       "Cassandra",
-      "Overview"
+      "Write",
+      "Write-Path",
+      "Mutation",
+      "Insert",
+      "Update",
+      "Upsert"
    ],
    "templating": {
       "list": [
@@ -2923,6 +2503,6 @@
       ]
    },
    "timezone": "browser",
-   "title": "Cassandra Overview",
+   "title": "Cassandra Write Path",
    "version": 0
 }
