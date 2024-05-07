@@ -6,7 +6,8 @@ Specifically run `bin/clean.py && bin/build.py` to generate appropriate files in
 
 
 ### Prometheus
-The [Prometheus Operator](https://operatorhub.io/operator/prometheus) handles the orchestration, configuration, and deployment of k8s resources required for a HA Prometheus installation. Rather than specifying a list of C\* nodes in a JSON file we direct Prometheus to monitor a Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) which exposes all C\* nodes via DNS. This mapping of hosts is handled by a `ServiceMonitor` Custom Resource defined by the operator. The following steps illustrate how to install the Prometheus operator, deploy a service monitor pointed at a C\* cluster (with metric relabeling), and  deploy a HA prometheus cluster connected to the service monitor.
+The [Prometheus Operator](https://operatorhub.io/operator/prometheus) handles the orchestration, configuration, and deployment of k8s resources required for a HA Prometheus installation. Rather than specifying a list of C\* nodes in a JSON file we direct Prometheus to monitor a Kubernetes [Service](https://kubernetes.io/docs/concepts/services-networking/service/) which exposes all C\* nodes via DNS. This mapping of hosts is handled by a `ServiceMonitor` Custom Resource defined by the operator. The following steps illustrate how to install the Prometheus operator, deploy a service monitor pointed at a C\* cluster (with metric relabeling), and  deploy a HA prometheus cluster connected to the service monitor.\
+Sample external Cassandra mapping for Kubernetes `Service` can be found in `dashboards/k8s-build/templates/prometheus/service.yaml`
 
 1. Install the OperatorHub Lifecycle Manager (OLM)
    
