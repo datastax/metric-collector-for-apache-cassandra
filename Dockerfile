@@ -1,4 +1,4 @@
-FROM maven:3.6.3-jdk-8-slim as builder
+FROM maven:3.8.2-jdk-8-slim as builder
 
 WORKDIR /build
 
