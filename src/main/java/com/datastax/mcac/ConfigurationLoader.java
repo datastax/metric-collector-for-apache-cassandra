@@ -22,6 +22,7 @@ import com.google.common.io.ByteStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -84,7 +85,7 @@ public class ConfigurationLoader {
                 throw new AssertionError(e);
             }
 
-            Constructor constructor = new CustomConstructor(Configuration.class);
+            Constructor constructor = new CustomConstructor();
             PropertiesChecker propertiesChecker = new PropertiesChecker();
             constructor.setPropertyUtils(propertiesChecker);
             Yaml yaml = new Yaml(constructor);
@@ -102,8 +103,8 @@ public class ConfigurationLoader {
     }
 
     static class CustomConstructor extends Constructor {
-        CustomConstructor(Class<?> theRoot) {
-            super(theRoot);
+        CustomConstructor() {
+            super(new LoaderOptions());
         }
 
         @Override

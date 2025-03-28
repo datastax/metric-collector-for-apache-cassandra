@@ -17,6 +17,7 @@
         <mustache.version>0.9.6</mustache.version>
         <collectd.version>0.1.7</collectd.version> <!-- from riptano/collectd -->       
         <docker.java.version>3.1.2</docker.java.version>
+        <snakeyaml.version>2.4</snakeyaml.version>
         <build.version.file>build_version.sh</build.version.file>
     </properties>
 
@@ -44,7 +45,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.26</version>
+            <version>${snakeyaml.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>

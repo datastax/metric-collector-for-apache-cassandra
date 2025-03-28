@@ -5,5 +5,4 @@ venv
 .settings
 .classpath
 target
-.vscode
 dependency-reduced-pom.xml
