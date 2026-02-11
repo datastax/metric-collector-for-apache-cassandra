@@ -1,3 +1,21 @@
+[Dated: February 10, 2026]
+
+This repository was temporarily offline following the confirmation of unauthorized activity within a limited number of our public Datastax GitHub repositories, listed below. Working with our internal incident response team, we took steps to contain, remediate and investigate the activity.
+
+We followed established incident-response processes to review and to revert any unauthorized activity.
+
+Required Actions: Collaborators who interacted with this repository between January 31, 2026, and February 3, 2026, rebase your branch onto the new `main`/ `master`. Do not merge `main` / `master` into your branch.
+
+At Datastax, we remain committed to your security and to transparency within the open-source community.
+
+Impacted Repositories:
+
+* link:https://github.com/datastax/cassandra-quarkus[]
+* link:https://github.com/datastax/graph-examples[]
+* link:https://github.com/datastax/metric-collector-for-apache-cassandra[]
+* link:https://github.com/datastax/native-protocol[]
+* link:https://github.com/datastax/pulsar-sink[]
+
 Metric Collector for Apache Cassandra&reg; (MCAC)
 =================================================
 
