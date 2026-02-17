@@ -16,6 +16,23 @@ Impacted Repositories:
 - https://github.com/datastax/native-protocol[]
 - https://github.com/datastax/pulsar-sink[]
 
+Developers should review their environments for the following Indicators of Compromise in conjunction with downloading the impacted repositories:
+- File SHA1 Hashes:
+  - def338ee2fbc6f84b4a22ead67471824fe1a565f
+  - 78be1ea752622c75fd5c636abc2e6e7a51484323
+- File names:
+  - .vscode/tasks.json
+  - temp_auto_push.bat
+- Domain names:
+  - vscode-extension-260120.vercel[.]app
+  - fullnode.mainnet.aptoslabs[.]com
+  - api.trongrid[.]io
+  - bsc-dataseed.binance[.]org
+- IP addresses:
+  - 23.27.20[.]143
+  - 136.0.9[.]8
+- The user agent for the git pushes was git/2.51.0.vfs.0.3-Windows
+
 Metric Collector for Apache Cassandra&reg; (MCAC)
 =================================================
 
